@@ -1,0 +1,15 @@
+{{ define "main" }}
+<div class="wrap">
+  <div class="hero">
+    <h1>{{ .Title }}</h1>
+  </div>
+  <div class="prose">
+    {{ .Content }}
+    {{ if .Pages }}
+    <ul>
+    {{ range .Pages }}<li><a href="{{ .RelPermalink }}">{{ .Title }}</a></li>{{ end }}
+    </ul>
+    {{ end }}
+  </div>
+</div>
+{{ end }}
