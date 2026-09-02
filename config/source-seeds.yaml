@@ -119,17 +119,17 @@ seeded_sources:
       repo: bitcoindevkit/bdk-sp
       project: BDK SP crate
       tags: [silent-payments]
-      summary: Experimental BDK Silent Payments integration (roadmap #13).
+      summary: "Experimental BDK Silent Payments integration (roadmap #13)."
     - id: zenulabidin-electrum-silent-payments-sender
       repo: ZenulAbidin/electrum-silent-payments-sender
       project: Electrum SP plugin
       tags: [silent-payments]
-      summary: BIP352 Silent Payments sender plugin for Electrum (roadmap #10).
+      summary: "BIP352 Silent Payments sender plugin for Electrum (roadmap #10)."
     - id: shakesco-shakesco-silent
       repo: shakesco/shakesco-silent
       project: Shakesco Wallet library
       tags: [silent-payments]
-      summary: BIP 352 Silent Payments library (roadmap #27).
+      summary: "BIP 352 Silent Payments library (roadmap #27)."
   github_pull_requests: []
   crates: []
 
