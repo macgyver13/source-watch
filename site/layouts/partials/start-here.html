@@ -1,0 +1,41 @@
+{{- $here := .here -}}
+{{- $latestWeek := "/weeks/" -}}
+{{- with site.GetPage "/weeks" -}}
+  {{- with (index (sort .Sections "RelPermalink" "desc") 0) -}}
+    {{- $latestWeek = .RelPermalink -}}
+  {{- end -}}
+{{- end -}}
+{{- $watch := site.Data.watch | default dict -}}
+{{- $topics := $watch.topics | default slice -}}
+<section class="start" aria-label="Start here">
+  <div class="start-label">Start here</div>
+  <div class="start-grid">
+    <a class="start-tile{{ if eq $here "week" }} here{{ end }}" href="{{ $latestWeek }}">
+      <div class="k">This week <i>→</i></div>
+      <div class="d">ISO week briefing of new and seeded work.</div>
+      <div class="n" data-count="candidates">new candidates</div>
+    </a>
+    <a class="start-tile{{ if eq $here "activity" }} here{{ end }}" href="/">
+      <div class="k">Latest activity <i>→</i></div>
+      <div class="d">Live public-source feed, unranked.</div>
+      <div class="n" data-count="sources">sources</div>
+    </a>
+    <a class="start-tile{{ if eq $here "projects" }} here{{ end }}" href="/projects/">
+      <div class="k">Projects <i>→</i></div>
+      <div class="d">Atlas of implementations, specs, crates.</div>
+      <div class="n" data-count="projects">projects</div>
+    </a>
+    {{- range $topics }}
+    <a class="start-tile{{ if eq $here "topic" }} here{{ end }}" href="/topics/{{ .slug }}/">
+      <div class="k">{{ .title }} <i>→</i></div>
+      <div class="d">{{ with .blurb }}{{ . }}{{ else }}Working notes.{{ end }}</div>
+      {{- with .note }}<div class="n">{{ . }}</div>{{ end }}
+    </a>
+    {{- end }}
+    <a class="start-tile{{ if eq $here "feeds" }} here{{ end }}" href="/feed.json">
+      <div class="k">Feeds <i>→</i></div>
+      <div class="d">Machine-readable copies of this index.</div>
+      <div class="n">JSON · RSS</div>
+    </a>
+  </div>
+</section>
