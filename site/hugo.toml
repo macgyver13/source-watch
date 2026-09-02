@@ -5,7 +5,7 @@ enableRobotsTXT = true
 disablePathToLower = true
 
 [params]
-  description = "Example public-source activity watch. Replace this config with your project."
+  description = "Public activity on tracked sources."
 
 [markup]
   [markup.goldmark]
