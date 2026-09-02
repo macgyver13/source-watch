@@ -1,0 +1,45 @@
+# Example tag vocabulary. Forks should replace this list with tags that
+# match the instance. Domain-specific terms belong in the fork, not here.
+tags:
+  - example
+  - docs
+  - spec
+  - reference
+  - implementation
+  - package
+  - blog
+  - release
+  - pull-request
+  - issue
+  - discussion
+  - media
+  - rust
+  - candidate-source
+  # Instance forks may add domain tags here (for example protocol or
+  # ciphersuite names). Keep them out of this template.
+
+event_types:
+  - source_seeded
+  - repo_activity
+  - pull_request_opened
+  - pull_request_merged
+  - issue_opened
+  - issue_closed
+  - release_published
+  - package_published
+  - docs_changed
+  - spec_changed
+  - blog_post
+  - media_item
+  - social_discussion
+  - new_project_discovered
+  - manual_drop
+
+confidence:
+  - seeded_source
+  - accepted_source
+  - exact_query_match
+  - candidate_discovery
+  - github_search
+  - manual_seed
+  - social_candidate
