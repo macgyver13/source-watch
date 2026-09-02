@@ -1,3 +1,4 @@
+# This file is for preview/silent-payments only; do not merge to main.
 # Silent Payments Watch — preview/silent-payments only.
 # Do not merge this file to source-watch main.
 
@@ -13,7 +14,27 @@ live_collectors:
       query: '"silent payments" archived:false'
       max_results: 10
       tags: [silent-payments, github, candidate, repository-discovery]
+    - id: github-silentpayments-repo-discovery
+      query: 'silentpayments archived:false'
+      max_results: 10
+      tags: [silent-payments, github, candidate, repository-discovery]
     - id: github-bip352-repo-discovery
-      query: 'BIP352 archived:false'
+      query: 'bip352 archived:false'
       max_results: 10
       tags: [silent-payments, bip352, github, candidate, repository-discovery]
+    - id: github-bip-352-repo-discovery
+      query: 'bip-352 archived:false'
+      max_results: 10
+      tags: [silent-payments, bip-352, github, candidate, repository-discovery]
+    - id: github-bip375-repo-discovery
+      query: 'bip375 archived:false'
+      max_results: 10
+      tags: [silent-payments, bip375, github, candidate, repository-discovery]
+    - id: github-bip376-repo-discovery
+      query: 'bip376 archived:false'
+      max_results: 10
+      tags: [silent-payments, bip376, github, candidate, repository-discovery]
+    - id: github-bip392-repo-discovery
+      query: 'bip392 archived:false'
+      max_results: 10
+      tags: [silent-payments, bip392, github, candidate, repository-discovery]
