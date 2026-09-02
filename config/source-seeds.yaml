@@ -2,30 +2,36 @@
 # Identity (name, base_url, description, default_tag, chips, topics, relevance)
 # lives in config/watch.yaml. This file is only seeds + collectors.
 #
-# Replace these placeholders with the sources your instance should track.
+# Leave these lists empty for a blank fork. Add entries, then run
+# scripts/build_seed_feed.py to fill site/static artifacts.
+#
+# Example:
+# seeded_sources:
+#   docs_pages:
+#     - id: example-docs
+#       name: Example docs
+#       url: https://example.com/docs
+#       project: Example
+#       tags: [docs]
+#       summary: A page this watch should track.
+#   github_repositories:
+#     - id: example-repo
+#       repo: example/repo
+#       project: Example
+#       tags: [docs]
+#       summary: A repository this watch should track.
+# live_collectors:
+#   github_repository_searches:
+#     - id: example-search
+#       query: 'topic:documentation archived:false'
+#       max_results: 5
+#       tags: [example, github, candidate, repository-discovery]
 
 seeded_sources:
-  docs_pages:
-    - id: example-docs-get-started
-      name: GitHub Docs · Get started
-      url: https://docs.github.com/en/get-started
-      project: GitHub Docs
-      tags: [example, docs]
-      summary: >-
-        Placeholder docs page. Replace with a documentation URL your watch
-        should track.
-  github_repositories:
-    - id: example-github-docs
-      repo: github/docs
-      project: GitHub Docs
-      tags: [example, docs]
-      summary: >-
-        Placeholder GitHub repository. Replace with a repo your watch
-        should track.
+  docs_pages: []
+  github_repositories: []
+  github_pull_requests: []
+  crates: []
 
 live_collectors:
-  github_repository_searches:
-    - id: example-docs-repo-discovery
-      query: 'topic:documentation archived:false'
-      max_results: 5
-      tags: [example, github, candidate, repository-discovery]
+  github_repository_searches: []

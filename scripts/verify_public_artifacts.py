@@ -14,9 +14,9 @@ def main() -> int:
     if missing:
         raise SystemExit(f"missing public artifacts: {missing}")
     feed = json.loads((STATIC / "feed.json").read_text())
-    items = feed.get("items", [])
-    if not items:
-        raise SystemExit("feed has no items")
+    items = feed.get("items")
+    if items is None or not isinstance(items, list):
+        raise SystemExit("feed items must be a list (empty is OK for a blank template)")
     for item in items:
         for key in ["id", "title", "source_url", "source_type", "event_type", "observed_at", "evidence"]:
             if not item.get(key):

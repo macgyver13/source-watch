@@ -15,6 +15,8 @@ Primary artifacts:
 
 The Hugo site under `site/` renders the public website from these artifacts.
 
+Committed `feed.json`, `feed.xml`, `items.jsonl`, `projects.json`, and `sources.json` ship empty so a fork starts blank. Fill `config/source-seeds.yaml` and run the pipeline to populate them. Do not commit another project's live feed into this template.
+
 ## How to use
 
 1. Fork or copy this repository.
