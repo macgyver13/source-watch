@@ -491,6 +491,10 @@ def item_activity_at(item: dict) -> str:
     )
 
 
+def skip_live_github_searches() -> bool:
+    return os.environ.get("SOURCE_WATCH_SKIP_LIVE", "").strip().lower() in ("1", "true")
+
+
 def build_items(cfg: dict, github_repo_fetcher=None, watch: dict | None = None) -> tuple[list[dict], dict, dict]:
     if watch is None:
         resolved = watch_from_cfg(cfg)
@@ -515,6 +519,9 @@ def build_items(cfg: dict, github_repo_fetcher=None, watch: dict | None = None) 
             items.append(item)
             sources[source["id"]] = source
             append_or_replace_project(projects, project)
+
+    if skip_live_github_searches():
+        return items, projects, sources
 
     for collector in cfg.get("live_collectors", {}).get("github_repository_searches", []) or []:
         query = collector.get("query", "").strip()
@@ -549,7 +556,7 @@ def build_items(cfg: dict, github_repo_fetcher=None, watch: dict | None = None) 
 
 def write_json(path: Path, data) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(data, indent=2, sort_keys=True) + "\n")
+    path.write_text(json.dumps(data, sort_keys=True, separators=(",", ":")) + "\n")
 
 
 def write_rss(path: Path, items: list[dict], watch: dict) -> None:
@@ -584,11 +591,36 @@ def write_rss(path: Path, items: list[dict], watch: dict) -> None:
     path.write_text("\n".join(parts) + "\n")
 
 
+def load_existing_preferred_chips() -> list:
+    """Keep atlas chips if yaml is empty but a previous watch.json still has them."""
+    for path in (STATIC / "watch.json", OUT / "watch.json"):
+        if not path.exists():
+            continue
+        try:
+            data = json.loads(path.read_text())
+        except Exception:
+            continue
+        chips = data.get("preferred_chips") if isinstance(data, dict) else None
+        if chips:
+            return list(chips)
+    return []
+
+
+def resolve_preferred_chips(watch: dict) -> list:
+    yaml_chips = list(watch.get("preferred_chips") or [])
+    if yaml_chips:
+        return yaml_chips
+    existing = load_existing_preferred_chips()
+    if existing:
+        return existing
+    return []
+
+
 def watch_client_payload(watch: dict) -> dict:
     return {
         "name": watch.get("name") or "Source Watch",
         "default_tag": watch.get("default_tag") or "",
-        "preferred_chips": list(watch.get("preferred_chips") or []),
+        "preferred_chips": resolve_preferred_chips(watch),
         "hidden_tags": list(watch.get("hidden_tags") or []),
         "topics": list(watch.get("topics") or []),
     }
