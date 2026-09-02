@@ -7,7 +7,13 @@
     github_pull_request: "pr",
     package_crate: "crate"
   };
-  var TAG_ALIAS = { "threshold-signatures": "threshold" };
+  var TAG_ALIAS = {
+    "threshold-signatures": "threshold",
+    "bip-352": "bip352",
+    "bip-375": "bip375",
+    "bip-376": "bip376",
+    "bip-392": "bip392"
+  };
   var GENERATED_SUMMARY = /^seeded monitored source for /i;
   var GENERATED_QUERY = /^github repository matched .+ live collector query:/i;
 
@@ -15,6 +21,7 @@
 
   var HIDDEN_TAGS = {};
   var PREFERRED_CHIPS = ["docs", "spec"];
+  var EXPLICIT_CHIPS = false;
 
   function applyWatch(raw) {
     raw = raw || {};
@@ -25,7 +32,8 @@
     if (raw.default_tag) hidden[String(raw.default_tag)] = true;
     HIDDEN_TAGS = hidden;
     var chips = raw.preferred_chips;
-    PREFERRED_CHIPS = (chips && chips.length) ? chips.slice() : ["docs", "spec"];
+    EXPLICIT_CHIPS = !!(chips && chips.length);
+    PREFERRED_CHIPS = EXPLICIT_CHIPS ? chips.slice() : ["docs", "spec"];
   }
 
   function esc(s) {
@@ -368,9 +376,11 @@
       });
     });
     var chipTags = preferred.filter(function (t) { return present[t]; });
-    Object.keys(present).forEach(function (t) {
-      if (chipTags.indexOf(t) === -1 && chipTags.length < 8) chipTags.push(t);
-    });
+    if (!EXPLICIT_CHIPS) {
+      Object.keys(present).forEach(function (t) {
+        if (chipTags.indexOf(t) === -1 && chipTags.length < 8) chipTags.push(t);
+      });
+    }
 
     var state = { q: "", tag: "all" };
 
