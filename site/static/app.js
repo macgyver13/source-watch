@@ -120,9 +120,9 @@
     var end = new Date(start);
     end.setUTCDate(start.getUTCDate() + 6);
     if (start.getUTCMonth() === end.getUTCMonth()) {
-      return MONTHS[start.getUTCMonth()] + " " + start.getUTCDate() + "\u2013" + end.getUTCDate();
+      return MONTHS[start.getUTCMonth()] + " " + start.getUTCDate() + "–" + end.getUTCDate();
     }
-    return MONTHS[start.getUTCMonth()] + " " + start.getUTCDate() + "\u2013" + MONTHS[end.getUTCMonth()] + " " + end.getUTCDate();
+    return MONTHS[start.getUTCMonth()] + " " + start.getUTCDate() + "–" + MONTHS[end.getUTCMonth()] + " " + end.getUTCDate();
   }
 
   function parseWeekSlug(slug) {
@@ -226,15 +226,11 @@
   function fillStartCounts(feed, projects, sources) {
     var nSources = (sources.sources || []).length || (feed.items || []).length;
     var nProjects = (projects.projects || []).length;
-    var nCand = (feed.items || []).filter(isCandidate).length;
     document.querySelectorAll("[data-count=sources]").forEach(function (el) {
       el.textContent = nSources + " source" + (nSources === 1 ? "" : "s");
     });
     document.querySelectorAll("[data-count=projects]").forEach(function (el) {
       el.textContent = nProjects + " project" + (nProjects === 1 ? "" : "s");
-    });
-    document.querySelectorAll("[data-count=candidates]").forEach(function (el) {
-      el.textContent = nCand + " new candidate" + (nCand === 1 ? "" : "s");
     });
     var now = new Date();
     var cur = isoWeekParts(now);
@@ -246,6 +242,9 @@
       var days = (now.getTime() - d.getTime()) / 86400000;
       return days >= 0 && days <= 7;
     }).length;
+    document.querySelectorAll("[data-count=week-new]").forEach(function (el) {
+      el.textContent = weekNew + " new this week";
+    });
     setText("stat-sources", String(nSources));
     setText("stat-projects", String(nProjects));
     setText("stat-new", String(weekNew));
@@ -255,6 +254,10 @@
     var root = document.getElementById("activity-feed");
     if (!root) return;
     var html = '<div class="feed-label">Latest activity</div>';
+    if (!items.length) {
+      root.innerHTML = html + '<p class="muted">No activity yet.</p>';
+      return;
+    }
     sortActivity(items).forEach(function (item) {
       var tags = topicTags(item, 3).map(function (t) {
         return '<span class="tag">' + esc(t) + "</span>";
@@ -290,11 +293,11 @@
       return !isCandidate(i) && (i.source_type === "github_repository" || i.source_type === "package_crate");
     });
     var docs = items.filter(function (i) { return i.source_type === "docs_page"; });
-    var n = cands.length;
+    var n = items.length;
     var lede =
       n === 0
-        ? "No new GitHub candidates this cycle."
-        : n + " GitHub candidate" + (n === 1 ? "" : "s") + " showed up.";
+        ? "Nothing new this ISO week."
+        : n + " item" + (n === 1 ? "" : "s") + " showed up.";
     setText("week-lede", lede);
 
     function rows(list) {
@@ -324,7 +327,7 @@
     var root = document.getElementById("week-groups");
     if (root) {
       root.innerHTML =
-        group("New candidates", cands) +
+        group("New this week", cands) +
         group("Pull requests", prs) +
         group("Repositories", repos) +
         group("Docs & writing", docs);
@@ -392,7 +395,7 @@
     function paint() {
       var shown = projects.filter(matches);
       if (coverage) {
-        coverage.innerHTML = "<b>" + shown.length + " project" + (shown.length === 1 ? "" : "s") + "</b> \u00b7 " + sourceCount + " sources";
+        coverage.innerHTML = "<b>" + shown.length + " project" + (shown.length === 1 ? "" : "s") + "</b> · " + sourceCount + " sources";
       }
       grid.innerHTML = shown.map(function (p) {
         var mine = items.filter(function (i) { return i.project === p.name; });
