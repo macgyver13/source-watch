@@ -1,7 +1,140 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0"><channel>
-<title>Example Watch</title>
+<title>Silent Payments Watch</title>
 <link>https://example.com/</link>
-<description>Public activity on tracked sources.</description>
-<lastBuildDate>Wed, 02 Sep 2026 16:23:48 +0000</lastBuildDate>
+<description>Public activity on Silent Payments and related work.</description>
+<lastBuildDate>Wed, 02 Sep 2026 16:35:20 +0000</lastBuildDate>
+<item>
+<title>bitcoindevkit/bdk-sp</title>
+<link>https://github.com/bitcoindevkit/bdk-sp</link>
+<guid isPermaLink="false">gh-search:github-silent-payments-repo-discovery:bitcoindevkit-bdk-sp</guid>
+<description>Experimental project to integrate silent payments in BDK</description>
+<pubDate>Wed, 02 Sep 2026 16:35:19 +0000</pubDate>
+</item>
+<item>
+<title>azeemshaik025/silent-payments</title>
+<link>https://github.com/azeemshaik025/silent-payments</link>
+<guid isPermaLink="false">gh-search:github-silent-payments-repo-discovery:azeemshaik025-silent-payments</guid>
+<description>BIP-352 silent payments implemented from scratch in TypeScript, verified against the official test vectors</description>
+<pubDate>Wed, 02 Sep 2026 16:35:19 +0000</pubDate>
+</item>
+<item>
+<title>diogo-ck/silentscan</title>
+<link>https://github.com/diogo-ck/silentscan</link>
+<guid isPermaLink="false">gh-search:github-silent-payments-repo-discovery:diogo-ck-silentscan</guid>
+<description>Silent Payments Scanner</description>
+<pubDate>Wed, 02 Sep 2026 16:35:19 +0000</pubDate>
+</item>
+<item>
+<title>bitsagarob/payment-name-startos</title>
+<link>https://github.com/bitsagarob/payment-name-startos</link>
+<guid isPermaLink="false">gh-search:github-silent-payments-repo-discovery:bitsagarob-payment-name-startos</guid>
+<description>Get paid by name instead of a long random address. Publishes a BIP-353 record for your silent payment address, and tells you if anyone repoints it.</description>
+<pubDate>Wed, 02 Sep 2026 16:35:19 +0000</pubDate>
+</item>
+<item>
+<title>shakesco/shakesco-silent</title>
+<link>https://github.com/shakesco/shakesco-silent</link>
+<guid isPermaLink="false">gh-search:github-silent-payments-repo-discovery:shakesco-shakesco-silent</guid>
+<description>BIP 352: Bitcoin Silent Payments</description>
+<pubDate>Wed, 02 Sep 2026 16:35:19 +0000</pubDate>
+</item>
+<item>
+<title>OZARUMOTO/PARANOIA-SIGNER</title>
+<link>https://github.com/OZARUMOTO/PARANOIA-SIGNER</link>
+<guid isPermaLink="false">gh-search:github-silent-payments-repo-discovery:ozarumoto-paranoia-signer</guid>
+<description>Offline Bitcoin wallet with BIP-352 silent payments, MuSig2 3-of-3 vaults, and quantum-link signing — paranoid by design</description>
+<pubDate>Wed, 02 Sep 2026 16:35:19 +0000</pubDate>
+</item>
+<item>
+<title>levinster82/bip352-js</title>
+<link>https://github.com/levinster82/bip352-js</link>
+<guid isPermaLink="false">gh-search:github-silent-payments-repo-discovery:levinster82-bip352-js</guid>
+<description>Simple js bip352 library for bitcoin silent payment address derivation</description>
+<pubDate>Wed, 02 Sep 2026 16:35:19 +0000</pubDate>
+</item>
+<item>
+<title>ZenulAbidin/electrum-silent-payments-sender</title>
+<link>https://github.com/ZenulAbidin/electrum-silent-payments-sender</link>
+<guid isPermaLink="false">gh-search:github-silent-payments-repo-discovery:zenulabidin-electrum-silent-payments-sender</guid>
+<description>BIP352 Silent Payments sender plugin for Electrum</description>
+<pubDate>Wed, 02 Sep 2026 16:35:19 +0000</pubDate>
+</item>
+<item>
+<title>aido/silentpayments</title>
+<link>https://github.com/aido/silentpayments</link>
+<guid isPermaLink="false">gh-search:github-silent-payments-repo-discovery:aido-silentpayments</guid>
+<description>A lightweight, experimental Python plug-in for Core Lightning (CLN) that introduces BIP352 (Silent Payments) support directly to your node.</description>
+<pubDate>Wed, 02 Sep 2026 16:35:19 +0000</pubDate>
+</item>
+<item>
+<title>azeemshaik025/silent-payments</title>
+<link>https://github.com/azeemshaik025/silent-payments</link>
+<guid isPermaLink="false">gh-search:github-bip352-repo-discovery:azeemshaik025-silent-payments</guid>
+<description>BIP-352 silent payments implemented from scratch in TypeScript, verified against the official test vectors</description>
+<pubDate>Wed, 02 Sep 2026 16:35:19 +0000</pubDate>
+</item>
+<item>
+<title>21-DOT-DEV/swift-secp256k1</title>
+<link>https://github.com/21-DOT-DEV/swift-secp256k1</link>
+<guid isPermaLink="false">gh-search:github-bip352-repo-discovery:21-dot-dev-swift-secp256k1</guid>
+<description>Swift cryptography library for Bitcoin and Nostr. ECDSA, Schnorr, ECDH, and zero-knowledge proofs on secp256k1. Apple platforms and Linux.</description>
+<pubDate>Wed, 02 Sep 2026 16:35:19 +0000</pubDate>
+</item>
+<item>
+<title>kkdao/kiss-bdk</title>
+<link>https://github.com/kkdao/kiss-bdk</link>
+<guid isPermaLink="false">gh-search:github-bip352-repo-discovery:kkdao-kiss-bdk</guid>
+<description>Offline Bitcoin transactions powered by BDK and signed by KISS</description>
+<pubDate>Wed, 02 Sep 2026 16:35:19 +0000</pubDate>
+</item>
+<item>
+<title>bitsagarob/payment-name-startos</title>
+<link>https://github.com/bitsagarob/payment-name-startos</link>
+<guid isPermaLink="false">gh-search:github-bip352-repo-discovery:bitsagarob-payment-name-startos</guid>
+<description>Get paid by name instead of a long random address. Publishes a BIP-353 record for your silent payment address, and tells you if anyone repoints it.</description>
+<pubDate>Wed, 02 Sep 2026 16:35:19 +0000</pubDate>
+</item>
+<item>
+<title>levinster82/bip352-js</title>
+<link>https://github.com/levinster82/bip352-js</link>
+<guid isPermaLink="false">gh-search:github-bip352-repo-discovery:levinster82-bip352-js</guid>
+<description>Simple js bip352 library for bitcoin silent payment address derivation</description>
+<pubDate>Wed, 02 Sep 2026 16:35:19 +0000</pubDate>
+</item>
+<item>
+<title>ZenulAbidin/electrum-silent-payments-sender</title>
+<link>https://github.com/ZenulAbidin/electrum-silent-payments-sender</link>
+<guid isPermaLink="false">gh-search:github-bip352-repo-discovery:zenulabidin-electrum-silent-payments-sender</guid>
+<description>BIP352 Silent Payments sender plugin for Electrum</description>
+<pubDate>Wed, 02 Sep 2026 16:35:19 +0000</pubDate>
+</item>
+<item>
+<title>aido/silentpayments</title>
+<link>https://github.com/aido/silentpayments</link>
+<guid isPermaLink="false">gh-search:github-bip352-repo-discovery:aido-silentpayments</guid>
+<description>A lightweight, experimental Python plug-in for Core Lightning (CLN) that introduces BIP352 (Silent Payments) support directly to your node.</description>
+<pubDate>Wed, 02 Sep 2026 16:35:19 +0000</pubDate>
+</item>
+<item>
+<title>echennells/silent-receipts</title>
+<link>https://github.com/echennells/silent-receipts</link>
+<guid isPermaLink="false">gh-search:github-bip352-repo-discovery:echennells-silent-receipts</guid>
+<description>Receipts for Bitcoin silent payments (BIP352): prove one payment - or one non-payment - to one chosen verifier, without revealing your scan key. Built on bdk-sp. bitcoin++ Toronto 2026.</description>
+<pubDate>Wed, 02 Sep 2026 16:35:19 +0000</pubDate>
+</item>
+<item>
+<title>BitPolito/silent-payments</title>
+<link>https://github.com/BitPolito/silent-payments</link>
+<guid isPermaLink="false">gh-search:github-bip352-repo-discovery:bitpolito-silent-payments</guid>
+<description>Silent Payments BIP352 implementation</description>
+<pubDate>Wed, 02 Sep 2026 16:35:19 +0000</pubDate>
+</item>
+<item>
+<title>theStack/bip352-signet-scan-worstcase</title>
+<link>https://github.com/theStack/bip352-signet-scan-worstcase</link>
+<guid isPermaLink="false">gh-search:github-bip352-repo-discovery:thestack-bip352-signet-scan-worstcase</guid>
+<description>BIP-352 worst-case scanning attack demo on Signet (block 297894)</description>
+<pubDate>Wed, 02 Sep 2026 16:35:19 +0000</pubDate>
+</item>
 </channel></rss>
