@@ -8,10 +8,6 @@
     "package"
   ],
   "name": "Silent Payments Watch",
-  "preferred_chips": [
-    "bip352",
-    "wallet",
-    "scanning"
-  ],
+  "preferred_chips": [],
   "topics": []
 }
