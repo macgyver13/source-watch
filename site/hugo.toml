@@ -1,0 +1,13 @@
+baseURL = "https://example.com/"
+locale = "en-us"
+title = "Example Watch"
+enableRobotsTXT = true
+disablePathToLower = true
+
+[params]
+  description = "Example public-source activity watch. Replace this config with your project."
+
+[markup]
+  [markup.goldmark]
+    [markup.goldmark.renderer]
+      unsafe = true
