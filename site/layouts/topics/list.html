@@ -1,0 +1,34 @@
+{{ define "main" }}
+{{- $isRoot := or (eq .RelPermalink "/topics/") (eq .RelPermalink "/topics") -}}
+{{- $watch := site.Data.watch | default dict -}}
+{{- $topics := $watch.topics | default slice -}}
+<div class="wrap">
+  {{- if $isRoot -}}
+  <div class="hero">
+    <h1>Topics</h1>
+    <p class="lede">Working notes attached to this watch index.</p>
+  </div>
+  {{ partial "start-here.html" (dict "here" "topic") }}
+  <div class="prose">
+    {{- if gt (len $topics) 0 }}
+    <ul>
+      {{- range $topics }}
+      <li><a href="/topics/{{ .slug }}/">{{ .title }}</a></li>
+      {{- end }}
+    </ul>
+    {{- else }}
+    <p>Add topics in <code>config/watch.yaml</code> to create extra Start-here tiles and topic pages.</p>
+    {{- end }}
+  </div>
+  {{- else -}}
+  <div class="hero">
+    <h1>{{ .Title }}</h1>
+    {{- with .Params.blurb }}<p class="lede">{{ . }}</p>{{ end }}
+  </div>
+  {{ partial "start-here.html" (dict "here" "topic") }}
+  <div class="prose">
+    {{ .Content }}
+  </div>
+  {{- end -}}
+</div>
+{{ end }}
