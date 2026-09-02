@@ -1,0 +1,45 @@
+{{ define "main" }}
+{{- $isIndex := or (eq .RelPermalink "/weeks/") (eq .RelPermalink "/weeks") -}}
+{{- $latest := "" -}}
+{{- with site.GetPage "/weeks" -}}
+  {{- with (index (sort .Sections "RelPermalink" "desc") 0) -}}
+    {{- $latest = .RelPermalink -}}
+  {{- end -}}
+{{- end -}}
+{{- if and $isIndex $latest -}}
+<div class="wrap">
+  <div class="hero">
+    <h1>Weeks</h1>
+    <p class="lede"><a href="{{ $latest }}">Open the current week briefing →</a></p>
+  </div>
+</div>
+{{- else -}}
+{{- $title := .Title -}}
+<div class="wrap">
+  <div class="hero week-hero">
+    <h1>{{ $title }}</h1>
+    <div class="week-range" id="week-range"></div>
+    <p class="lede" id="week-lede"></p>
+  </div>
+  {{ partial "start-here.html" (dict "here" "week") }}
+  <div class="brief">
+    <nav class="rail" aria-label="Previous weeks">
+      {{- $cur := .RelPermalink -}}
+      {{- with site.GetPage "/weeks" -}}
+        {{- range (sort .Sections "RelPermalink" "desc") -}}
+          {{- $wk := strings.TrimSuffix "/" (path.Base .RelPermalink) -}}
+          {{- $num := replaceRE `(?i)^\d{4}-w0?` "" $wk -}}
+      <a href="{{ .RelPermalink }}" data-week="{{ $wk }}"{{ if eq .RelPermalink $cur }} class="on"{{ end }}>
+        <span class="wk">W{{ $num }}</span>
+        <span class="sub"></span>
+      </a>
+        {{- end -}}
+      {{- end -}}
+    </nav>
+    <div id="week-groups">
+      <p class="muted">Loading week briefing…</p>
+    </div>
+  </div>
+</div>
+{{- end -}}
+{{ end }}
