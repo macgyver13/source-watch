@@ -1,31 +1,5 @@
-# Seeded sources and live collectors for this watch instance.
-# Identity (name, base_url, description, default_tag, chips, topics, relevance)
-# lives in config/watch.yaml. This file is only seeds + collectors.
-#
-# Leave these lists empty for a blank fork. Add entries, then run
-# scripts/build_seed_feed.py to fill site/static artifacts.
-#
-# Example:
-# seeded_sources:
-#   docs_pages:
-#     - id: example-docs
-#       name: Example docs
-#       url: https://example.com/docs
-#       project: Example
-#       tags: [docs]
-#       summary: A page this watch should track.
-#   github_repositories:
-#     - id: example-repo
-#       repo: example/repo
-#       project: Example
-#       tags: [docs]
-#       summary: A repository this watch should track.
-# live_collectors:
-#   github_repository_searches:
-#     - id: example-search
-#       query: 'topic:documentation archived:false'
-#       max_results: 5
-#       tags: [example, github, candidate, repository-discovery]
+# Silent Payments Watch — preview/silent-payments only.
+# Do not merge this file to source-watch main.
 
 seeded_sources:
   docs_pages: []
@@ -34,4 +8,12 @@ seeded_sources:
   crates: []
 
 live_collectors:
-  github_repository_searches: []
+  github_repository_searches:
+    - id: github-silent-payments-repo-discovery
+      query: '"silent payments" archived:false'
+      max_results: 10
+      tags: [silent-payments, github, candidate, repository-discovery]
+    - id: github-bip352-repo-discovery
+      query: 'BIP352 archived:false'
+      max_results: 10
+      tags: [silent-payments, bip352, github, candidate, repository-discovery]

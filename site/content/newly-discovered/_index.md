@@ -2,4 +2,22 @@
 title: "Newly discovered"
 ---
 
-No activity yet.
+- [bitcoindevkit/bdk-sp](https://github.com/bitcoindevkit/bdk-sp)
+- [azeemshaik025/silent-payments](https://github.com/azeemshaik025/silent-payments)
+- [diogo-ck/silentscan](https://github.com/diogo-ck/silentscan)
+- [bitsagarob/payment-name-startos](https://github.com/bitsagarob/payment-name-startos)
+- [shakesco/shakesco-silent](https://github.com/shakesco/shakesco-silent)
+- [OZARUMOTO/PARANOIA-SIGNER](https://github.com/OZARUMOTO/PARANOIA-SIGNER)
+- [levinster82/bip352-js](https://github.com/levinster82/bip352-js)
+- [ZenulAbidin/electrum-silent-payments-sender](https://github.com/ZenulAbidin/electrum-silent-payments-sender)
+- [aido/silentpayments](https://github.com/aido/silentpayments)
+- [azeemshaik025/silent-payments](https://github.com/azeemshaik025/silent-payments)
+- [21-DOT-DEV/swift-secp256k1](https://github.com/21-DOT-DEV/swift-secp256k1)
+- [kkdao/kiss-bdk](https://github.com/kkdao/kiss-bdk)
+- [bitsagarob/payment-name-startos](https://github.com/bitsagarob/payment-name-startos)
+- [levinster82/bip352-js](https://github.com/levinster82/bip352-js)
+- [ZenulAbidin/electrum-silent-payments-sender](https://github.com/ZenulAbidin/electrum-silent-payments-sender)
+- [aido/silentpayments](https://github.com/aido/silentpayments)
+- [echennells/silent-receipts](https://github.com/echennells/silent-receipts)
+- [BitPolito/silent-payments](https://github.com/BitPolito/silent-payments)
+- [theStack/bip352-signet-scan-worstcase](https://github.com/theStack/bip352-signet-scan-worstcase)

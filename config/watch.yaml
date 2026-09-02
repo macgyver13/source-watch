@@ -1,10 +1,11 @@
-name: Example Watch
+name: Silent Payments Watch
 base_url: https://example.com/
-description: Public activity on tracked sources.
-default_tag: example
+description: Public activity on Silent Payments and related work.
+default_tag: silent-payments
 preferred_chips:
-  - docs
-  - spec
+  - bip352
+  - wallet
+  - scanning
 hidden_tags:
   - github
   - repository-discovery
@@ -12,7 +13,17 @@ hidden_tags:
   - pull-request
   - package
 relevance:
-  always_match: []   # accept if any of these appear in repo description/topics
-  required_any: []   # if non-empty, one of these must appear; empty = no required term
-  context_any: []    # if required_any is set AND this is non-empty, also need one of these
-topics: []           # optional extra Start-here tiles: [{title, slug, blurb, note}]
+  always_match:
+    - bip352
+    - bip-352
+    - silent-payments
+    - silent payments
+    - silentpayments
+  required_any:
+    - bip352
+    - bip-352
+    - silent-payments
+    - silent payments
+    - silentpayments
+  context_any: []
+topics: []

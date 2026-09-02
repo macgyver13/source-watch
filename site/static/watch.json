@@ -1,5 +1,5 @@
 {
-  "default_tag": "example",
+  "default_tag": "silent-payments",
   "hidden_tags": [
     "github",
     "repository-discovery",
@@ -7,10 +7,11 @@
     "pull-request",
     "package"
   ],
-  "name": "Example Watch",
+  "name": "Silent Payments Watch",
   "preferred_chips": [
-    "docs",
-    "spec"
+    "bip352",
+    "wallet",
+    "scanning"
   ],
   "topics": []
 }
