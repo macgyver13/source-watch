@@ -1,0 +1,16 @@
+{
+  "default_tag": "example",
+  "hidden_tags": [
+    "github",
+    "repository-discovery",
+    "candidate",
+    "pull-request",
+    "package"
+  ],
+  "name": "Example Watch",
+  "preferred_chips": [
+    "docs",
+    "spec"
+  ],
+  "topics": []
+}
