@@ -1,6 +1,6 @@
 # Source Watch
 
-Source Watch is a feed-first static public-source tracker template. Forkers fill config, enable GitHub Actions, and host the Hugo site on Cloudflare Pages or GitHub Pages. No Workers.
+Source Watch is a feed-first static public-source tracker. Fill the config, generate artifacts, and host the Hugo site on Cloudflare Pages or GitHub Pages. No Workers.
 
 Originally extracted from frost-watch.
 
@@ -17,11 +17,13 @@ The Hugo site under `site/` renders the public website from these artifacts.
 
 ## How to use
 
-1. Create a repository from this template (GitHub **Use this template**).
+1. Fork or copy this repository.
 2. Fill `config/watch.yaml` (name, base URL, description, tags, relevance, optional topics).
 3. Fill `config/source-seeds.yaml` with the docs pages, repositories, PRs, and crates to track, plus any live GitHub repository searches.
-4. Enable GitHub Actions on the new repository.
+4. Run the local pipeline below so `site/static/` has fresh artifacts.
 5. Point Cloudflare Pages **or** GitHub Pages at `site/`.
+
+This repo is not marked as a GitHub template yet, and it does not ship a GitHub Actions workflow. Refresh the feed locally (or with your own CI) until those are added.
 
 ## Scope
 
@@ -52,7 +54,7 @@ unauthenticated calls are tightly rate-limited.
 - Build output directory: `public`
 - Environment: `HUGO_VERSION=0.164.0`
 
-Actions refreshes `site/static/` artifacts on a schedule; Pages builds Hugo from `site/`.
+Pages builds Hugo from `site/`. Feed artifacts in `site/static/` come from the Python pipeline above.
 
 ## GitHub Pages
 
@@ -61,8 +63,7 @@ Use the same Hugo settings: build from `site/` with `hugo --minify`,
 
 A typical setup is a GitHub Pages workflow (or the Pages UI) that publishes
 the Hugo output, or a `gh-pages` branch containing the built `public/`
-directory. The included `.github/workflows/refresh.yml` only regenerates
-feed artifacts; it does not run Hugo.
+directory.
 
 ## Config
 
