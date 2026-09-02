@@ -1,0 +1,17 @@
+{{ define "main" }}
+<div class="wrap">
+  <div class="hero">
+    <h1>{{ with .Site.Params.description }}{{ . }}{{ else }}Public activity on tracked sources.{{ end }}</h1>
+    <div class="stats">
+      <span class="stat"><b id="stat-sources">–</b> sources</span>
+      <span class="stat"><b id="stat-projects">–</b> projects</span>
+      <span class="stat"><b id="stat-new">–</b> new this week</span>
+    </div>
+  </div>
+  {{ partial "start-here.html" (dict "here" "activity") }}
+  <section class="feed" id="activity-feed" aria-label="Latest activity">
+    <div class="feed-label">Latest activity</div>
+    <p class="muted">Loading feed…</p>
+  </section>
+</div>
+{{ end }}
