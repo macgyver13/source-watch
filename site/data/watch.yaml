@@ -16,12 +16,18 @@ relevance:
   always_match:
     - bip352
     - bip-352
+    - bip375
+    - bip376
+    - bip392
     - silent-payments
     - silent payments
     - silentpayments
   required_any:
     - bip352
     - bip-352
+    - bip375
+    - bip376
+    - bip392
     - silent-payments
     - silent payments
     - silentpayments
