@@ -2,7 +2,10 @@ name: Silent Payments Watch
 base_url: https://example.com/
 description: Public activity on Silent Payments and related work.
 default_tag: silent-payments
-preferred_chips: []
+preferred_chips:
+  - bip352
+  - wallet
+  - scanning
 hidden_tags:
   - github
   - repository-discovery
@@ -14,11 +17,8 @@ relevance:
     - bip352
     - bip-352
     - bip375
-    - bip-375
     - bip376
-    - bip-376
     - bip392
-    - bip-392
     - silent-payments
     - silent payments
     - silentpayments
@@ -26,11 +26,8 @@ relevance:
     - bip352
     - bip-352
     - bip375
-    - bip-375
     - bip376
-    - bip-376
     - bip392
-    - bip-392
     - silent-payments
     - silent payments
     - silentpayments
