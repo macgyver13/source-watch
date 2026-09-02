@@ -1,0 +1,12 @@
+{{ define "main" }}
+<div class="wrap">
+  <div class="hero">
+    <h1>Sources</h1>
+    <p class="lede">Monitored public sources behind this feed. Inclusion is a match, not a review.</p>
+  </div>
+  {{ partial "start-here.html" (dict "here" "") }}
+  <div id="source-list" class="feed" style="max-width:none">
+    <p class="muted">Loading sources…</p>
+  </div>
+</div>
+{{ end }}
