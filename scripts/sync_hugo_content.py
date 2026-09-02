@@ -153,12 +153,19 @@ def main() -> int:
 
     week_root = CONTENT / "weeks"
     week_root.mkdir(parents=True, exist_ok=True)
-    write(week_root / week / "_index.md", fm(week_title(week)))
-    week_dirs = sorted((p.name for p in week_root.iterdir() if p.is_dir()), reverse=True)
-    for slug in week_dirs:
-        page = week_root / slug / "_index.md"
-        write(page, fm(week_title(slug)))
-    write(week_root / "_index.md", fm("Weeks"))
+    if items:
+        write(week_root / week / "_index.md", fm(week_title(week)))
+        week_dirs = sorted((p.name for p in week_root.iterdir() if p.is_dir()), reverse=True)
+        for slug in week_dirs:
+            page = week_root / slug / "_index.md"
+            write(page, fm(week_title(slug)))
+    else:
+        for path in list(week_root.iterdir()):
+            if path.is_dir():
+                shutil.rmtree(path)
+        week_dirs = []
+    weeks_note = "" if week_dirs else "No activity yet.\n"
+    write(week_root / "_index.md", fm("Weeks") + weeks_note)
 
     sync_topics(watch)
 
@@ -177,15 +184,18 @@ def main() -> int:
             lines.append(f"- [{title}]({url})")
         return "\n".join(lines) + ("\n" if lines else "")
 
-    write(CONTENT / "latest" / "_index.md", fm("Latest activity") + link_list(items))
-    write(CONTENT / "tags" / "_index.md", fm("Tags") + "\n".join(
+    empty_note = "No activity yet.\n"
+    write(CONTENT / "latest" / "_index.md", fm("Latest activity") + (link_list(items) or empty_note))
+    tags_body = "\n".join(
         [f"## {tag}\n\n{link_list(rows)}" for tag, rows in sorted(by_tag.items())]
-    ) + "\n")
-    write(CONTENT / "source-types" / "_index.md", fm("Source types") + "\n".join(
+    )
+    write(CONTENT / "tags" / "_index.md", fm("Tags") + ((tags_body + "\n") if tags_body else empty_note))
+    types_body = "\n".join(
         [f"## {st}\n\n{link_list(rows)}" for st, rows in sorted(by_type.items())]
-    ) + "\n")
-    write(CONTENT / "recently-changed" / "_index.md", fm("Recently changed") + link_list(items))
-    write(CONTENT / "newly-discovered" / "_index.md", fm("Newly discovered") + link_list(items))
+    )
+    write(CONTENT / "source-types" / "_index.md", fm("Source types") + ((types_body + "\n") if types_body else empty_note))
+    write(CONTENT / "recently-changed" / "_index.md", fm("Recently changed") + (link_list(items) or empty_note))
+    write(CONTENT / "newly-discovered" / "_index.md", fm("Newly discovered") + (link_list(items) or empty_note))
     write(
         CONTENT / "needs-human-source-seeding" / "_index.md",
         fm("Needs human source seeding") + "No live collector events queued for human seeding.\n",
