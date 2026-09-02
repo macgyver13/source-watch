@@ -1,0 +1,44 @@
+{
+  "schema_version": "source-watch.feed.v0",
+  "title": "Example Watch",
+  "description": "Example public-source activity watch. Replace this config with your project.",
+  "generated_at": "2026-09-02T15:27:01Z",
+  "items": [
+    {
+      "id": "seed:example-docs-get-started",
+      "title": "GitHub Docs · Get started",
+      "summary": "Placeholder docs page. Replace with a documentation URL your watch should track.",
+      "source_url": "https://docs.github.com/en/get-started",
+      "source_type": "docs_page",
+      "event_type": "source_seeded",
+      "project": "GitHub Docs",
+      "tags": ["example", "docs"],
+      "status": "seeded",
+      "discovered_at": "2026-09-02T15:21:39Z",
+      "event_time": "2026-09-02T15:21:39Z",
+      "activity_at": "2026-09-02T15:21:39Z",
+      "observed_at": "2026-09-02T15:27:00Z",
+      "last_seen_at": "2026-09-02T15:27:00Z",
+      "confidence": "seeded_source",
+      "evidence": [{"url": "https://docs.github.com/en/get-started", "retrieved_at": "2026-09-02T15:27:00Z"}]
+    },
+    {
+      "id": "seed:example-github-docs",
+      "title": "github/docs",
+      "summary": "Placeholder GitHub repository. Replace with a repo your watch should track.",
+      "source_url": "https://github.com/github/docs",
+      "source_type": "github_repository",
+      "event_type": "source_seeded",
+      "project": "GitHub Docs",
+      "tags": ["example", "docs"],
+      "status": "seeded",
+      "discovered_at": "2026-09-02T15:21:39Z",
+      "event_time": "2026-09-02T15:21:39Z",
+      "activity_at": "2026-09-02T15:21:39Z",
+      "observed_at": "2026-09-02T15:27:00Z",
+      "last_seen_at": "2026-09-02T15:27:00Z",
+      "confidence": "seeded_source",
+      "evidence": [{"url": "https://github.com/github/docs", "retrieved_at": "2026-09-02T15:27:00Z"}]
+    }
+  ]
+}

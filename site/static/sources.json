@@ -1,0 +1,29 @@
+{
+  "schema_version": "source-watch.sources.v0",
+  "sources": [
+    {
+      "id": "example-docs-get-started",
+      "name": "GitHub Docs · Get started",
+      "url": "https://docs.github.com/en/get-started",
+      "source_type": "docs_page",
+      "project": "GitHub Docs",
+      "tags": ["example", "docs"],
+      "confidence": "seeded_source",
+      "discovered_at": "2026-09-02T15:21:39Z",
+      "first_seen": "2026-09-02T15:21:39Z",
+      "last_checked": "2026-09-02T15:27:00Z"
+    },
+    {
+      "id": "example-github-docs",
+      "name": "github/docs",
+      "url": "https://github.com/github/docs",
+      "source_type": "github_repository",
+      "project": "GitHub Docs",
+      "tags": ["example", "docs"],
+      "confidence": "seeded_source",
+      "discovered_at": "2026-09-02T15:21:39Z",
+      "first_seen": "2026-09-02T15:21:39Z",
+      "last_checked": "2026-09-02T15:27:00Z"
+    }
+  ]
+}
