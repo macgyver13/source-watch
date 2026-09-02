@@ -1,0 +1,21 @@
+{{ define "main" }}
+<div class="wrap">
+  <div class="hero">
+    <h1>Project atlas</h1>
+    <p class="lede">Seeded coverage plus GitHub candidates that matched the collector. Inclusion is a match, not a review.</p>
+    <div class="toolbar">
+      <input class="search" id="atlas-search" type="search" placeholder="Search projects…" value="" aria-label="Search projects">
+      <div class="filters" id="atlas-chips" style="margin:0"></div>
+    </div>
+  </div>
+  {{ partial "start-here.html" (dict "here" "projects") }}
+  <p class="coverage" id="atlas-coverage"><b>–</b> projects</p>
+  <div class="legend">
+    <span><i class="dot repo"></i> repo</span>
+    <span><i class="dot docs"></i> docs</span>
+    <span><i class="dot pr"></i> PR</span>
+    <span><i class="dot crate"></i> crate</span>
+  </div>
+  <div class="grid" id="atlas-grid"></div>
+</div>
+{{ end }}
