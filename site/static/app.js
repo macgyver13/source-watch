@@ -1,0 +1,495 @@
+(function () {
+  "use strict";
+
+  var TYPE_DOT = {
+    docs_page: "docs",
+    github_repository: "repo",
+    github_pull_request: "pr",
+    package_crate: "crate"
+  };
+  var TAG_ALIAS = { "threshold-signatures": "threshold" };
+  var GENERATED_SUMMARY = /^seeded monitored source for /i;
+  var GENERATED_QUERY = /^github repository matched .+ live collector query:/i;
+
+  var MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+  var HIDDEN_TAGS = {};
+  var PREFERRED_CHIPS = ["docs", "spec"];
+
+  function applyWatch(raw) {
+    raw = raw || {};
+    var hidden = {};
+    (raw.hidden_tags || []).forEach(function (t) {
+      if (t) hidden[String(t)] = true;
+    });
+    if (raw.default_tag) hidden[String(raw.default_tag)] = true;
+    HIDDEN_TAGS = hidden;
+    var chips = raw.preferred_chips;
+    PREFERRED_CHIPS = (chips && chips.length) ? chips.slice() : ["docs", "spec"];
+  }
+
+  function esc(s) {
+    return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) {
+      return ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c];
+    });
+  }
+
+  function parseDate(iso) {
+    if (!iso) return null;
+    var d = new Date(iso);
+    return isNaN(d.getTime()) ? null : d;
+  }
+
+  function humanDate(iso) {
+    var d = parseDate(iso);
+    if (!d) return "";
+    var now = new Date();
+    var diff = now.getTime() - d.getTime();
+    var mins = Math.round(diff / 60000);
+    var hours = Math.round(diff / 3600000);
+    var days = Math.round(diff / 86400000);
+    if (mins < 60 && mins >= 0) return (mins <= 1 ? "1m" : mins + "m") + " ago";
+    if (hours < 24 && hours >= 0) return hours + "h ago";
+    if (days < 7 && days >= 0) return days + "d ago";
+    if (d.getFullYear() === now.getFullYear()) return MONTHS[d.getMonth()] + " " + d.getDate();
+    return MONTHS[d.getMonth()] + " " + d.getFullYear();
+  }
+
+  function relativeFrom(iso) {
+    var d = parseDate(iso);
+    if (!d) return "";
+    var diff = Date.now() - d.getTime();
+    if (diff < 0) diff = 0;
+    var mins = Math.round(diff / 60000);
+    var hours = Math.round(diff / 3600000);
+    var days = Math.round(diff / 86400000);
+    if (mins < 60) return (mins <= 1 ? "1m" : mins + "m") + " ago";
+    if (hours < 48) return hours + "h ago";
+    return days + "d ago";
+  }
+
+  function formatStamp(iso) {
+    var d = parseDate(iso);
+    if (!d) return "";
+    try {
+      var parts = new Intl.DateTimeFormat("en-US", {
+        timeZone: "America/New_York",
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+        hour: "numeric",
+        minute: "2-digit",
+        hour12: true
+      }).formatToParts(d);
+      var get = function (t) {
+        var p = parts.find(function (x) { return x.type === t; });
+        return p ? p.value : "";
+      };
+      var dayPeriod = get("dayPeriod").toLowerCase().replace(/\./g, "");
+      return get("month") + " " + get("day") + ", " + get("year") + " " + get("hour") + ":" + get("minute") + dayPeriod + " ET";
+    } catch (e) {
+      return d.toISOString();
+    }
+  }
+  function formatET(iso) {
+    var stamp = formatStamp(iso);
+    return stamp ? "Generated " + stamp : "";
+  }
+
+  function isoWeekParts(d) {
+    var date = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()));
+    var day = date.getUTCDay() || 7;
+    date.setUTCDate(date.getUTCDate() + 4 - day);
+    var year = date.getUTCFullYear();
+    var yearStart = new Date(Date.UTC(year, 0, 1));
+    var week = Math.ceil((((date - yearStart) / 86400000) + 1) / 7);
+    return { year: year, week: week };
+  }
+
+  function isoWeekStart(year, week) {
+    var jan4 = new Date(Date.UTC(year, 0, 4));
+    var day = jan4.getUTCDay() || 7;
+    var monday = new Date(jan4);
+    monday.setUTCDate(jan4.getUTCDate() - (day - 1));
+    monday.setUTCDate(monday.getUTCDate() + (week - 1) * 7);
+    return monday;
+  }
+
+  function formatWeekRange(year, week) {
+    var start = isoWeekStart(year, week);
+    var end = new Date(start);
+    end.setUTCDate(start.getUTCDate() + 6);
+    if (start.getUTCMonth() === end.getUTCMonth()) {
+      return MONTHS[start.getUTCMonth()] + " " + start.getUTCDate() + "–" + end.getUTCDate();
+    }
+    return MONTHS[start.getUTCMonth()] + " " + start.getUTCDate() + "–" + MONTHS[end.getUTCMonth()] + " " + end.getUTCDate();
+  }
+
+  function parseWeekSlug(slug) {
+    var m = String(slug || "").match(/(\d{4})-W(\d{1,2})/i);
+    if (!m) return null;
+    return { year: parseInt(m[1], 10), week: parseInt(m[2], 10), slug: m[1] + "-W" + String(m[2]).padStart(2, "0") };
+  }
+
+  function isCandidate(item) {
+    return item && (item.status === "candidate" || (item.tags || []).indexOf("candidate") !== -1);
+  }
+
+  function itemDate(item) {
+    return item.activity_at || item.source_updated_at || item.source_published_at || item.discovered_at || item.event_time || item.observed_at;
+  }
+
+  function displayTitle(item) {
+    var t = item.title || item.name || "";
+    t = t.replace(/ PR #(\d+)/, " #$1");
+    t = t.replace(/ developer page$/, "");
+    return t;
+  }
+
+  function displaySummary(item) {
+    var raw = (item.summary || "").trim();
+    if (raw && !GENERATED_SUMMARY.test(raw) && !GENERATED_QUERY.test(raw)) {
+      if (raw.length > 160) {
+        var cut = raw.slice(0, 157);
+        var sp = cut.lastIndexOf(" ");
+        return (sp > 80 ? cut.slice(0, sp) : cut) + ".";
+      }
+      return raw.charAt(raw.length - 1) === "." ? raw : raw + ".";
+    }
+    var title = displayTitle(item);
+    var kind = item.source_type;
+    if (kind === "github_pull_request") return "Tracked pull request: " + title + ".";
+    if (kind === "package_crate") return "Published crate: " + title + ".";
+    if (kind === "docs_page") return "Public documentation: " + title + ".";
+    if (kind === "github_repository") return "Public repository: " + title + ".";
+    return title;
+  }
+
+  function topicTags(item, limit) {
+    limit = limit || 3;
+    var out = [];
+    var seen = {};
+    (item.tags || []).forEach(function (tag) {
+      var key = TAG_ALIAS[tag] || tag;
+      if (HIDDEN_TAGS[tag] || HIDDEN_TAGS[key] || seen[key]) return;
+      seen[key] = true;
+      out.push(key);
+    });
+    if (item.source_type === "github_pull_request") {
+      var merged = (item.tags || []).indexOf("merged") !== -1;
+      if (!merged && !seen.open) {
+        out.push("open");
+        seen.open = true;
+      }
+    }
+    return out.slice(0, limit);
+  }
+
+  function sortActivity(items) {
+    return items.slice().sort(function (a, b) {
+      var da = itemDate(a) || "";
+      var db = itemDate(b) || "";
+      return db < da ? -1 : db > da ? 1 : 0;
+    });
+  }
+
+  function itemWeek(item) {
+    var d = parseDate(item.discovered_at || item.event_time || item.activity_at);
+    return d ? isoWeekParts(d) : null;
+  }
+
+  function itemsForWeek(items, weekSlug) {
+    var parsed = parseWeekSlug(weekSlug);
+    if (!parsed) return [];
+    return items.filter(function (item) {
+      var p = itemWeek(item);
+      return p && p.year === parsed.year && p.week === parsed.week;
+    });
+  }
+
+  function setText(id, text) {
+    var el = document.getElementById(id);
+    if (el) el.textContent = text;
+  }
+
+  function currentPage() {
+    return document.body.getAttribute("data-page") || "";
+  }
+
+  function fillRefresh(generatedAt) {
+    var el = document.getElementById("refreshed");
+    if (!el || !generatedAt) return;
+    el.textContent = relativeFrom(generatedAt);
+    el.setAttribute("title", formatET(generatedAt));
+  }
+
+  function fillStartCounts(feed, projects, sources) {
+    var nSources = (sources.sources || []).length || (feed.items || []).length;
+    var nProjects = (projects.projects || []).length;
+    var nCand = (feed.items || []).filter(isCandidate).length;
+    document.querySelectorAll("[data-count=sources]").forEach(function (el) {
+      el.textContent = nSources + " source" + (nSources === 1 ? "" : "s");
+    });
+    document.querySelectorAll("[data-count=projects]").forEach(function (el) {
+      el.textContent = nProjects + " project" + (nProjects === 1 ? "" : "s");
+    });
+    document.querySelectorAll("[data-count=candidates]").forEach(function (el) {
+      el.textContent = nCand + " new candidate" + (nCand === 1 ? "" : "s");
+    });
+    var now = new Date();
+    var cur = isoWeekParts(now);
+    var weekNew = (feed.items || []).filter(function (item) {
+      var d = parseDate(item.discovered_at || item.event_time);
+      if (!d) return false;
+      var p = isoWeekParts(d);
+      if (p.year === cur.year && p.week === cur.week) return true;
+      var days = (now.getTime() - d.getTime()) / 86400000;
+      return days >= 0 && days <= 7;
+    }).length;
+    setText("stat-sources", String(nSources));
+    setText("stat-projects", String(nProjects));
+    setText("stat-new", String(weekNew));
+  }
+
+  function renderFeed(items) {
+    var root = document.getElementById("activity-feed");
+    if (!root) return;
+    var html = '<div class="feed-label">Latest activity</div>';
+    sortActivity(items).forEach(function (item) {
+      var tags = topicTags(item, 3).map(function (t) {
+        return '<span class="tag">' + esc(t) + "</span>";
+      }).join("");
+      html +=
+        '<article class="item">' +
+          '<div class="item-top">' +
+            "<h3><a href=\"" + esc(item.source_url) + "\">" + esc(displayTitle(item)) + "</a></h3>" +
+          "</div>" +
+          "<p>" + esc(displaySummary(item)) + "</p>" +
+          '<div class="item-meta"><span class="proj">' + esc(item.project || "") + '</span><span class="time" title="' + esc(formatStamp(itemDate(item))) + '">' + esc(humanDate(itemDate(item))) + "</span></div>" +
+          (tags ? '<div class="tags">' + tags + "</div>" : "") +
+        "</article>";
+    });
+    root.innerHTML = html;
+  }
+
+  function renderWeek(items, weekSlug) {
+    var parsed = parseWeekSlug(weekSlug);
+    items = itemsForWeek(items, weekSlug);
+    if (parsed) {
+      setText("week-range", formatWeekRange(parsed.year, parsed.week));
+      document.querySelectorAll(".rail a[data-week]").forEach(function (a) {
+        var p = parseWeekSlug(a.getAttribute("data-week"));
+        if (!p) return;
+        var sub = a.querySelector(".sub");
+        if (sub) sub.textContent = formatWeekRange(p.year, p.week);
+      });
+    }
+    var cands = items.filter(isCandidate);
+    var prs = items.filter(function (i) { return i.source_type === "github_pull_request" && !isCandidate(i); });
+    var repos = items.filter(function (i) {
+      return !isCandidate(i) && (i.source_type === "github_repository" || i.source_type === "package_crate");
+    });
+    var docs = items.filter(function (i) { return i.source_type === "docs_page"; });
+    var n = cands.length;
+    var lede =
+      n === 0
+        ? "No new GitHub candidates this cycle."
+        : n + " GitHub candidate" + (n === 1 ? "" : "s") + " showed up.";
+    setText("week-lede", lede);
+
+    function rows(list) {
+      return list.map(function (item) {
+        return (
+          '<div class="row">' +
+            "<div>" +
+              '<a class="title" href="' + esc(item.source_url) + '">' + esc(displayTitle(item)) + "</a>" +
+              '<div class="sum">' + esc(displaySummary(item)) + "</div>" +
+            "</div>" +
+            '<span class="time">' + esc(humanDate(itemDate(item))) + "</span>" +
+          "</div>"
+        );
+      }).join("");
+    }
+
+    function group(title, list) {
+      if (!list.length) return "";
+      return (
+        '<section class="group">' +
+          "<h2>" + esc(title) + ' <span class="count">' + list.length + "</span></h2>" +
+          rows(list) +
+        "</section>"
+      );
+    }
+
+    var root = document.getElementById("week-groups");
+    if (root) {
+      root.innerHTML =
+        group("New candidates", cands) +
+        group("Pull requests", prs) +
+        group("Repositories", repos) +
+        group("Docs & writing", docs);
+    }
+  }
+
+  function projectSummary(project, items) {
+    var mine = items.filter(function (i) { return i.project === project.name; });
+    var best = mine.find(function (i) {
+      var s = (i.summary || "").trim();
+      return s && !GENERATED_SUMMARY.test(s);
+    }) || mine[0];
+    if (best) return displaySummary(best);
+    return "Public project.";
+  }
+
+  function projectHref(project, items) {
+    var mine = items.filter(function (i) { return i.project === project.name; });
+    var repo = mine.find(function (i) { return i.source_type === "github_repository"; });
+    if (repo) return repo.source_url;
+    if (mine[0]) return mine[0].source_url;
+    return "#";
+  }
+
+  function renderAtlas(projects, items, sources) {
+    var grid = document.getElementById("atlas-grid");
+    var coverage = document.getElementById("atlas-coverage");
+    var chips = document.getElementById("atlas-chips");
+    var search = document.getElementById("atlas-search");
+    if (!grid) return;
+    var sourceCount = (sources.sources || []).length || items.length;
+    var preferred = PREFERRED_CHIPS;
+    var present = {};
+    projects.forEach(function (p) {
+      (p.tags || []).forEach(function (t) {
+        var key = TAG_ALIAS[t] || t;
+        if (!HIDDEN_TAGS[t] && !HIDDEN_TAGS[key]) present[key] = true;
+      });
+    });
+    var chipTags = preferred.filter(function (t) { return present[t]; });
+    Object.keys(present).forEach(function (t) {
+      if (chipTags.indexOf(t) === -1 && chipTags.length < 8) chipTags.push(t);
+    });
+
+    var state = { q: "", tag: "all" };
+
+    if (chips) {
+      chips.innerHTML =
+        '<span class="pill filter on" data-tag="all" role="button" tabindex="0">All</span>' +
+        chipTags.map(function (t) {
+          return '<span class="pill filter" data-tag="' + esc(t) + '" role="button" tabindex="0">' + esc(t) + "</span>";
+        }).join("");
+    }
+
+    function matches(p) {
+      var hay = (p.name + " " + (p.tags || []).join(" ") + " " + projectSummary(p, items)).toLowerCase();
+      if (state.q && hay.indexOf(state.q) === -1) return false;
+      if (state.tag !== "all") {
+        var tags = (p.tags || []).map(function (t) { return TAG_ALIAS[t] || t; });
+        if (tags.indexOf(state.tag) === -1) return false;
+      }
+      return true;
+    }
+
+    function paint() {
+      var shown = projects.filter(matches);
+      if (coverage) {
+        coverage.innerHTML = "<b>" + shown.length + " project" + (shown.length === 1 ? "" : "s") + "</b> · " + sourceCount + " sources";
+      }
+      grid.innerHTML = shown.map(function (p) {
+        var mine = items.filter(function (i) { return i.project === p.name; });
+        var types = [];
+        var seenT = {};
+        mine.forEach(function (i) {
+          var d = TYPE_DOT[i.source_type];
+          if (d && !seenT[d]) { seenT[d] = true; types.push(d); }
+        });
+        var nSrc = (p.sources || []).length || mine.length || 1;
+        var when = p.activity_at || p.latest_discovered_at || p.discovered_at;
+        var name = p.name;
+        return (
+          '<article class="card">' +
+            '<div class="card-top">' +
+              "<h3><a href=\"" + esc(projectHref(p, items)) + "\">" + esc(name) + "</a></h3>" +
+            "</div>" +
+            '<p class="what">' + esc(projectSummary(p, items)) + "</p>" +
+            '<div class="card-foot">' +
+              '<span class="time">' + esc(humanDate(when)) + "</span>" +
+              '<span class="src">' + nSrc + " source" + (nSrc === 1 ? "" : "s") + "</span>" +
+              '<span class="dots" title="' + esc(types.join(", ")) + '">' +
+                types.map(function (t) { return '<i class="dot ' + t + '"></i>'; }).join("") +
+              "</span>" +
+            "</div>" +
+          "</article>"
+        );
+      }).join("");
+    }
+
+    if (chips) {
+      chips.addEventListener("click", function (ev) {
+        var pill = ev.target.closest("[data-tag]");
+        if (!pill) return;
+        state.tag = pill.getAttribute("data-tag") || "all";
+        chips.querySelectorAll(".pill.filter").forEach(function (el) {
+          el.classList.toggle("on", el === pill);
+        });
+        paint();
+      });
+    }
+    if (search) {
+      search.addEventListener("input", function () {
+        state.q = (search.value || "").trim().toLowerCase();
+        paint();
+      });
+    }
+    paint();
+  }
+
+  function renderSources(sources) {
+    var root = document.getElementById("source-list");
+    if (!root) return;
+    var list = (sources.sources || []).slice().sort(function (a, b) {
+      return String(a.name || "").localeCompare(String(b.name || ""));
+    });
+    root.innerHTML = list.map(function (s) {
+      return (
+        '<div class="source-row">' +
+          '<a class="name" href="' + esc(s.url) + '">' + esc(s.name) + "</a>" +
+          '<span class="proj">' + esc(s.project || "") + "</span>" +
+        "</div>"
+      );
+    }).join("");
+  }
+
+  function boot(feed, projects, sources) {
+    var items = feed.items || [];
+    fillRefresh(feed.generated_at);
+    fillStartCounts(feed, projects, sources);
+    var page = currentPage();
+    if (page === "home") renderFeed(items);
+    if (page === "week") renderWeek(items, document.body.getAttribute("data-week") || "");
+    if (page === "projects") renderAtlas(projects.projects || [], items, sources);
+    if (page === "sources") renderSources(sources);
+  }
+
+  function fetchJson(url, fallback) {
+    return fetch(url).then(function (r) {
+      if (!r.ok) return fallback;
+      return r.json();
+    }).catch(function () { return fallback; });
+  }
+
+  Promise.all([
+    fetchJson("/feed.json", { items: [] }),
+    fetchJson("/projects.json", { projects: [] }),
+    fetchJson("/sources.json", { sources: [] }),
+    fetchJson("/watch.json", {})
+  ]).then(function (res) {
+    applyWatch(res[3] || {});
+    if (!(res[0] && res[0].items)) {
+      throw new Error("feed missing");
+    }
+    boot(res[0], res[1], res[2]);
+  }).catch(function () {
+    var el = document.getElementById("activity-feed") || document.getElementById("atlas-grid") || document.getElementById("week-groups") || document.getElementById("source-list");
+    if (el) el.innerHTML = '<p class="muted">Could not load live feed artifacts.</p>';
+  });
+})();
