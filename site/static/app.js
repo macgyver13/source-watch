@@ -120,9 +120,9 @@
     var end = new Date(start);
     end.setUTCDate(start.getUTCDate() + 6);
     if (start.getUTCMonth() === end.getUTCMonth()) {
-      return MONTHS[start.getUTCMonth()] + " " + start.getUTCDate() + "–" + end.getUTCDate();
+      return MONTHS[start.getUTCMonth()] + " " + start.getUTCDate() + "\u2013" + end.getUTCDate();
     }
-    return MONTHS[start.getUTCMonth()] + " " + start.getUTCDate() + "–" + MONTHS[end.getUTCMonth()] + " " + end.getUTCDate();
+    return MONTHS[start.getUTCMonth()] + " " + start.getUTCDate() + "\u2013" + MONTHS[end.getUTCMonth()] + " " + end.getUTCDate();
   }
 
   function parseWeekSlug(slug) {
@@ -392,7 +392,7 @@
     function paint() {
       var shown = projects.filter(matches);
       if (coverage) {
-        coverage.innerHTML = "<b>" + shown.length + " project" + (shown.length === 1 ? "" : "s") + "</b> · " + sourceCount + " sources";
+        coverage.innerHTML = "<b>" + shown.length + " project" + (shown.length === 1 ? "" : "s") + "</b> \u00b7 " + sourceCount + " sources";
       }
       grid.innerHTML = shown.map(function (p) {
         var mine = items.filter(function (i) { return i.project === p.name; });
