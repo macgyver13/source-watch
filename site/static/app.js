@@ -120,13 +120,13 @@
     var end = new Date(start);
     end.setUTCDate(start.getUTCDate() + 6);
     if (start.getUTCMonth() === end.getUTCMonth()) {
-      return MONTHS[start.getUTCMonth()] + " " + start.getUTCDate() + "–" + end.getUTCDate();
+      return MONTHS[start.getUTCMonth()] + " " + start.getUTCDate() + "\\u2013" + end.getUTCDate();
     }
-    return MONTHS[start.getUTCMonth()] + " " + start.getUTCDate() + "–" + MONTHS[end.getUTCMonth()] + " " + end.getUTCDate();
+    return MONTHS[start.getUTCMonth()] + " " + start.getUTCDate() + "\\u2013" + MONTHS[end.getUTCMonth()] + " " + end.getUTCDate();
   }
 
   function parseWeekSlug(slug) {
-    var m = String(slug || "").match(/(\d{4})-W(\d{1,2})/i);
+    var m = String(slug || "").match(/(\\d{4})-W(\\d{1,2})/i);
     if (!m) return null;
     return { year: parseInt(m[1], 10), week: parseInt(m[2], 10), slug: m[1] + "-W" + String(m[2]).padStart(2, "0") };
   }
@@ -141,7 +141,7 @@
 
   function displayTitle(item) {
     var t = item.title || item.name || "";
-    t = t.replace(/ PR #(\d+)/, " #$1");
+    t = t.replace(/ PR #(\\d+)/, " #$1");
     t = t.replace(/ developer page$/, "");
     return t;
   }
@@ -395,7 +395,7 @@
     function paint() {
       var shown = projects.filter(matches);
       if (coverage) {
-        coverage.innerHTML = "<b>" + shown.length + " project" + (shown.length === 1 ? "" : "s") + "</b> · " + sourceCount + " sources";
+        coverage.innerHTML = "<b>" + shown.length + " project" + (shown.length === 1 ? "" : "s") + "</b> \\u00b7 " + sourceCount + " sources";
       }
       grid.innerHTML = shown.map(function (p) {
         var mine = items.filter(function (i) { return i.project === p.name; });
