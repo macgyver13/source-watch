@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0"><channel>
+<title>Example Watch</title>
+<link>https://example.com/</link>
+<description>Example public-source activity watch. Replace this config with your project.</description>
+<lastBuildDate>Wed, 02 Sep 2026 15:27:01 +0000</lastBuildDate>
+<item>
+<title>pip-install-python/dash-improve-my-llms</title>
+<link>https://github.com/pip-install-python/dash-improve-my-llms</link>
+<guid isPermaLink="false">gh-search:example-docs-repo-discovery:pip-install-python-dash-improve-my-llms</guid>
+<description>Automate page creation for an llms.txt, page.json and architecture.txt. Allow llms the ability to read and understand your dash applications pages.</description>
+<pubDate>Wed, 02 Sep 2026 15:27:00 +0000</pubDate>
+</item>
+<item>
+<title>supernovae-st/nika-docs</title>
+<link>https://github.com/supernovae-st/nika-docs</link>
+<guid isPermaLink="false">gh-search:example-docs-repo-discovery:supernovae-st-nika-docs</guid>
+<description>The Nika documentation website. Guides, reference, recipes.</description>
+<pubDate>Wed, 02 Sep 2026 15:27:00 +0000</pubDate>
+</item>
+<item>
+<title>baraklabs/doculigent</title>
+<link>https://github.com/baraklabs/doculigent</link>
+<guid isPermaLink="false">gh-search:example-docs-repo-discovery:baraklabs-doculigent</guid>
+<description>Open-source AI workspace for meetings and async work. Record, transcribe, chat with recordings, async team collaboration</description>
+<pubDate>Wed, 02 Sep 2026 15:27:00 +0000</pubDate>
+</item>
+<item>
+<title>arcacomputer/hypersnapweb</title>
+<link>https://github.com/arcacomputer/hypersnapweb</link>
+<guid isPermaLink="false">gh-search:example-docs-repo-discovery:arcacomputer-hypersnapweb</guid>
+<description>Hypersnap.org: public web, documentation, network information, and operator resources.</description>
+<pubDate>Wed, 02 Sep 2026 15:27:00 +0000</pubDate>
+</item>
+<item>
+<title>pgsty/oink</title>
+<link>https://github.com/pgsty/oink</link>
+<guid isPermaLink="false">gh-search:example-docs-repo-discovery:pgsty-oink</guid>
+<description>Hugo theme for engineering documentation</description>
+<pubDate>Wed, 02 Sep 2026 15:27:00 +0000</pubDate>
+</item>
+<item>
+<title>GitHub Docs · Get started</title>
+<link>https://docs.github.com/en/get-started</link>
+<guid isPermaLink="false">seed:example-docs-get-started</guid>
+<description>Placeholder docs page. Replace with a documentation URL your watch should track.</description>
+<pubDate>Wed, 02 Sep 2026 15:21:39 +0000</pubDate>
+</item>
+<item>
+<title>github/docs</title>
+<link>https://github.com/github/docs</link>
+<guid isPermaLink="false">seed:example-github-docs</guid>
+<description>Placeholder GitHub repository. Replace with a repo your watch should track.</description>
+<pubDate>Wed, 02 Sep 2026 15:21:39 +0000</pubDate>
+</item>
+</channel></rss>
