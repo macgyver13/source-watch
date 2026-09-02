@@ -1,0 +1,25 @@
+rules:
+  require_source_url: true
+  require_observed_at: true
+  disallow_merit_language: true
+  auto_publish_seeded_sources: true
+  auto_publish_accepted_sources: true
+  auto_publish_candidate_discoveries: true
+  candidate_discovery_section_only: true
+
+banned_assessment_terms:
+  - promising
+  - secure
+  - production-ready
+  - best
+  - recommended
+  - canonical
+  - approved
+  - high quality
+  - mature
+  - safe
+
+candidate_publication_note: >-
+  Candidate discoveries are public source matches that may be relevant but are
+  not yet part of the accepted monitored source catalog. Inclusion is not an
+  endorsement or review.
