@@ -1,109 +1,120 @@
 # This file is for preview/silent-payments only; do not merge to main.
+# Silent Payments Watch — preview/silent-payments only.
 
 seeded_sources:
   docs_pages:
-    - id: rust-secp256k1-silent-payments-bindings
-      name: rust-secp256k1 silent payments bindings PR
+    - id: rust-secp256k1-sp-bindings
+      name: Silent Payments Bindings rust-secp256k1
       url: https://gitea.bitcoin.ninja/rust-bitcoin/rust-secp256k1/pulls/909
-      project: rust-secp256k1 Silent Payments bindings
+      project: rust-secp256k1
       tags: [silent-payments]
-      summary: Public gitea pull request adding a feature-gated silentpayments module to rust-secp256k1.
+      summary: Feature-gated silentpayments module for rust-secp256k1, based on bitcoin-core/secp256k1 pull 1765.
   github_repositories:
-    - id: blockstream-jade
-      repo: Blockstream/Jade
-      project: Jade / Libwally Silent Payment Integration
+    - id: bip0352-index-server-specification
+      repo: silent-payments/BIP0352-index-server-specification
+      project: Indexing Server Spec
       tags: [silent-payments]
-      summary: Blockstream Jade hardware wallet repository listed for Silent Payment PSBT support work.
-    - id: guggero-btcutil-js
-      repo: guggero/btcutil-js
-      project: btcutil-js library
+      summary: Specification repository defining a BIP-352 Silent Payments indexing server.
+    - id: setavenger-blindbit-oracle
+      repo: setavenger/blindbit-oracle
+      project: BlindBit-Oracle
       tags: [silent-payments]
-      summary: JavaScript/TypeScript Bitcoin utility library with BIP-352 Silent Payments scanning utilities.
-    - id: selfcustody-krux
-      repo: selfcustody/krux
-      project: Krux Silent Payments
+      summary: Go Silent Payments indexing oracle, including v1 and v2 faster client sync and gRPC work.
+    - id: bitcoin-bitcoin
+      repo: bitcoin/bitcoin
+      project: Bitcoin Core
       tags: [silent-payments]
-      summary: Open-source Bitcoin signing-device firmware with a Silent Payments feature branch.
-    - id: setavenger-blindbit-rs
-      repo: setavenger/blindbit-rs
-      project: Friglet Personal Scanner
+      summary: Bitcoin Core repository for Silent Payments foundation PR 35301 and wallet send/receive PRs 35302 and 32966.
+    - id: romanz-bindex-rs
+      repo: romanz/bindex-rs
+      project: bindex-rs
       tags: [silent-payments]
-      summary: Rust scanner that looks for Silent Payments and exposes Electrum TCP and HTTP APIs.
-    - id: caravan-bitcoin-caravan
-      repo: caravan-bitcoin/caravan
-      project: Unchained Capital Silent Payments
+      summary: Bitcoin indexing library with a BIP-352 tweak index pull request.
+    - id: setavenger-bip0352-light-client-specification
+      repo: setavenger/BIP0352-light-client-specification
+      project: Light Client Spec
       tags: [silent-payments]
-      summary: Caravan wallet repository listed for Silent Payments send support using PSBT BIP-375.
-    - id: kernel-node-kernel-node
-      repo: kernel-node/kernel-node
-      project: kernel-node SP receiver scanning
+      summary: Work-in-progress specification for a BIP-352 Silent Payments light client.
+    - id: setavenger-go-bip352
+      repo: setavenger/go-bip352
+      project: go-bip352
       tags: [silent-payments]
-      summary: kernel-node repository listed for BIP-352 receiver-side scanning and wallet work.
-    - id: nunchuk-io-libnunchuk
-      repo: nunchuk-io/libnunchuk
-      project: Nunchuk Wallet
+      summary: Go library for BIP-352 elliptic-curve computations, output creation, and scanning.
+    - id: diybitcoinhardware-embit
+      repo: diybitcoinhardware/embit
+      project: embit
       tags: [silent-payments]
-      summary: libnunchuk repository listed for adding Silent Payments send support.
-    - id: satoshiportal-bullbitcoin-mobile
-      repo: SatoshiPortal/bullbitcoin-mobile
-      project: Bull Bitcoin Wallet
+      summary: Python Bitcoin library with Silent Payments implementation in pull request 145.
+    - id: bluewallet-silentpayments
+      repo: BlueWallet/SilentPayments
+      project: BlueWallet SilentPayments
       tags: [silent-payments]
-      summary: Bull Bitcoin mobile wallet repository listed for Silent Payment support.
+      summary: TypeScript Silent Payments library used for BlueWallet receive support.
+    - id: seedsigner-seedsigner
+      repo: SeedSigner/seedsigner
+      project: SeedSigner
+      tags: [silent-payments]
+      summary: SeedSigner firmware listed for Silent Payments signing with Sparrow as coordinator.
+    - id: romanz-electrs
+      repo: romanz/electrs
+      project: electrs
+      tags: [silent-payments]
+      summary: Electrs repository listed for a BIP-352 silent payments index option.
+    - id: setavenger-blindbit-desktop
+      repo: setavenger/blindbit-desktop
+      project: BlindBit-Desktop
+      tags: [silent-payments]
+      summary: Go desktop wallet combining BlindBit scan and wallet CLI for BIP-352 Silent Payments.
+    - id: coldcard-firmware
+      repo: Coldcard/firmware
+      project: Coldcard
+      tags: [silent-payments]
+      summary: Coldcard firmware listed for Silent Payments and BIP 375 support.
     - id: cygnet3-spdk
       repo: cygnet3/spdk
       project: Silent Payment Dev Kit
       tags: [silent-payments]
-      summary: Rust Silent Payment Dev Kit for wallet-level scanning and transaction construction.
-    - id: coldcard-firmware
-      repo: Coldcard/firmware
-      project: Coldcard Silent Payments
+      summary: Rust library for building Silent Payment wallets, including scanning and transaction signing.
+    - id: satoshiportal-bullbitcoin-mobile
+      repo: SatoshiPortal/bullbitcoin-mobile
+      project: Bull Bitcoin Wallet
       tags: [silent-payments]
-      summary: Coldcard firmware repository listed for Silent Payments and BIP 375 support.
-    - id: setavenger-blindbit-desktop
-      repo: setavenger/blindbit-desktop
-      project: BlindBit-Desktop Wallet
+      summary: Bull Bitcoin mobile wallet repository tracked for Silent Payment support.
+    - id: nunchuk-io-libnunchuk
+      repo: nunchuk-io/libnunchuk
+      project: Nunchuk
       tags: [silent-payments]
-      summary: Desktop wallet combining BlindBit scan and wallet-cli for BIP 352 Silent Payments.
-    - id: romanz-electrs
-      repo: romanz/electrs
-      project: Electrs silent payments index
+      summary: libnunchuk repository tracked for Silent Payments send support.
+    - id: kernel-node-kernel-node
+      repo: kernel-node/kernel-node
+      project: kernel-node
       tags: [silent-payments]
-      summary: electrs repository listed for a silent-payments-index option covering BIP352.
-    - id: seedsigner-seedsigner
-      repo: SeedSigner/seedsigner
-      project: Seedsigner SP Integration
+      summary: kernel-node listed for BIP-352 receiver-side scanning and wallet support.
+    - id: caravan-bitcoin-caravan
+      repo: caravan-bitcoin/caravan
+      project: Unchained Capital / Caravan
       tags: [silent-payments]
-      summary: SeedSigner repository listed for Silent Payments signing support.
-    - id: bluewallet-silentpayments
-      repo: BlueWallet/SilentPayments
-      project: BlueWallet Silent Payments
+      summary: Caravan wallet listed for Silent Payments send support using PSBT BIP-375.
+    - id: setavenger-blindbit-rs
+      repo: setavenger/blindbit-rs
+      project: Friglet Personal Scanner
       tags: [silent-payments]
-      summary: BlueWallet Silent Payments TypeScript library listed for receive-side tweak calculation.
-    - id: bitcoin-bitcoin
-      repo: bitcoin/bitcoin
-      project: Bitcoin Core Silent Payments
+      summary: Personalized Silent Payments scanner exposing an Electrum TCP server and HTTP API.
+    - id: selfcustody-krux
+      repo: selfcustody/krux
+      project: Krux
       tags: [silent-payments]
-      summary: Bitcoin Core repository listed for Silent Payments PRs covering protocol and wallet send/receive.
-    - id: diybitcoinhardware-embit
-      repo: diybitcoinhardware/embit
-      project: embit Silent Payments
+      summary: Open-source signing-device firmware with a Silent Payments feature branch.
+    - id: guggero-btcutil-js
+      repo: guggero/btcutil-js
+      project: btcutil-js
       tags: [silent-payments]
-      summary: embit repository listed for a Silent Payments implementation pull request.
-    - id: setavenger-bip0352-light-client-specification
-      repo: setavenger/BIP0352-light-client-specification
-      project: Light Client Specification
+      summary: JavaScript/TypeScript Bitcoin utility library with BIP-352 Silent Payments scanning via WebAssembly.
+    - id: blockstream-jade
+      repo: Blockstream/Jade
+      project: Jade / Libwally
       tags: [silent-payments]
-      summary: Specification repository for a BIP-0352 Silent Payments light client.
-    - id: romanz-bindex-rs
-      repo: romanz/bindex-rs
-      project: Bitcoin indexing library bindex-rs
-      tags: [silent-payments]
-      summary: bindex-rs repository listed for Bitcoin indexing work related to Silent Payments.
-    - id: silent-payments-bip0352-index-server-specification
-      repo: silent-payments/BIP0352-index-server-specification
-      project: Indexing Server Spec
-      tags: [silent-payments]
-      summary: Specification repository defining a BIP-0352 Silent Payments indexing server.
+      summary: Blockstream Jade repository listed for Silent Payment PSBT support in Jade and libwally-core.
   github_pull_requests: []
   crates: []
 
