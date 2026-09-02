@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ if eq .Kind "home" }}Activity · {{ .Site.Title }}{{ else if and .Title (ne .Title .Site.Title) }}{{ .Title }} · {{ .Site.Title }}{{ else }}{{ .Site.Title }}{{ end }}</title>
+  <meta name="description" content="{{ .Site.Params.description }}">
+  <link rel="stylesheet" href="/style.css">
+  <link rel="alternate" type="application/rss+xml" title="{{ .Site.Title }}" href="/feed.xml">
+{{- if or (eq .RelPermalink "/weeks/") (eq .RelPermalink "/weeks") }}
+  {{- with site.GetPage "/weeks" }}
+    {{- with (index (sort .Sections "RelPermalink" "desc") 0) }}
+  <meta http-equiv="refresh" content="0; url={{ .RelPermalink }}">
+    {{- end }}
+  {{- end }}
+{{- end }}
+</head>
+{{- $page := "other" -}}
+{{- if eq .Kind "home" }}{{ $page = "home" }}{{ end -}}
+{{- if eq .Section "projects" }}{{ $page = "projects" }}{{ end -}}
+{{- if eq .Section "sources" }}{{ $page = "sources" }}{{ end -}}
+{{- if eq .Section "weeks" }}{{ $page = "week" }}{{ end -}}
+{{- if eq .Section "topics" }}{{ $page = "topic" }}{{ end -}}
+{{- $weekSlug := "" -}}
+{{- if and (eq .Section "weeks") (ne .RelPermalink "/weeks/") -}}
+  {{- $weekSlug = strings.TrimSuffix "/" (path.Base .RelPermalink) -}}
+{{- end -}}
+{{- $latestWeek := "/weeks/" -}}
+{{- with site.GetPage "/weeks" -}}
+  {{- with (index (sort .Sections "RelPermalink" "desc") 0) -}}
+    {{- $latestWeek = .RelPermalink -}}
+  {{- end -}}
+{{- end -}}
+{{- $watch := site.Data.watch | default dict -}}
+{{- $topics := $watch.topics | default slice -}}
+<body data-page="{{ $page }}"{{ if $weekSlug }} data-week="{{ $weekSlug }}"{{ end }} data-latest-week="{{ $latestWeek }}">
+<header>
+  <div class="wrap header-inner">
+    <a class="wordmark" href="/">{{ .Site.Title }}</a>
+    <nav>
+      <a{{ if eq $page "home" }} class="active"{{ end }} href="/">Activity</a>
+      <a{{ if eq $page "projects" }} class="active"{{ end }} href="/projects/">Projects</a>
+      <a{{ if eq $page "week" }} class="active"{{ end }} href="{{ $latestWeek }}">Weeks</a>
+      <a{{ if eq $page "sources" }} class="active"{{ end }} href="/sources/">Sources</a>
+      {{- if gt (len $topics) 0 }}
+      <a{{ if eq $page "topic" }} class="active"{{ end }} href="/topics/">Topics</a>
+      {{- end }}
+    </nav>
+    <div class="header-right">
+      <a class="rss" href="/feed.xml" title="RSS">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <circle cx="6" cy="18" r="2.2" fill="currentColor"/>
+          <path d="M4 10.5c5 0 9.5 4.5 9.5 9.5" stroke="currentColor" stroke-width="2.2" fill="none"/>
+          <path d="M4 4.5c8.4 0 15.5 7.1 15.5 15.5" stroke="currentColor" stroke-width="2.2" fill="none"/>
+        </svg>
+      </a>
+      <span class="chip">Not an endorsement</span>
+      <span class="refreshed" id="refreshed" title=""> </span>
+    </div>
+  </div>
+</header>
+<main>
+{{ block "main" . }}{{ .Content }}{{ end }}
+</main>
+<footer>
+  <div class="wrap">Aggregation, not endorsement or review.</div>
+</footer>
+<script src="/app.js" defer></script>
+</body>
+</html>
