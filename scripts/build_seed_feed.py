@@ -437,7 +437,8 @@ def build_github_repo_item(
     repo_slug = slugify(full_name)
     source_id = f"gh-search:{collector['id']}:{repo_slug}"
     old_item = existing_items.get(source_id, {})
-    discovered_at = discovery_time(old_item, observed_at)
+    created_at = optional_iso(repo.get("created_at"))
+    discovered_at = created_at or discovery_time(old_item, observed_at)
     topics = [str(topic) for topic in repo.get("topics", [])]
     tags = merge_tags(watch, collector.get("tags", []), topics)
     desc = str(repo.get("description") or "").strip()
@@ -478,7 +479,7 @@ def build_github_repo_item(
     }
 
     old_source = existing_sources.get(source_id, {})
-    source_discovered_at = discovery_time(old_source, observed_at)
+    source_discovered_at = created_at or discovery_time(old_source, observed_at)
     source = {
         "id": source_id,
         "name": full_name,
@@ -494,7 +495,7 @@ def build_github_repo_item(
 
     pslug = slugify(project)
     old_project = existing_projects.get(pslug, {})
-    project_discovered_at = discovery_time(old_project, observed_at)
+    project_discovered_at = created_at or discovery_time(old_project, observed_at)
     project_record = {
         "id": pslug,
         "name": project,
@@ -502,9 +503,9 @@ def build_github_repo_item(
         "sources": [source_id],
         "discovered_at": project_discovered_at,
         "first_seen": project_discovered_at,
-        "activity_at": max(old_project.get("activity_at") or old_project.get("last_observed_activity") or activity_at, activity_at),
+        "activity_at": activity_at,
         "last_observed_activity": observed_at,
-        "latest_discovered_at": max(old_project.get("latest_discovered_at", project_discovered_at), discovered_at),
+        "latest_discovered_at": discovered_at,
     }
     return item, source, project_record
 
@@ -599,6 +600,13 @@ def build_items(
     if skip_searches:
         return items, projects, sources
 
+    def github_repo_key(url: str) -> str | None:
+        match = re.match(r"https://github\.com/([^/]+)/([^/]+)(?:/|$)", str(url or ""), re.I)
+        if not match:
+            return None
+        return f"{match.group(1)}/{match.group(2)}".lower()
+
+    seen_repos = {key for key in (github_repo_key(item.get("source_url", "")) for item in items) if key}
 
     for collector in cfg.get("live_collectors", {}).get("github_repository_searches", []) or []:
         query = collector.get("query", "").strip()
@@ -612,10 +620,15 @@ def build_items(
         for repo in results:
             if not repo.get("full_name") or not repo.get("html_url"):
                 continue
+            repo_key = str(repo["full_name"]).lower()
+            if repo_key in seen_repos:
+                continue
             if repo_excluded_by_query_terms(repo, query):
                 continue
             if not repo_matches_relevance_rules(repo, resolved):
                 continue
+            seen_repos.add(repo_key)
+
             item, source, project = build_github_repo_item(
                 collector,
                 repo,

@@ -3,272 +3,41 @@
 <title>Silent Payments Watch</title>
 <link>https://example.com/</link>
 <description>Public activity on Silent Payments and related work.</description>
-<lastBuildDate>Thu, 03 Sep 2026 20:34:30 +0000</lastBuildDate>
-<item>
-<title>bitcoindevkit/bdk-sp</title>
-<link>https://github.com/bitcoindevkit/bdk-sp</link>
-<guid isPermaLink="false">gh-search:github-silent-payments-repo-discovery:bitcoindevkit-bdk-sp</guid>
-<description>Experimental project to integrate silent payments in BDK</description>
-<pubDate>Thu, 03 Sep 2026 20:32:52 +0000</pubDate>
-</item>
+<lastBuildDate>Thu, 03 Sep 2026 21:38:04 +0000</lastBuildDate>
 <item>
 <title>bitsagarob/blindbit-v1-shim</title>
 <link>https://github.com/bitsagarob/blindbit-v1-shim</link>
 <guid isPermaLink="false">gh-search:github-silent-payments-repo-discovery:bitsagarob-blindbit-v1-shim</guid>
 <description>Serves the removed BlindBit Oracle v1 HTTP API in front of a v2 oracle, so existing BIP-352 silent payments clients keep working. Measures its own spent-index coverage rather than claiming it.</description>
-<pubDate>Thu, 03 Sep 2026 20:32:52 +0000</pubDate>
-</item>
-<item>
-<title>azeemshaik025/silent-payments</title>
-<link>https://github.com/azeemshaik025/silent-payments</link>
-<guid isPermaLink="false">gh-search:github-silent-payments-repo-discovery:azeemshaik025-silent-payments</guid>
-<description>BIP-352 silent payments implemented from scratch in TypeScript, verified against the official test vectors</description>
-<pubDate>Thu, 03 Sep 2026 20:32:52 +0000</pubDate>
-</item>
-<item>
-<title>diogo-ck/silentscan</title>
-<link>https://github.com/diogo-ck/silentscan</link>
-<guid isPermaLink="false">gh-search:github-silent-payments-repo-discovery:diogo-ck-silentscan</guid>
-<description>Silent Payments Scanner</description>
-<pubDate>Thu, 03 Sep 2026 20:32:52 +0000</pubDate>
-</item>
-<item>
-<title>bitsagarob/payment-name-startos</title>
-<link>https://github.com/bitsagarob/payment-name-startos</link>
-<guid isPermaLink="false">gh-search:github-silent-payments-repo-discovery:bitsagarob-payment-name-startos</guid>
-<description>Get paid by name instead of a long random address. Publishes a BIP-353 record for your silent payment address, and tells you if anyone repoints it.</description>
-<pubDate>Thu, 03 Sep 2026 20:32:52 +0000</pubDate>
-</item>
-<item>
-<title>shakesco/shakesco-silent</title>
-<link>https://github.com/shakesco/shakesco-silent</link>
-<guid isPermaLink="false">gh-search:github-silent-payments-repo-discovery:shakesco-shakesco-silent</guid>
-<description>BIP 352: Bitcoin Silent Payments</description>
-<pubDate>Thu, 03 Sep 2026 20:32:52 +0000</pubDate>
-</item>
-<item>
-<title>OZARUMOTO/PARANOIA-SIGNER</title>
-<link>https://github.com/OZARUMOTO/PARANOIA-SIGNER</link>
-<guid isPermaLink="false">gh-search:github-silent-payments-repo-discovery:ozarumoto-paranoia-signer</guid>
-<description>Offline Bitcoin wallet with BIP-352 silent payments, MuSig2 3-of-3 vaults, and quantum-link signing — paranoid by design</description>
-<pubDate>Thu, 03 Sep 2026 20:32:52 +0000</pubDate>
-</item>
-<item>
-<title>levinster82/bip352-js</title>
-<link>https://github.com/levinster82/bip352-js</link>
-<guid isPermaLink="false">gh-search:github-silent-payments-repo-discovery:levinster82-bip352-js</guid>
-<description>Simple js bip352 library for bitcoin silent payment address derivation</description>
-<pubDate>Thu, 03 Sep 2026 20:32:52 +0000</pubDate>
-</item>
-<item>
-<title>ZenulAbidin/electrum-silent-payments-sender</title>
-<link>https://github.com/ZenulAbidin/electrum-silent-payments-sender</link>
-<guid isPermaLink="false">gh-search:github-silent-payments-repo-discovery:zenulabidin-electrum-silent-payments-sender</guid>
-<description>BIP352 Silent Payments sender plugin for Electrum</description>
-<pubDate>Thu, 03 Sep 2026 20:32:52 +0000</pubDate>
+<pubDate>Wed, 02 Sep 2026 19:47:06 +0000</pubDate>
 </item>
 <item>
 <title>bitsagarob/spcommit-checkpoint-startos</title>
 <link>https://github.com/bitsagarob/spcommit-checkpoint-startos</link>
 <guid isPermaLink="false">gh-search:github-silentpayments-repo-discovery:bitsagarob-spcommit-checkpoint-startos</guid>
 <description>A second, independently-computed nostr checkpoint witness for the silentpayments.net BIP-352 tweak-index commitment chain (StartOS package)</description>
-<pubDate>Thu, 03 Sep 2026 20:32:52 +0000</pubDate>
-</item>
-<item>
-<title>ponthief/thrilla</title>
-<link>https://github.com/ponthief/thrilla</link>
-<guid isPermaLink="false">gh-search:github-silentpayments-repo-discovery:ponthief-thrilla</guid>
-<description>SilentPayments Wallet</description>
-<pubDate>Thu, 03 Sep 2026 20:32:52 +0000</pubDate>
-</item>
-<item>
-<title>levinster82/bip352-js</title>
-<link>https://github.com/levinster82/bip352-js</link>
-<guid isPermaLink="false">gh-search:github-silentpayments-repo-discovery:levinster82-bip352-js</guid>
-<description>Simple js bip352 library for bitcoin silent payment address derivation</description>
-<pubDate>Thu, 03 Sep 2026 20:32:52 +0000</pubDate>
-</item>
-<item>
-<title>aido/silentpayments</title>
-<link>https://github.com/aido/silentpayments</link>
-<guid isPermaLink="false">gh-search:github-silentpayments-repo-discovery:aido-silentpayments</guid>
-<description>A lightweight, experimental Python plug-in for Core Lightning (CLN) that introduces BIP352 (Silent Payments) support directly to your node.</description>
-<pubDate>Thu, 03 Sep 2026 20:32:52 +0000</pubDate>
-</item>
-<item>
-<title>securitybrahh/silentpayments-electrum</title>
-<link>https://github.com/securitybrahh/silentpayments-electrum</link>
-<guid isPermaLink="false">gh-search:github-silentpayments-repo-discovery:securitybrahh-silentpayments-electrum</guid>
-<description>Electrum plugin for recieving and sending silent payments</description>
-<pubDate>Thu, 03 Sep 2026 20:32:52 +0000</pubDate>
-</item>
-<item>
-<title>cygnet3/rust-silentpayments</title>
-<link>https://github.com/cygnet3/rust-silentpayments</link>
-<guid isPermaLink="false">gh-search:github-silentpayments-repo-discovery:cygnet3-rust-silentpayments</guid>
-<description>A rust implementation of BIP352: Silent Payments.</description>
-<pubDate>Thu, 03 Sep 2026 20:32:52 +0000</pubDate>
-</item>
-<item>
-<title>21-DOT-DEV/swift-secp256k1</title>
-<link>https://github.com/21-DOT-DEV/swift-secp256k1</link>
-<guid isPermaLink="false">gh-search:github-bip352-repo-discovery:21-dot-dev-swift-secp256k1</guid>
-<description>Swift cryptography library for Bitcoin and Nostr. ECDSA, Schnorr, ECDH, and zero-knowledge proofs on secp256k1. Apple platforms and Linux.</description>
-<pubDate>Thu, 03 Sep 2026 20:32:52 +0000</pubDate>
+<pubDate>Wed, 02 Sep 2026 10:47:27 +0000</pubDate>
 </item>
 <item>
 <title>azeemshaik025/silent-payments</title>
 <link>https://github.com/azeemshaik025/silent-payments</link>
-<guid isPermaLink="false">gh-search:github-bip352-repo-discovery:azeemshaik025-silent-payments</guid>
+<guid isPermaLink="false">gh-search:github-silent-payments-repo-discovery:azeemshaik025-silent-payments</guid>
 <description>BIP-352 silent payments implemented from scratch in TypeScript, verified against the official test vectors</description>
-<pubDate>Thu, 03 Sep 2026 20:32:52 +0000</pubDate>
+<pubDate>Tue, 01 Sep 2026 08:38:44 +0000</pubDate>
 </item>
 <item>
-<title>kkdao/kiss-bdk</title>
-<link>https://github.com/kkdao/kiss-bdk</link>
-<guid isPermaLink="false">gh-search:github-bip352-repo-discovery:kkdao-kiss-bdk</guid>
-<description>Offline Bitcoin transactions powered by BDK and signed by KISS</description>
-<pubDate>Thu, 03 Sep 2026 20:32:52 +0000</pubDate>
+<title>diogo-ck/silentscan</title>
+<link>https://github.com/diogo-ck/silentscan</link>
+<guid isPermaLink="false">gh-search:github-silent-payments-repo-discovery:diogo-ck-silentscan</guid>
+<description>Silent Payments Scanner</description>
+<pubDate>Fri, 28 Aug 2026 00:58:07 +0000</pubDate>
 </item>
 <item>
 <title>bitsagarob/payment-name-startos</title>
 <link>https://github.com/bitsagarob/payment-name-startos</link>
-<guid isPermaLink="false">gh-search:github-bip352-repo-discovery:bitsagarob-payment-name-startos</guid>
+<guid isPermaLink="false">gh-search:github-silent-payments-repo-discovery:bitsagarob-payment-name-startos</guid>
 <description>Get paid by name instead of a long random address. Publishes a BIP-353 record for your silent payment address, and tells you if anyone repoints it.</description>
-<pubDate>Thu, 03 Sep 2026 20:32:52 +0000</pubDate>
-</item>
-<item>
-<title>levinster82/bip352-js</title>
-<link>https://github.com/levinster82/bip352-js</link>
-<guid isPermaLink="false">gh-search:github-bip352-repo-discovery:levinster82-bip352-js</guid>
-<description>Simple js bip352 library for bitcoin silent payment address derivation</description>
-<pubDate>Thu, 03 Sep 2026 20:32:52 +0000</pubDate>
-</item>
-<item>
-<title>ZenulAbidin/electrum-silent-payments-sender</title>
-<link>https://github.com/ZenulAbidin/electrum-silent-payments-sender</link>
-<guid isPermaLink="false">gh-search:github-bip352-repo-discovery:zenulabidin-electrum-silent-payments-sender</guid>
-<description>BIP352 Silent Payments sender plugin for Electrum</description>
-<pubDate>Thu, 03 Sep 2026 20:32:52 +0000</pubDate>
-</item>
-<item>
-<title>aido/silentpayments</title>
-<link>https://github.com/aido/silentpayments</link>
-<guid isPermaLink="false">gh-search:github-bip352-repo-discovery:aido-silentpayments</guid>
-<description>A lightweight, experimental Python plug-in for Core Lightning (CLN) that introduces BIP352 (Silent Payments) support directly to your node.</description>
-<pubDate>Thu, 03 Sep 2026 20:32:52 +0000</pubDate>
-</item>
-<item>
-<title>echennells/silent-receipts</title>
-<link>https://github.com/echennells/silent-receipts</link>
-<guid isPermaLink="false">gh-search:github-bip352-repo-discovery:echennells-silent-receipts</guid>
-<description>Receipts for Bitcoin silent payments (BIP352): prove one payment - or one non-payment - to one chosen verifier, without revealing your scan key. Built on bdk-sp. bitcoin++ Toronto 2026.</description>
-<pubDate>Thu, 03 Sep 2026 20:32:52 +0000</pubDate>
-</item>
-<item>
-<title>BitPolito/silent-payments</title>
-<link>https://github.com/BitPolito/silent-payments</link>
-<guid isPermaLink="false">gh-search:github-bip352-repo-discovery:bitpolito-silent-payments</guid>
-<description>Silent Payments BIP352 implementation</description>
-<pubDate>Thu, 03 Sep 2026 20:32:52 +0000</pubDate>
-</item>
-<item>
-<title>theStack/bip352-signet-scan-worstcase</title>
-<link>https://github.com/theStack/bip352-signet-scan-worstcase</link>
-<guid isPermaLink="false">gh-search:github-bip352-repo-discovery:thestack-bip352-signet-scan-worstcase</guid>
-<description>BIP-352 worst-case scanning attack demo on Signet (block 297894)</description>
-<pubDate>Thu, 03 Sep 2026 20:32:52 +0000</pubDate>
-</item>
-<item>
-<title>bitsagarob/blindbit-v1-shim</title>
-<link>https://github.com/bitsagarob/blindbit-v1-shim</link>
-<guid isPermaLink="false">gh-search:github-bip-352-repo-discovery:bitsagarob-blindbit-v1-shim</guid>
-<description>Serves the removed BlindBit Oracle v1 HTTP API in front of a v2 oracle, so existing BIP-352 silent payments clients keep working. Measures its own spent-index coverage rather than claiming it.</description>
-<pubDate>Thu, 03 Sep 2026 20:32:52 +0000</pubDate>
-</item>
-<item>
-<title>bitsagarob/spcommit-checkpoint-startos</title>
-<link>https://github.com/bitsagarob/spcommit-checkpoint-startos</link>
-<guid isPermaLink="false">gh-search:github-bip-352-repo-discovery:bitsagarob-spcommit-checkpoint-startos</guid>
-<description>A second, independently-computed nostr checkpoint witness for the silentpayments.net BIP-352 tweak-index commitment chain (StartOS package)</description>
-<pubDate>Thu, 03 Sep 2026 20:32:52 +0000</pubDate>
-</item>
-<item>
-<title>azeemshaik025/silent-payments</title>
-<link>https://github.com/azeemshaik025/silent-payments</link>
-<guid isPermaLink="false">gh-search:github-bip-352-repo-discovery:azeemshaik025-silent-payments</guid>
-<description>BIP-352 silent payments implemented from scratch in TypeScript, verified against the official test vectors</description>
-<pubDate>Thu, 03 Sep 2026 20:32:52 +0000</pubDate>
-</item>
-<item>
-<title>shrec/UltrafastSecp256k1</title>
-<link>https://github.com/shrec/UltrafastSecp256k1</link>
-<guid isPermaLink="false">gh-search:github-bip-352-repo-discovery:shrec-ultrafastsecp256k1</guid>
-<description>Ultra high-performance secp256k1 ECC engine | Python, Node.js, Rust, Go, C#, Swift, Java bindings | CUDA, Metal, OpenCL GPU | ECDSA, Schnorr, FROST, MuSig2, BIP-352 | 15+ platforms</description>
-<pubDate>Thu, 03 Sep 2026 20:32:52 +0000</pubDate>
-</item>
-<item>
-<title>Coinfidential/dkgkit</title>
-<link>https://github.com/Coinfidential/dkgkit</link>
-<guid isPermaLink="false">gh-search:github-bip-352-repo-discovery:coinfidential-dkgkit</guid>
-<description>Threshold cryptography core — FROST DKG, signing, resharing and redistribution. Rust → wasm. MuSig2 tree and BIP-352 are targets, not code</description>
-<pubDate>Thu, 03 Sep 2026 20:32:52 +0000</pubDate>
-</item>
-<item>
-<title>shakesco/shakesco-silent</title>
-<link>https://github.com/shakesco/shakesco-silent</link>
-<guid isPermaLink="false">gh-search:github-bip-352-repo-discovery:shakesco-shakesco-silent</guid>
-<description>BIP 352: Bitcoin Silent Payments</description>
-<pubDate>Thu, 03 Sep 2026 20:32:52 +0000</pubDate>
-</item>
-<item>
-<title>OZARUMOTO/PARANOIA-SIGNER</title>
-<link>https://github.com/OZARUMOTO/PARANOIA-SIGNER</link>
-<guid isPermaLink="false">gh-search:github-bip-352-repo-discovery:ozarumoto-paranoia-signer</guid>
-<description>Offline Bitcoin wallet with BIP-352 silent payments, MuSig2 3-of-3 vaults, and quantum-link signing — paranoid by design</description>
-<pubDate>Thu, 03 Sep 2026 20:32:52 +0000</pubDate>
-</item>
-<item>
-<title>levinster82/bip352-js</title>
-<link>https://github.com/levinster82/bip352-js</link>
-<guid isPermaLink="false">gh-search:github-bip-352-repo-discovery:levinster82-bip352-js</guid>
-<description>Simple js bip352 library for bitcoin silent payment address derivation</description>
-<pubDate>Thu, 03 Sep 2026 20:32:52 +0000</pubDate>
-</item>
-<item>
-<title>shuv-amp/sp-differ</title>
-<link>https://github.com/shuv-amp/sp-differ</link>
-<guid isPermaLink="false">gh-search:github-bip-352-repo-discovery:shuv-amp-sp-differ</guid>
-<description>Differential testing harness for BIP 352 Silent Payments implementations.</description>
-<pubDate>Thu, 03 Sep 2026 20:32:52 +0000</pubDate>
-</item>
-<item>
-<title>kkdao/kiss-bdk</title>
-<link>https://github.com/kkdao/kiss-bdk</link>
-<guid isPermaLink="false">gh-search:github-bip375-repo-discovery:kkdao-kiss-bdk</guid>
-<description>Offline Bitcoin transactions powered by BDK and signed by KISS</description>
-<pubDate>Thu, 03 Sep 2026 20:32:52 +0000</pubDate>
-</item>
-<item>
-<title>FreeOnlineUser/bip375-test-tools</title>
-<link>https://github.com/FreeOnlineUser/bip375-test-tools</link>
-<guid isPermaLink="false">gh-search:github-bip375-repo-discovery:freeonlineuser-bip375-test-tools</guid>
-<description>Test PSBT generator for BIP-375 Silent Payments</description>
-<pubDate>Thu, 03 Sep 2026 20:32:52 +0000</pubDate>
-</item>
-<item>
-<title>FreeOnlineUser/bip375-test-tools</title>
-<link>https://github.com/FreeOnlineUser/bip375-test-tools</link>
-<guid isPermaLink="false">gh-search:github-bip-375-repo-discovery:freeonlineuser-bip375-test-tools</guid>
-<description>Test PSBT generator for BIP-375 Silent Payments</description>
-<pubDate>Thu, 03 Sep 2026 20:32:52 +0000</pubDate>
-</item>
-<item>
-<title>kkdao/kiss-bdk</title>
-<link>https://github.com/kkdao/kiss-bdk</link>
-<guid isPermaLink="false">gh-search:github-bip376-repo-discovery:kkdao-kiss-bdk</guid>
-<description>Offline Bitcoin transactions powered by BDK and signed by KISS</description>
-<pubDate>Thu, 03 Sep 2026 20:32:52 +0000</pubDate>
+<pubDate>Mon, 24 Aug 2026 21:03:04 +0000</pubDate>
 </item>
 <item>
 <title>Blockstream/Jade</title>
@@ -278,11 +47,60 @@
 <pubDate>Fri, 14 Aug 2026 14:56:39 +0000</pubDate>
 </item>
 <item>
+<title>Coinfidential/dkgkit</title>
+<link>https://github.com/Coinfidential/dkgkit</link>
+<guid isPermaLink="false">gh-search:github-bip-352-repo-discovery:coinfidential-dkgkit</guid>
+<description>Threshold cryptography core — FROST DKG, signing, resharing and redistribution. Rust → wasm. MuSig2 tree and BIP-352 are targets, not code</description>
+<pubDate>Sat, 08 Aug 2026 04:33:20 +0000</pubDate>
+</item>
+<item>
+<title>OZARUMOTO/PARANOIA-SIGNER</title>
+<link>https://github.com/OZARUMOTO/PARANOIA-SIGNER</link>
+<guid isPermaLink="false">gh-search:github-silent-payments-repo-discovery:ozarumoto-paranoia-signer</guid>
+<description>Offline Bitcoin wallet with BIP-352 silent payments, MuSig2 3-of-3 vaults, and quantum-link signing — paranoid by design</description>
+<pubDate>Thu, 06 Aug 2026 20:11:16 +0000</pubDate>
+</item>
+<item>
+<title>echennells/silent-receipts</title>
+<link>https://github.com/echennells/silent-receipts</link>
+<guid isPermaLink="false">gh-search:github-bip352-repo-discovery:echennells-silent-receipts</guid>
+<description>Receipts for Bitcoin silent payments (BIP352): prove one payment - or one non-payment - to one chosen verifier, without revealing your scan key. Built on bdk-sp. bitcoin++ Toronto 2026.</description>
+<pubDate>Thu, 23 Jul 2026 14:08:13 +0000</pubDate>
+</item>
+<item>
+<title>kkdao/kiss-bdk</title>
+<link>https://github.com/kkdao/kiss-bdk</link>
+<guid isPermaLink="false">gh-search:github-bip352-repo-discovery:kkdao-kiss-bdk</guid>
+<description>Offline Bitcoin transactions powered by BDK and signed by KISS</description>
+<pubDate>Thu, 23 Jul 2026 02:00:42 +0000</pubDate>
+</item>
+<item>
+<title>ponthief/thrilla</title>
+<link>https://github.com/ponthief/thrilla</link>
+<guid isPermaLink="false">gh-search:github-silentpayments-repo-discovery:ponthief-thrilla</guid>
+<description>SilentPayments Wallet</description>
+<pubDate>Wed, 22 Jul 2026 07:18:55 +0000</pubDate>
+</item>
+<item>
 <title>guggero/btcutil-js</title>
 <link>https://github.com/guggero/btcutil-js</link>
 <guid isPermaLink="false">seed:guggero-btcutil-js</guid>
 <description>JavaScript/TypeScript Bitcoin utility library with BIP-352 Silent Payments scanning via WebAssembly.</description>
 <pubDate>Tue, 21 Jul 2026 18:23:10 +0000</pubDate>
+</item>
+<item>
+<title>aido/silentpayments</title>
+<link>https://github.com/aido/silentpayments</link>
+<guid isPermaLink="false">gh-search:github-silentpayments-repo-discovery:aido-silentpayments</guid>
+<description>A lightweight, experimental Python plug-in for Core Lightning (CLN) that introduces BIP352 (Silent Payments) support directly to your node.</description>
+<pubDate>Mon, 20 Jul 2026 19:40:28 +0000</pubDate>
+</item>
+<item>
+<title>Coldcard/firmware #683</title>
+<link>https://github.com/Coldcard/firmware/pull/683</link>
+<guid isPermaLink="false">seed:coldcard-pr-683</guid>
+<description>Add MuSig2 + Silent Payments.</description>
+<pubDate>Wed, 01 Jul 2026 14:56:21 +0000</pubDate>
 </item>
 <item>
 <title>selfcustody/krux</title>
@@ -313,6 +131,20 @@
 <pubDate>Wed, 29 Apr 2026 14:21:04 +0000</pubDate>
 </item>
 <item>
+<title>shuv-amp/sp-differ</title>
+<link>https://github.com/shuv-amp/sp-differ</link>
+<guid isPermaLink="false">gh-search:github-bip-352-repo-discovery:shuv-amp-sp-differ</guid>
+<description>Differential testing harness for BIP 352 Silent Payments implementations.</description>
+<pubDate>Sat, 04 Apr 2026 11:37:31 +0000</pubDate>
+</item>
+<item>
+<title>theStack/bip352-signet-scan-worstcase</title>
+<link>https://github.com/theStack/bip352-signet-scan-worstcase</link>
+<guid isPermaLink="false">gh-search:github-bip352-repo-discovery:thestack-bip352-signet-scan-worstcase</guid>
+<description>BIP-352 worst-case scanning attack demo on Signet (block 297894)</description>
+<pubDate>Tue, 31 Mar 2026 23:39:52 +0000</pubDate>
+</item>
+<item>
 <title>nunchuk-io/libnunchuk</title>
 <link>https://github.com/nunchuk-io/libnunchuk</link>
 <guid isPermaLink="false">seed:nunchuk-io-libnunchuk</guid>
@@ -327,11 +159,32 @@
 <pubDate>Wed, 18 Mar 2026 22:50:49 +0000</pubDate>
 </item>
 <item>
+<title>securitybrahh/silentpayments-electrum</title>
+<link>https://github.com/securitybrahh/silentpayments-electrum</link>
+<guid isPermaLink="false">gh-search:github-silentpayments-repo-discovery:securitybrahh-silentpayments-electrum</guid>
+<description>Electrum plugin for recieving and sending silent payments</description>
+<pubDate>Mon, 16 Mar 2026 02:28:12 +0000</pubDate>
+</item>
+<item>
 <title>Silent Payments Bindings rust-secp256k1</title>
 <link>https://gitea.bitcoin.ninja/rust-bitcoin/rust-secp256k1/pulls/909</link>
 <guid isPermaLink="false">seed:rust-secp256k1-sp-bindings</guid>
 <description>Feature-gated silentpayments module for rust-secp256k1, based on bitcoin-core/secp256k1 pull 1765.</description>
 <pubDate>Tue, 03 Feb 2026 15:54:14 +0000</pubDate>
+</item>
+<item>
+<title>shrec/UltrafastSecp256k1</title>
+<link>https://github.com/shrec/UltrafastSecp256k1</link>
+<guid isPermaLink="false">gh-search:github-bip-352-repo-discovery:shrec-ultrafastsecp256k1</guid>
+<description>Ultra high-performance secp256k1 ECC engine | Python, Node.js, Rust, Go, C#, Swift, Java bindings | CUDA, Metal, OpenCL GPU | ECDSA, Schnorr, FROST, MuSig2, BIP-352 | 15+ platforms</description>
+<pubDate>Mon, 02 Feb 2026 13:29:44 +0000</pubDate>
+</item>
+<item>
+<title>FreeOnlineUser/bip375-test-tools</title>
+<link>https://github.com/FreeOnlineUser/bip375-test-tools</link>
+<guid isPermaLink="false">gh-search:github-bip375-repo-discovery:freeonlineuser-bip375-test-tools</guid>
+<description>Test PSBT generator for BIP-375 Silent Payments</description>
+<pubDate>Wed, 07 Jan 2026 05:07:30 +0000</pubDate>
 </item>
 <item>
 <title>cygnet3/spdk</title>
@@ -346,6 +199,20 @@
 <guid isPermaLink="false">seed:coldcard-firmware</guid>
 <description>Coldcard firmware listed for Silent Payments and BIP 375 support.</description>
 <pubDate>Wed, 26 Nov 2025 15:00:48 +0000</pubDate>
+</item>
+<item>
+<title>Coldcard/firmware #587</title>
+<link>https://github.com/Coldcard/firmware/pull/587</link>
+<guid isPermaLink="false">seed:coldcard-pr-587</guid>
+<description>Add Silent Payments Support.</description>
+<pubDate>Wed, 26 Nov 2025 14:57:08 +0000</pubDate>
+</item>
+<item>
+<title>levinster82/bip352-js</title>
+<link>https://github.com/levinster82/bip352-js</link>
+<guid isPermaLink="false">gh-search:github-silent-payments-repo-discovery:levinster82-bip352-js</guid>
+<description>Simple js bip352 library for bitcoin silent payment address derivation</description>
+<pubDate>Wed, 08 Oct 2025 23:07:41 +0000</pubDate>
 </item>
 <item>
 <title>setavenger/blindbit-desktop</title>
@@ -479,5 +346,26 @@
 <guid isPermaLink="false">seed:bip0352-index-server-specification</guid>
 <description>Specification repository defining a BIP-352 Silent Payments indexing server.</description>
 <pubDate>Mon, 25 Aug 2025 20:45:15 +0000</pubDate>
+</item>
+<item>
+<title>BitPolito/silent-payments</title>
+<link>https://github.com/BitPolito/silent-payments</link>
+<guid isPermaLink="false">gh-search:github-bip352-repo-discovery:bitpolito-silent-payments</guid>
+<description>Silent Payments BIP352 implementation</description>
+<pubDate>Tue, 01 Apr 2025 09:39:06 +0000</pubDate>
+</item>
+<item>
+<title>cygnet3/rust-silentpayments</title>
+<link>https://github.com/cygnet3/rust-silentpayments</link>
+<guid isPermaLink="false">gh-search:github-silentpayments-repo-discovery:cygnet3-rust-silentpayments</guid>
+<description>A rust implementation of BIP352: Silent Payments.</description>
+<pubDate>Tue, 11 Jul 2023 19:41:51 +0000</pubDate>
+</item>
+<item>
+<title>21-DOT-DEV/swift-secp256k1</title>
+<link>https://github.com/21-DOT-DEV/swift-secp256k1</link>
+<guid isPermaLink="false">gh-search:github-bip352-repo-discovery:21-dot-dev-swift-secp256k1</guid>
+<description>Swift cryptography library for Bitcoin and Nostr. ECDSA, Schnorr, ECDH, and zero-knowledge proofs on secp256k1. Apple platforms and Linux.</description>
+<pubDate>Sun, 05 Jul 2020 07:26:05 +0000</pubDate>
 </item>
 </channel></rss>

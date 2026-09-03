@@ -121,6 +121,8 @@ seeded_sources:
       discovered_at: "2025-11-26T15:00:48Z"
       activity_at: "2025-11-26T15:01:02Z"
       roadmap_issue: 45
+      live_activity: false
+
     - id: cygnet3-spdk
       repo: cygnet3/spdk
       project: Silent Payment Dev Kit
@@ -254,6 +256,24 @@ seeded_sources:
       discovered_at: "2025-08-25T21:07:36Z"
       activity_at: "2026-07-23T13:30:03Z"
       roadmap_issue: 2
+    - id: coldcard-pr-587
+      name: "Coldcard/firmware #587"
+      url: https://github.com/Coldcard/firmware/pull/587
+      project: Coldcard
+      tags: [silent-payments, pull-request]
+      summary: Add Silent Payments Support.
+      discovered_at: "2025-11-26T14:57:08Z"
+      activity_at: "2026-08-07T17:46:02Z"
+      roadmap_issue: 45
+    - id: coldcard-pr-683
+      name: "Coldcard/firmware #683"
+      url: https://github.com/Coldcard/firmware/pull/683
+      project: Coldcard
+      tags: [silent-payments, pull-request]
+      summary: Add MuSig2 + Silent Payments.
+      discovered_at: "2026-07-01T14:56:21Z"
+      activity_at: "2026-08-05T14:15:42Z"
+
 
   crates: []
 

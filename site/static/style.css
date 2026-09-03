@@ -393,6 +393,24 @@ header nav a.active {
   line-height: 1.4;
   flex: 1;
 }
+.card-sources {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 10px;
+}
+.card-src {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 11px;
+  color: var(--muted);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  padding: 2px 7px;
+}
+.card-src:hover { color: var(--text); border-color: var(--accent); }
 .card-foot {
   display: flex;
   align-items: center;
@@ -440,6 +458,15 @@ header nav a.active {
 .source-row .name { color: var(--text); font-weight: 500; }
 .source-row .name:hover { color: #fff; }
 .source-row .proj { color: var(--muted); font-size: 12px; }
+.source-row .kind {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: var(--muted);
+  text-transform: lowercase;
+}
+
 
 .prose { max-width: 760px; padding-bottom: 48px; color: var(--muted); }
 .prose h2, .prose h3 { color: var(--text); margin: 1.4em 0 .5em; font-weight: 550; font-size: 13px; }
