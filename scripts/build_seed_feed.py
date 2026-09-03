@@ -60,6 +60,11 @@ def parse_iso(value: str | None) -> datetime | None:
             return None
 
 
+def optional_iso(value) -> str | None:
+    text = str(value or "").strip()
+    return text if text and parse_iso(text) else None
+
+
 def parse_yaml(path: Path) -> dict:
     try:
         import yaml  # type: ignore
@@ -304,7 +309,14 @@ def build_seeded_item(
     source_type = source_type_for(kind)
     item_id = f"seed:{source_id}"
     old_item = existing_items.get(item_id, {})
-    discovered_at = discovery_time(old_item, observed_at)
+    seed_discovered = optional_iso(entry.get("discovered_at"))
+    seed_activity = optional_iso(entry.get("activity_at"))
+    discovered_at = seed_discovered or discovery_time(old_item, observed_at)
+    activity_at = seed_activity or item_activity_at({
+        **old_item,
+        "event_time": discovered_at,
+        "discovered_at": discovered_at,
+    })
     item = {
         "id": item_id,
         "title": title_for(entry, kind),
@@ -317,7 +329,7 @@ def build_seeded_item(
         "status": "seeded",
         "discovered_at": discovered_at,
         "event_time": discovered_at,
-        "activity_at": item_activity_at({**old_item, "event_time": discovered_at}),
+        "activity_at": activity_at,
         "observed_at": observed_at,
         "last_seen_at": observed_at,
         "confidence": "seeded_source",
@@ -325,7 +337,7 @@ def build_seeded_item(
     }
 
     old_source = existing_sources.get(source_id, {})
-    source_discovered_at = discovery_time(old_source, observed_at)
+    source_discovered_at = seed_discovered or discovery_time(old_source, observed_at)
     source = {
         "id": source_id,
         "name": title_for(entry, kind),
@@ -341,7 +353,18 @@ def build_seeded_item(
 
     pslug = slugify(project)
     old_project = existing_projects.get(pslug, {})
-    project_discovered_at = discovery_time(old_project, observed_at)
+    project_discovered_at = seed_discovered or discovery_time(old_project, observed_at)
+    old_activity = old_project.get("activity_at") or ""
+    if seed_activity:
+        project_activity = seed_activity
+    elif old_activity:
+        project_activity = max(old_activity, activity_at)
+    else:
+        project_activity = activity_at
+    old_latest = old_project.get("latest_discovered_at") or old_project.get("discovered_at") or ""
+    latest_discovered_at = discovered_at if seed_discovered else (
+        max(old_latest, discovered_at) if old_latest else discovered_at
+    )
     project_record = {
         "id": pslug,
         "name": project,
@@ -349,9 +372,9 @@ def build_seeded_item(
         "sources": [source_id],
         "discovered_at": project_discovered_at,
         "first_seen": project_discovered_at,
-        "activity_at": max(old_project.get("activity_at") or old_project.get("last_observed_activity") or observed_at, item["activity_at"]),
+        "activity_at": project_activity,
         "last_observed_activity": observed_at,
-        "latest_discovered_at": max(old_project.get("latest_discovered_at", project_discovered_at), discovered_at),
+        "latest_discovered_at": latest_discovered_at,
     }
     return item, source, project_record
 

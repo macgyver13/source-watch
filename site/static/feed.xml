@@ -3,180 +3,180 @@
 <title>Silent Payments Watch</title>
 <link>https://example.com/</link>
 <description>Public activity on Silent Payments and related work.</description>
-<lastBuildDate>Wed, 02 Sep 2026 17:23:08 +0000</lastBuildDate>
+<lastBuildDate>Thu, 03 Sep 2026 19:20:02 +0000</lastBuildDate>
 <item>
-<title>Silent Payments Bindings rust-secp256k1</title>
-<link>https://gitea.bitcoin.ninja/rust-bitcoin/rust-secp256k1/pulls/909</link>
-<guid isPermaLink="false">seed:rust-secp256k1-sp-bindings</guid>
-<description>Feature-gated silentpayments module for rust-secp256k1, based on bitcoin-core/secp256k1 pull 1765.</description>
-<pubDate>Wed, 02 Sep 2026 17:21:11 +0000</pubDate>
-</item>
-<item>
-<title>silent-payments/BIP0352-index-server-specification</title>
-<link>https://github.com/silent-payments/BIP0352-index-server-specification</link>
-<guid isPermaLink="false">seed:bip0352-index-server-specification</guid>
-<description>Specification repository defining a BIP-352 Silent Payments indexing server.</description>
-<pubDate>Wed, 02 Sep 2026 17:21:11 +0000</pubDate>
-</item>
-<item>
-<title>setavenger/blindbit-oracle</title>
-<link>https://github.com/setavenger/blindbit-oracle</link>
-<guid isPermaLink="false">seed:setavenger-blindbit-oracle</guid>
-<description>Go Silent Payments indexing oracle, including v1 and v2 faster client sync and gRPC work.</description>
-<pubDate>Wed, 02 Sep 2026 17:21:11 +0000</pubDate>
-</item>
-<item>
-<title>bitcoin/bitcoin</title>
-<link>https://github.com/bitcoin/bitcoin</link>
-<guid isPermaLink="false">seed:bitcoin-bitcoin</guid>
-<description>Bitcoin Core repository for Silent Payments foundation PR 35301 and wallet send/receive PRs 35302 and 32966.</description>
-<pubDate>Wed, 02 Sep 2026 17:21:11 +0000</pubDate>
-</item>
-<item>
-<title>romanz/bindex-rs</title>
-<link>https://github.com/romanz/bindex-rs</link>
-<guid isPermaLink="false">seed:romanz-bindex-rs</guid>
-<description>Bitcoin indexing library with a BIP-352 tweak index pull request.</description>
-<pubDate>Wed, 02 Sep 2026 17:21:11 +0000</pubDate>
-</item>
-<item>
-<title>setavenger/BIP0352-light-client-specification</title>
-<link>https://github.com/setavenger/BIP0352-light-client-specification</link>
-<guid isPermaLink="false">seed:setavenger-bip0352-light-client-specification</guid>
-<description>Work-in-progress specification for a BIP-352 Silent Payments light client.</description>
-<pubDate>Wed, 02 Sep 2026 17:21:11 +0000</pubDate>
-</item>
-<item>
-<title>setavenger/go-bip352</title>
-<link>https://github.com/setavenger/go-bip352</link>
-<guid isPermaLink="false">seed:setavenger-go-bip352</guid>
-<description>Go library for BIP-352 elliptic-curve computations, output creation, and scanning.</description>
-<pubDate>Wed, 02 Sep 2026 17:21:11 +0000</pubDate>
-</item>
-<item>
-<title>diybitcoinhardware/embit</title>
-<link>https://github.com/diybitcoinhardware/embit</link>
-<guid isPermaLink="false">seed:diybitcoinhardware-embit</guid>
-<description>Python Bitcoin library with Silent Payments implementation in pull request 145.</description>
-<pubDate>Wed, 02 Sep 2026 17:21:11 +0000</pubDate>
-</item>
-<item>
-<title>BlueWallet/SilentPayments</title>
-<link>https://github.com/BlueWallet/SilentPayments</link>
-<guid isPermaLink="false">seed:bluewallet-silentpayments</guid>
-<description>TypeScript Silent Payments library used for BlueWallet receive support.</description>
-<pubDate>Wed, 02 Sep 2026 17:21:11 +0000</pubDate>
-</item>
-<item>
-<title>SeedSigner/seedsigner</title>
-<link>https://github.com/SeedSigner/seedsigner</link>
-<guid isPermaLink="false">seed:seedsigner-seedsigner</guid>
-<description>SeedSigner firmware listed for Silent Payments signing with Sparrow as coordinator.</description>
-<pubDate>Wed, 02 Sep 2026 17:21:11 +0000</pubDate>
-</item>
-<item>
-<title>romanz/electrs</title>
-<link>https://github.com/romanz/electrs</link>
-<guid isPermaLink="false">seed:romanz-electrs</guid>
-<description>Electrs repository listed for a BIP-352 silent payments index option.</description>
-<pubDate>Wed, 02 Sep 2026 17:21:11 +0000</pubDate>
-</item>
-<item>
-<title>setavenger/blindbit-desktop</title>
-<link>https://github.com/setavenger/blindbit-desktop</link>
-<guid isPermaLink="false">seed:setavenger-blindbit-desktop</guid>
-<description>Go desktop wallet combining BlindBit scan and wallet CLI for BIP-352 Silent Payments.</description>
-<pubDate>Wed, 02 Sep 2026 17:21:11 +0000</pubDate>
-</item>
-<item>
-<title>Coldcard/firmware</title>
-<link>https://github.com/Coldcard/firmware</link>
-<guid isPermaLink="false">seed:coldcard-firmware</guid>
-<description>Coldcard firmware listed for Silent Payments and BIP 375 support.</description>
-<pubDate>Wed, 02 Sep 2026 17:21:11 +0000</pubDate>
-</item>
-<item>
-<title>cygnet3/spdk</title>
-<link>https://github.com/cygnet3/spdk</link>
-<guid isPermaLink="false">seed:cygnet3-spdk</guid>
-<description>Rust library for building Silent Payment wallets, including scanning and transaction signing.</description>
-<pubDate>Wed, 02 Sep 2026 17:21:11 +0000</pubDate>
-</item>
-<item>
-<title>SatoshiPortal/bullbitcoin-mobile</title>
-<link>https://github.com/SatoshiPortal/bullbitcoin-mobile</link>
-<guid isPermaLink="false">seed:satoshiportal-bullbitcoin-mobile</guid>
-<description>Bull Bitcoin mobile wallet repository tracked for Silent Payment support.</description>
-<pubDate>Wed, 02 Sep 2026 17:21:11 +0000</pubDate>
-</item>
-<item>
-<title>nunchuk-io/libnunchuk</title>
-<link>https://github.com/nunchuk-io/libnunchuk</link>
-<guid isPermaLink="false">seed:nunchuk-io-libnunchuk</guid>
-<description>libnunchuk repository tracked for Silent Payments send support.</description>
-<pubDate>Wed, 02 Sep 2026 17:21:11 +0000</pubDate>
-</item>
-<item>
-<title>kernel-node/kernel-node</title>
-<link>https://github.com/kernel-node/kernel-node</link>
-<guid isPermaLink="false">seed:kernel-node-kernel-node</guid>
-<description>kernel-node listed for BIP-352 receiver-side scanning and wallet support.</description>
-<pubDate>Wed, 02 Sep 2026 17:21:11 +0000</pubDate>
-</item>
-<item>
-<title>caravan-bitcoin/caravan</title>
-<link>https://github.com/caravan-bitcoin/caravan</link>
-<guid isPermaLink="false">seed:caravan-bitcoin-caravan</guid>
-<description>Caravan wallet listed for Silent Payments send support using PSBT BIP-375.</description>
-<pubDate>Wed, 02 Sep 2026 17:21:11 +0000</pubDate>
-</item>
-<item>
-<title>setavenger/blindbit-rs</title>
-<link>https://github.com/setavenger/blindbit-rs</link>
-<guid isPermaLink="false">seed:setavenger-blindbit-rs</guid>
-<description>Personalized Silent Payments scanner exposing an Electrum TCP server and HTTP API.</description>
-<pubDate>Wed, 02 Sep 2026 17:21:11 +0000</pubDate>
-</item>
-<item>
-<title>selfcustody/krux</title>
-<link>https://github.com/selfcustody/krux</link>
-<guid isPermaLink="false">seed:selfcustody-krux</guid>
-<description>Open-source signing-device firmware with a Silent Payments feature branch.</description>
-<pubDate>Wed, 02 Sep 2026 17:21:11 +0000</pubDate>
+<title>Blockstream/Jade</title>
+<link>https://github.com/Blockstream/Jade</link>
+<guid isPermaLink="false">seed:blockstream-jade</guid>
+<description>Blockstream Jade repository listed for Silent Payment PSBT support in Jade and libwally-core.</description>
+<pubDate>Fri, 14 Aug 2026 14:56:39 +0000</pubDate>
 </item>
 <item>
 <title>guggero/btcutil-js</title>
 <link>https://github.com/guggero/btcutil-js</link>
 <guid isPermaLink="false">seed:guggero-btcutil-js</guid>
 <description>JavaScript/TypeScript Bitcoin utility library with BIP-352 Silent Payments scanning via WebAssembly.</description>
-<pubDate>Wed, 02 Sep 2026 17:21:11 +0000</pubDate>
+<pubDate>Tue, 21 Jul 2026 18:23:10 +0000</pubDate>
 </item>
 <item>
-<title>Blockstream/Jade</title>
-<link>https://github.com/Blockstream/Jade</link>
-<guid isPermaLink="false">seed:blockstream-jade</guid>
-<description>Blockstream Jade repository listed for Silent Payment PSBT support in Jade and libwally-core.</description>
-<pubDate>Wed, 02 Sep 2026 17:21:11 +0000</pubDate>
+<title>selfcustody/krux</title>
+<link>https://github.com/selfcustody/krux</link>
+<guid isPermaLink="false">seed:selfcustody-krux</guid>
+<description>Open-source signing-device firmware with a Silent Payments feature branch.</description>
+<pubDate>Wed, 03 Jun 2026 18:04:13 +0000</pubDate>
 </item>
 <item>
-<title>bitcoindevkit/bdk-sp</title>
-<link>https://github.com/bitcoindevkit/bdk-sp</link>
-<guid isPermaLink="false">seed:bitcoindevkit-bdk-sp</guid>
-<description>Experimental BDK Silent Payments integration (roadmap #13).</description>
-<pubDate>Wed, 02 Sep 2026 17:21:11 +0000</pubDate>
+<title>setavenger/blindbit-rs</title>
+<link>https://github.com/setavenger/blindbit-rs</link>
+<guid isPermaLink="false">seed:setavenger-blindbit-rs</guid>
+<description>Personalized Silent Payments scanner exposing an Electrum TCP server and HTTP API.</description>
+<pubDate>Fri, 29 May 2026 19:06:24 +0000</pubDate>
 </item>
 <item>
-<title>ZenulAbidin/electrum-silent-payments-sender</title>
-<link>https://github.com/ZenulAbidin/electrum-silent-payments-sender</link>
-<guid isPermaLink="false">seed:zenulabidin-electrum-silent-payments-sender</guid>
-<description>BIP352 Silent Payments sender plugin for Electrum (roadmap #10).</description>
-<pubDate>Wed, 02 Sep 2026 17:21:11 +0000</pubDate>
+<title>caravan-bitcoin/caravan</title>
+<link>https://github.com/caravan-bitcoin/caravan</link>
+<guid isPermaLink="false">seed:caravan-bitcoin-caravan</guid>
+<description>Caravan wallet listed for Silent Payments send support using PSBT BIP-375.</description>
+<pubDate>Wed, 29 Apr 2026 14:39:15 +0000</pubDate>
+</item>
+<item>
+<title>kernel-node/kernel-node</title>
+<link>https://github.com/kernel-node/kernel-node</link>
+<guid isPermaLink="false">seed:kernel-node-kernel-node</guid>
+<description>kernel-node listed for BIP-352 receiver-side scanning and wallet support.</description>
+<pubDate>Wed, 29 Apr 2026 14:21:04 +0000</pubDate>
+</item>
+<item>
+<title>nunchuk-io/libnunchuk</title>
+<link>https://github.com/nunchuk-io/libnunchuk</link>
+<guid isPermaLink="false">seed:nunchuk-io-libnunchuk</guid>
+<description>libnunchuk repository tracked for Silent Payments send support.</description>
+<pubDate>Wed, 18 Mar 2026 22:59:11 +0000</pubDate>
+</item>
+<item>
+<title>SatoshiPortal/bullbitcoin-mobile</title>
+<link>https://github.com/SatoshiPortal/bullbitcoin-mobile</link>
+<guid isPermaLink="false">seed:satoshiportal-bullbitcoin-mobile</guid>
+<description>Bull Bitcoin mobile wallet repository tracked for Silent Payment support.</description>
+<pubDate>Wed, 18 Mar 2026 22:50:49 +0000</pubDate>
+</item>
+<item>
+<title>Silent Payments Bindings rust-secp256k1</title>
+<link>https://gitea.bitcoin.ninja/rust-bitcoin/rust-secp256k1/pulls/909</link>
+<guid isPermaLink="false">seed:rust-secp256k1-sp-bindings</guid>
+<description>Feature-gated silentpayments module for rust-secp256k1, based on bitcoin-core/secp256k1 pull 1765.</description>
+<pubDate>Tue, 03 Feb 2026 15:54:14 +0000</pubDate>
+</item>
+<item>
+<title>cygnet3/spdk</title>
+<link>https://github.com/cygnet3/spdk</link>
+<guid isPermaLink="false">seed:cygnet3-spdk</guid>
+<description>Rust library for building Silent Payment wallets, including scanning and transaction signing.</description>
+<pubDate>Mon, 05 Jan 2026 23:12:48 +0000</pubDate>
+</item>
+<item>
+<title>Coldcard/firmware</title>
+<link>https://github.com/Coldcard/firmware</link>
+<guid isPermaLink="false">seed:coldcard-firmware</guid>
+<description>Coldcard firmware listed for Silent Payments and BIP 375 support.</description>
+<pubDate>Wed, 26 Nov 2025 15:00:48 +0000</pubDate>
+</item>
+<item>
+<title>setavenger/blindbit-desktop</title>
+<link>https://github.com/setavenger/blindbit-desktop</link>
+<guid isPermaLink="false">seed:setavenger-blindbit-desktop</guid>
+<description>Go desktop wallet combining BlindBit scan and wallet CLI for BIP-352 Silent Payments.</description>
+<pubDate>Tue, 30 Sep 2025 14:20:16 +0000</pubDate>
+</item>
+<item>
+<title>romanz/electrs</title>
+<link>https://github.com/romanz/electrs</link>
+<guid isPermaLink="false">seed:romanz-electrs</guid>
+<description>Electrs repository listed for a BIP-352 silent payments index option.</description>
+<pubDate>Fri, 29 Aug 2025 20:55:43 +0000</pubDate>
+</item>
+<item>
+<title>SeedSigner/seedsigner</title>
+<link>https://github.com/SeedSigner/seedsigner</link>
+<guid isPermaLink="false">seed:seedsigner-seedsigner</guid>
+<description>SeedSigner firmware listed for Silent Payments signing with Sparrow as coordinator.</description>
+<pubDate>Fri, 29 Aug 2025 20:46:19 +0000</pubDate>
+</item>
+<item>
+<title>BlueWallet/SilentPayments</title>
+<link>https://github.com/BlueWallet/SilentPayments</link>
+<guid isPermaLink="false">seed:bluewallet-silentpayments</guid>
+<description>TypeScript Silent Payments library used for BlueWallet receive support.</description>
+<pubDate>Fri, 29 Aug 2025 20:10:24 +0000</pubDate>
+</item>
+<item>
+<title>diybitcoinhardware/embit</title>
+<link>https://github.com/diybitcoinhardware/embit</link>
+<guid isPermaLink="false">seed:diybitcoinhardware-embit</guid>
+<description>Python Bitcoin library with Silent Payments implementation in pull request 145.</description>
+<pubDate>Fri, 29 Aug 2025 18:11:44 +0000</pubDate>
 </item>
 <item>
 <title>shakesco/shakesco-silent</title>
 <link>https://github.com/shakesco/shakesco-silent</link>
 <guid isPermaLink="false">seed:shakesco-shakesco-silent</guid>
 <description>BIP 352 Silent Payments library (roadmap #27).</description>
-<pubDate>Wed, 02 Sep 2026 17:21:11 +0000</pubDate>
+<pubDate>Fri, 29 Aug 2025 17:59:11 +0000</pubDate>
+</item>
+<item>
+<title>setavenger/go-bip352</title>
+<link>https://github.com/setavenger/go-bip352</link>
+<guid isPermaLink="false">seed:setavenger-go-bip352</guid>
+<description>Go library for BIP-352 elliptic-curve computations, output creation, and scanning.</description>
+<pubDate>Fri, 29 Aug 2025 17:13:25 +0000</pubDate>
+</item>
+<item>
+<title>setavenger/BIP0352-light-client-specification</title>
+<link>https://github.com/setavenger/BIP0352-light-client-specification</link>
+<guid isPermaLink="false">seed:setavenger-bip0352-light-client-specification</guid>
+<description>Work-in-progress specification for a BIP-352 Silent Payments light client.</description>
+<pubDate>Thu, 28 Aug 2025 16:17:50 +0000</pubDate>
+</item>
+<item>
+<title>romanz/bindex-rs</title>
+<link>https://github.com/romanz/bindex-rs</link>
+<guid isPermaLink="false">seed:romanz-bindex-rs</guid>
+<description>Bitcoin indexing library with a BIP-352 tweak index pull request.</description>
+<pubDate>Thu, 28 Aug 2025 01:33:09 +0000</pubDate>
+</item>
+<item>
+<title>bitcoindevkit/bdk-sp</title>
+<link>https://github.com/bitcoindevkit/bdk-sp</link>
+<guid isPermaLink="false">seed:bitcoindevkit-bdk-sp</guid>
+<description>Experimental BDK Silent Payments integration (roadmap #13).</description>
+<pubDate>Tue, 26 Aug 2025 18:28:51 +0000</pubDate>
+</item>
+<item>
+<title>ZenulAbidin/electrum-silent-payments-sender</title>
+<link>https://github.com/ZenulAbidin/electrum-silent-payments-sender</link>
+<guid isPermaLink="false">seed:zenulabidin-electrum-silent-payments-sender</guid>
+<description>BIP352 Silent Payments sender plugin for Electrum (roadmap #10).</description>
+<pubDate>Tue, 26 Aug 2025 18:20:48 +0000</pubDate>
+</item>
+<item>
+<title>bitcoin/bitcoin</title>
+<link>https://github.com/bitcoin/bitcoin</link>
+<guid isPermaLink="false">seed:bitcoin-bitcoin</guid>
+<description>Bitcoin Core repository for Silent Payments foundation PR 35301 and wallet send/receive PRs 35302 and 32966.</description>
+<pubDate>Tue, 26 Aug 2025 17:54:03 +0000</pubDate>
+</item>
+<item>
+<title>setavenger/blindbit-oracle</title>
+<link>https://github.com/setavenger/blindbit-oracle</link>
+<guid isPermaLink="false">seed:setavenger-blindbit-oracle</guid>
+<description>Go Silent Payments indexing oracle, including v1 and v2 faster client sync and gRPC work.</description>
+<pubDate>Mon, 25 Aug 2025 21:28:19 +0000</pubDate>
+</item>
+<item>
+<title>silent-payments/BIP0352-index-server-specification</title>
+<link>https://github.com/silent-payments/BIP0352-index-server-specification</link>
+<guid isPermaLink="false">seed:bip0352-index-server-specification</guid>
+<description>Specification repository defining a BIP-352 Silent Payments indexing server.</description>
+<pubDate>Mon, 25 Aug 2025 20:45:15 +0000</pubDate>
 </item>
 </channel></rss>

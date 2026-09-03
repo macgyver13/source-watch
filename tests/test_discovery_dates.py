@@ -189,6 +189,82 @@ class DiscoveryDateTests(unittest.TestCase):
             finally:
                 build_seed_feed.OUT = old_out
 
+    def test_seed_discovered_at_overrides_existing_artifact(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            out = Path(tmp)
+            old_out = build_seed_feed.OUT
+            build_seed_feed.OUT = out
+            try:
+                (out / "feed.json").write_text(json.dumps({
+                    "items": [{
+                        "id": "seed:example-docs-get-started",
+                        "discovered_at": "2026-09-02T00:00:00Z",
+                        "event_time": "2026-09-02T00:00:00Z",
+                        "activity_at": "2026-09-02T00:00:00Z",
+                    }]
+                }))
+                (out / "projects.json").write_text(json.dumps({
+                    "projects": [{
+                        "id": "github-docs",
+                        "discovered_at": "2026-09-02T00:00:00Z",
+                        "first_seen": "2026-09-02T00:00:00Z",
+                        "activity_at": "2026-09-02T00:00:00Z",
+                        "latest_discovered_at": "2026-09-02T00:00:00Z",
+                    }]
+                }))
+                (out / "sources.json").write_text(json.dumps({
+                    "sources": [{
+                        "id": "example-docs-get-started",
+                        "discovered_at": "2026-09-02T00:00:00Z",
+                        "first_seen": "2026-09-02T00:00:00Z",
+                    }]
+                }))
+                cfg = {"seeded_sources": {"docs_pages": [{
+                    "id": "example-docs-get-started",
+                    "name": "GitHub Docs · Get started",
+                    "url": "https://docs.github.com/en/get-started",
+                    "project": "GitHub Docs",
+                    "tags": ["docs"],
+                    "discovered_at": "2025-08-26T18:20:48Z",
+                    "activity_at": "2026-04-20T13:45:21Z",
+                }]}}
+                items, projects, sources = build_seed_feed.build_items(cfg)
+                self.assertEqual(items[0]["discovered_at"], "2025-08-26T18:20:48Z")
+                self.assertEqual(items[0]["event_time"], "2025-08-26T18:20:48Z")
+                self.assertEqual(items[0]["activity_at"], "2026-04-20T13:45:21Z")
+                self.assertNotEqual(items[0]["observed_at"], "2025-08-26T18:20:48Z")
+                self.assertEqual(sources["example-docs-get-started"]["discovered_at"], "2025-08-26T18:20:48Z")
+                self.assertEqual(projects["github-docs"]["discovered_at"], "2025-08-26T18:20:48Z")
+                self.assertEqual(projects["github-docs"]["activity_at"], "2026-04-20T13:45:21Z")
+                self.assertEqual(projects["github-docs"]["latest_discovered_at"], "2025-08-26T18:20:48Z")
+            finally:
+                build_seed_feed.OUT = old_out
+
+    def test_project_activity_at_is_not_refresh_time(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            out = Path(tmp)
+            old_out = build_seed_feed.OUT
+            build_seed_feed.OUT = out
+            try:
+                (out / "feed.json").write_text(json.dumps({"items": []}))
+                (out / "projects.json").write_text(json.dumps({"projects": []}))
+                (out / "sources.json").write_text(json.dumps({"sources": []}))
+                cfg = {"seeded_sources": {"github_repositories": [{
+                    "id": "example-repo",
+                    "repo": "example/docs",
+                    "project": "Example",
+                    "tags": ["docs"],
+                    "discovered_at": "2025-08-25T21:28:19Z",
+                    "activity_at": "2025-08-29T20:20:27Z",
+                }]}}
+                items, projects, _sources = build_seed_feed.build_items(cfg)
+                self.assertEqual(items[0]["discovered_at"], "2025-08-25T21:28:19Z")
+                self.assertEqual(items[0]["activity_at"], "2025-08-29T20:20:27Z")
+                self.assertEqual(projects["example"]["activity_at"], "2025-08-29T20:20:27Z")
+                self.assertGreater(projects["example"]["last_observed_activity"], items[0]["activity_at"])
+            finally:
+                build_seed_feed.OUT = old_out
+
 
 if __name__ == "__main__":
     unittest.main()
