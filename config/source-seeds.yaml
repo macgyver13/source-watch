@@ -39,6 +39,16 @@ seeded_sources:
       discovered_at: "2025-08-26T17:54:03Z"
       activity_at: "2026-05-29T18:55:54Z"
       roadmap_issue: [6, 7, 32]
+      live_activity: false
+    - id: bitcoin-core-secp256k1
+      repo: bitcoin-core/secp256k1
+      project: secp256k1
+      tags: [silent-payments]
+      summary: libsecp256k1 silentpayments module from PR 1765, merged to master.
+      discovered_at: "2025-08-25T21:07:36Z"
+      activity_at: "2026-07-23T13:30:03Z"
+      roadmap_issue: 2
+
     - id: romanz-bindex-rs
       repo: romanz/bindex-rs
       project: bindex-rs
@@ -207,7 +217,44 @@ seeded_sources:
       discovered_at: "2025-08-29T17:59:11Z"
       activity_at: "2025-08-29T19:44:51Z"
       roadmap_issue: 27
-  github_pull_requests: []
+  github_pull_requests:
+    - id: bitcoin-pr-35301
+      name: "bitcoin/bitcoin #35301"
+      url: https://github.com/bitcoin/bitcoin/pull/35301
+      project: Bitcoin Core
+      tags: [silent-payments, pull-request]
+      summary: Silent Payments foundation (BIP-352) implementation, take 2.
+      discovered_at: "2025-08-29T19:44:02Z"
+      activity_at: "2026-05-29T18:55:54Z"
+      roadmap_issue: 32
+    - id: bitcoin-pr-35302
+      name: "bitcoin/bitcoin #35302"
+      url: https://github.com/bitcoin/bitcoin/pull/35302
+      project: Bitcoin Core
+      tags: [silent-payments, pull-request]
+      summary: Silent Payments wallet sending, take 2.
+      discovered_at: "2025-08-26T17:54:03Z"
+      activity_at: "2026-05-29T18:55:00Z"
+      roadmap_issue: 6
+    - id: bitcoin-pr-32966
+      name: "bitcoin/bitcoin #32966"
+      url: https://github.com/bitcoin/bitcoin/pull/32966
+      project: Bitcoin Core
+      tags: [silent-payments, pull-request]
+      summary: Silent Payments wallet receiving.
+      discovered_at: "2025-08-26T17:55:29Z"
+      activity_at: "2025-08-30T18:50:11Z"
+      roadmap_issue: 7
+    - id: secp256k1-pr-1765
+      name: "bitcoin-core/secp256k1 #1765"
+      url: https://github.com/bitcoin-core/secp256k1/pull/1765
+      project: secp256k1
+      tags: [silent-payments, pull-request]
+      summary: silentpayments module implementing BIP-352, merged to master.
+      discovered_at: "2025-08-25T21:07:36Z"
+      activity_at: "2026-07-23T13:30:03Z"
+      roadmap_issue: 2
+
   crates: []
 
 live_collectors:

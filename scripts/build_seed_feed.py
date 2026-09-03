@@ -12,6 +12,7 @@ config/source-seeds.yaml.
 """
 from __future__ import annotations
 
+import argparse
 import json
 import os
 import re
@@ -27,7 +28,9 @@ WATCH_CONFIG = ROOT / "config" / "watch.yaml"
 CONFIG = ROOT / "config" / "source-seeds.yaml"
 OUT = ROOT / "data" / "public"
 STATIC = ROOT / "site" / "static"
-GITHUB_SEARCH_API = "https://api.github.com/search/repositories"
+GITHUB_API = "https://api.github.com"
+GITHUB_SEARCH_API = f"{GITHUB_API}/search/repositories"
+PR_URL_RE = re.compile(r"https://github\.com/([^/]+)/([^/]+)/pull/(\d+)/?$", re.I)
 
 GENERATED_SUMMARY_RE = re.compile(r"^seeded monitored source for ", re.I)
 GENERATED_QUERY_RE = re.compile(r"^github repository matched .+ live collector query:", re.I)
@@ -222,6 +225,50 @@ def search_github_repositories(query: str, max_results: int = 10) -> list[dict]:
     return payload.get("items", [])
 
 
+
+
+def github_get_json(path: str) -> dict | None:
+    request = Request(f"{GITHUB_API}{path}", headers=github_headers())
+    try:
+        with urlopen(request, timeout=30) as response:
+            payload = json.loads(response.read().decode("utf-8"))
+    except Exception as exc:
+        print(f"warning: GitHub GET {path} failed: {exc}", file=sys.stderr)
+        return None
+    return payload if isinstance(payload, dict) else None
+
+
+def later_iso(*values: str | None) -> str | None:
+    stamps = [value for value in values if value]
+    return max(stamps) if stamps else None
+
+
+def live_seed_activity(entry: dict, kind: str, github_json_fetcher) -> str | None:
+    """Latest GitHub timestamp for a seeded repo or pull request."""
+    if github_json_fetcher is None or entry.get("live_activity") is False:
+        return None
+    if kind == "github_repositories":
+        repo = str(entry.get("repo") or "").strip()
+        if not repo:
+            return None
+        payload = github_json_fetcher(f"/repos/{repo}") or {}
+        return optional_iso(payload.get("pushed_at") or payload.get("updated_at"))
+    if kind == "github_pull_requests":
+        match = PR_URL_RE.match(str(entry.get("url") or ""))
+        if not match:
+            return None
+        owner, name, number = match.group(1), match.group(2), match.group(3)
+        payload = github_json_fetcher(f"/repos/{owner}/{name}/pulls/{number}") or {}
+        return later_iso(
+            optional_iso(payload.get("merged_at")),
+            optional_iso(payload.get("updated_at")),
+            optional_iso(payload.get("closed_at")),
+        )
+    return None
+
+
+
+
 def repo_excluded_by_query_terms(repo: dict, query: str) -> bool:
     negative_terms = [term.lower() for term in re.findall(r"(?<!\S)-([a-zA-Z0-9_]+)", query)]
     if not negative_terms:
@@ -301,6 +348,7 @@ def build_seeded_item(
     existing_projects: dict[str, dict],
     existing_sources: dict[str, dict],
     watch: dict,
+    github_json_fetcher=None,
 ) -> tuple[dict, dict, dict]:
     url = source_url_for(entry, kind)
     source_id = entry.get("id") or slugify(url)
@@ -311,8 +359,9 @@ def build_seeded_item(
     old_item = existing_items.get(item_id, {})
     seed_discovered = optional_iso(entry.get("discovered_at"))
     seed_activity = optional_iso(entry.get("activity_at"))
+    live_activity = live_seed_activity(entry, kind, github_json_fetcher)
     discovered_at = seed_discovered or discovery_time(old_item, observed_at)
-    activity_at = seed_activity or item_activity_at({
+    activity_at = later_iso(seed_activity, live_activity) or item_activity_at({
         **old_item,
         "event_time": discovered_at,
         "discovered_at": discovered_at,
@@ -354,13 +403,7 @@ def build_seeded_item(
     pslug = slugify(project)
     old_project = existing_projects.get(pslug, {})
     project_discovered_at = seed_discovered or discovery_time(old_project, observed_at)
-    old_activity = old_project.get("activity_at") or ""
-    if seed_activity:
-        project_activity = seed_activity
-    elif old_activity:
-        project_activity = max(old_activity, activity_at)
-    else:
-        project_activity = activity_at
+    project_activity = activity_at
     old_latest = old_project.get("latest_discovered_at") or old_project.get("discovered_at") or ""
     latest_discovered_at = discovered_at if seed_discovered else (
         max(old_latest, discovered_at) if old_latest else discovered_at
@@ -377,6 +420,7 @@ def build_seeded_item(
         "latest_discovered_at": latest_discovered_at,
     }
     return item, source, project_record
+
 
 
 def build_github_repo_item(
@@ -518,11 +562,19 @@ def skip_live_github_searches() -> bool:
     return os.environ.get("SOURCE_WATCH_SKIP_LIVE", "").strip().lower() in ("1", "true")
 
 
-def build_items(cfg: dict, github_repo_fetcher=None, watch: dict | None = None) -> tuple[list[dict], dict, dict]:
+def build_items(
+    cfg: dict,
+    github_repo_fetcher=None,
+    watch: dict | None = None,
+    github_json_fetcher=None,
+    skip_searches: bool | None = None,
+) -> tuple[list[dict], dict, dict]:
     if watch is None:
         resolved = watch_from_cfg(cfg)
     else:
         resolved = normalize_watch(watch or {})
+    if skip_searches is None:
+        skip_searches = skip_live_github_searches()
     observed_at = utc_now_iso()
     existing_items, existing_projects, existing_sources = load_existing_artifacts()
     sources: dict[str, dict] = {}
@@ -538,13 +590,15 @@ def build_items(cfg: dict, github_repo_fetcher=None, watch: dict | None = None) 
                 existing_projects,
                 existing_sources,
                 resolved,
+                github_json_fetcher=github_json_fetcher,
             )
             items.append(item)
             sources[source["id"]] = source
             append_or_replace_project(projects, project)
 
-    if skip_live_github_searches():
+    if skip_searches:
         return items, projects, sources
+
 
     for collector in cfg.get("live_collectors", {}).get("github_repository_searches", []) or []:
         query = collector.get("query", "").strip()
@@ -650,9 +704,22 @@ def watch_client_payload(watch: dict) -> dict:
 
 
 def main() -> int:
+    parser = argparse.ArgumentParser(description="Build Source Watch public feed artifacts.")
+    parser.add_argument(
+        "--seed-only",
+        action="store_true",
+        help="Skip live GitHub HTTP (repository searches and seeded repo/PR timestamps).",
+    )
+    args = parser.parse_args()
+    seed_only = args.seed_only or skip_live_github_searches()
     watch = load_watch()
     cfg = parse_yaml(CONFIG)
-    items, projects, sources = build_items(cfg, watch=watch)
+    items, projects, sources = build_items(
+        cfg,
+        watch=watch,
+        github_json_fetcher=None if seed_only else github_get_json,
+        skip_searches=seed_only,
+    )
     items = sorted(items, key=lambda x: x.get("discovered_at", ""), reverse=True)
     description = watch.get("description") or cfg.get("scope_note") or "Public-source activity feed."
     feed = {
@@ -672,8 +739,10 @@ def main() -> int:
         (base / "items.jsonl").write_text("".join(json.dumps(i, sort_keys=True) + "\n" for i in items))
         write_rss(base / "feed.xml", items, watch)
         write_json(base / "watch.json", client_watch)
-    print(f"wrote {len(items)} feed items, {len(projects_list)} projects, {len(sources_list)} sources")
+    mode = "seed-only" if seed_only else "live GitHub refresh"
+    print(f"wrote {len(items)} feed items, {len(projects_list)} projects, {len(sources_list)} sources ({mode})")
     return 0
+
 
 
 if __name__ == "__main__":
