@@ -283,18 +283,22 @@
     root.innerHTML = html;
   }
 
-  function renderWeek(items, weekSlug) {
+  function renderWeek(allItems, weekSlug) {
     var parsed = parseWeekSlug(weekSlug);
-    items = itemsForWeek(items, weekSlug);
     if (parsed) {
       setText("week-range", formatWeekRange(parsed.year, parsed.week));
       document.querySelectorAll(".rail a[data-week]").forEach(function (a) {
-        var p = parseWeekSlug(a.getAttribute("data-week"));
+        var slug = a.getAttribute("data-week");
+        var p = parseWeekSlug(slug);
         if (!p) return;
+        var n = itemsForWeek(allItems, slug).length;
         var sub = a.querySelector(".sub");
         if (sub) sub.textContent = formatWeekRange(p.year, p.week);
+        var countEl = a.querySelector(".n");
+        if (countEl) countEl.textContent = String(n);
       });
     }
+    var items = itemsForWeek(allItems, weekSlug);
     var cands = sortActivity(items.filter(isCandidate));
     var prs = sortActivity(items.filter(function (i) { return i.source_type === "github_pull_request" && !isCandidate(i); }));
     var repos = sortActivity(items.filter(function (i) {
@@ -307,6 +311,7 @@
         ? "Nothing new this ISO week."
         : n + " item" + (n === 1 ? "" : "s") + " showed up.";
     setText("week-lede", lede);
+
 
     function rows(list) {
       return list.map(function (item) {
