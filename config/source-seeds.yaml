@@ -5,6 +5,13 @@
 # Leave these lists empty for a blank fork. Add entries, then run
 # scripts/build_seed_feed.py to fill site/static artifacts.
 #
+# Optional per seed:
+#   discovered_at:  ISO timestamp; weeks and "new" sort use this (stable).
+#   activity_at:    ISO timestamp; latest-activity views use this.
+#   live_activity:  false to skip GitHub pushed_at on noisy monorepos
+#                   (pair with github_pull_requests for the real PRs).
+# Live GitHub searches use repo created_at as discovered_at.
+#
 # Example:
 # seeded_sources:
 #   docs_pages:
@@ -20,12 +27,19 @@
 #       project: Example
 #       tags: [docs]
 #       summary: A repository this watch should track.
+#   github_pull_requests:
+#     - id: example-pr
+#       name: "example/repo #1"
+#       url: https://github.com/example/repo/pull/1
+#       project: Example
+#       tags: [docs, pull-request]
 # live_collectors:
 #   github_repository_searches:
 #     - id: example-search
 #       query: 'topic:documentation archived:false'
 #       max_results: 5
 #       tags: [example, github, candidate, repository-discovery]
+
 
 seeded_sources:
   docs_pages: []

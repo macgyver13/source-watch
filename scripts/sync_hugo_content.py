@@ -14,7 +14,7 @@ import json
 import re
 import shutil
 from collections import defaultdict
-from datetime import datetime, timezone
+from datetime import datetime
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -54,6 +54,18 @@ def week_title(slug: str) -> str:
     if match:
         return f"Week {int(match.group(2))}, {match.group(1)}"
     return slug
+
+
+def item_iso_week(item: dict) -> str | None:
+    raw = str(item.get("discovered_at") or item.get("event_time") or "").strip()
+    if not raw:
+        return None
+    try:
+        dt = datetime.fromisoformat(raw.replace("Z", "+00:00"))
+    except ValueError:
+        return None
+    return dt.strftime("%G-W%V")
+
 
 
 def write(path: Path, text: str) -> None:
@@ -145,7 +157,6 @@ def main() -> int:
 
     feed = json.loads((STATIC / "feed.json").read_text())
     items = feed.get("items", [])
-    week = datetime.now(timezone.utc).strftime("%G-W%V")
 
     write(CONTENT / "_index.md", fm("Activity"))
     write(CONTENT / "projects" / "_index.md", fm("Projects"))
@@ -153,17 +164,13 @@ def main() -> int:
 
     week_root = CONTENT / "weeks"
     week_root.mkdir(parents=True, exist_ok=True)
-    if items:
-        write(week_root / week / "_index.md", fm(week_title(week)))
-        week_dirs = sorted((p.name for p in week_root.iterdir() if p.is_dir()), reverse=True)
-        for slug in week_dirs:
-            page = week_root / slug / "_index.md"
-            write(page, fm(week_title(slug)))
-    else:
-        for path in list(week_root.iterdir()):
-            if path.is_dir():
-                shutil.rmtree(path)
-        week_dirs = []
+    wanted = {slug for slug in (item_iso_week(item) for item in items) if slug}
+    existing = {path.name for path in week_root.iterdir() if path.is_dir()}
+    for slug in existing - wanted:
+        shutil.rmtree(week_root / slug)
+    for slug in wanted:
+        write(week_root / slug / "_index.md", fm(week_title(slug)))
+    week_dirs = sorted(wanted, reverse=True)
     weeks_note = "" if week_dirs else "No activity yet.\n"
     write(week_root / "_index.md", fm("Weeks") + weeks_note)
 

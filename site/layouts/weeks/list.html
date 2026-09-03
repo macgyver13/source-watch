@@ -30,7 +30,7 @@
           {{- $wk := strings.TrimSuffix "/" (path.Base .RelPermalink) -}}
           {{- $num := replaceRE `(?i)^\d{4}-w0?` "" $wk -}}
       <a href="{{ .RelPermalink }}" data-week="{{ $wk }}"{{ if eq .RelPermalink $cur }} class="on"{{ end }}>
-        <span class="wk">W{{ $num }}</span>
+        <span class="wk">W{{ $num }} <span class="n"></span></span>
         <span class="sub"></span>
       </a>
         {{- end -}}

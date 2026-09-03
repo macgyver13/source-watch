@@ -25,7 +25,10 @@ Committed `feed.json`, `feed.xml`, `items.jsonl`, `projects.json`, and `sources.
 4. Run the local pipeline below so `site/static/` has fresh artifacts.
 5. Point Cloudflare Pages **or** GitHub Pages at `site/`.
 
+Agent-oriented stand-up (FROST Watch first): see `AGENTS.md`.
+
 This repo is not marked as a GitHub template yet, and it does not ship a GitHub Actions workflow. Refresh the feed locally (or with your own CI) until those are added.
+
 
 ## Scope
 
@@ -40,14 +43,21 @@ python3 scripts/verify_public_artifacts.py
 hugo --source site --minify
 ```
 
-`config/source-seeds.yaml` supports live GitHub repository discovery under
-`live_collectors.github_repository_searches`. Each collector runs a GitHub
-repository search during refresh and emits candidate `source_discovered` items
-into the structured feed alongside the static seeded sources.
+`python3 scripts/build_seed_feed.py` refreshes seeded GitHub repo/PR
+`activity_at` timestamps and runs `live_collectors.github_repository_searches`.
+Each collector emits candidate `source_discovered` items alongside seeds.
+Discovery dates on seeds stay put; activity moves if GitHub is newer.
 
-Set `GITHUB_TOKEN` or `GH_TOKEN` if you want authenticated GitHub search
-(higher rate limits). The live collector does not require a token, but
-unauthenticated calls are tightly rate-limited.
+Set `GITHUB_TOKEN` or `GH_TOKEN` for authenticated GitHub calls (higher rate
+limits). Unauthenticated calls work but are tightly rate-limited.
+
+Seed-only (no GitHub HTTP):
+
+```bash
+python3 scripts/build_seed_feed.py --seed-only
+# or: SOURCE_WATCH_SKIP_LIVE=1 python3 scripts/build_seed_feed.py
+```
+
 
 ## Cloudflare Pages
 

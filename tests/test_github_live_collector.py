@@ -229,6 +229,7 @@ class GitHubLiveCollectorTests(unittest.TestCase):
                 self.assertEqual(item["project"], "example/frost-dkg")
                 self.assertEqual(item["confidence"], "github_search")
                 self.assertEqual(item["status"], "candidate")
+                self.assertEqual(item["discovered_at"], "2026-08-20T12:00:00Z")
                 self.assertEqual(item["activity_at"], "2026-08-29T12:00:00Z")
                 self.assertIn("candidate", item["tags"])
                 self.assertIn("threshold-signatures", item["tags"])
@@ -238,7 +239,7 @@ class GitHubLiveCollectorTests(unittest.TestCase):
             finally:
                 build_seed_feed.OUT = old_out
 
-    def test_existing_github_discovery_keeps_original_discovered_at(self) -> None:
+    def test_github_created_at_is_the_discovery_date(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             out = Path(tmp)
             old_out = build_seed_feed.OUT
@@ -278,11 +279,11 @@ class GitHubLiveCollectorTests(unittest.TestCase):
                     github_repo_fetcher=fake_fetch,
                     watch=FROST_WATCH,
                 )
-                self.assertEqual(items[0]["discovered_at"], "2026-08-25T00:00:00Z")
-                self.assertEqual(items[0]["event_time"], "2026-08-25T00:00:00Z")
+                self.assertEqual(items[0]["discovered_at"], "2026-08-20T12:00:00Z")
+                self.assertEqual(items[0]["event_time"], "2026-08-20T12:00:00Z")
                 self.assertEqual(
                     sources["gh-search:repo-discovery:example-frost-dkg"]["discovered_at"],
-                    "2026-08-25T00:00:00Z",
+                    "2026-08-20T12:00:00Z",
                 )
             finally:
                 build_seed_feed.OUT = old_out
