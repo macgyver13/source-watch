@@ -9,19 +9,21 @@
 {{- if and $isIndex $latest -}}
 <div class="wrap">
   <div class="hero">
+    {{ partial "crumb.html" (dict "section" "Weeks") }}
     <h1>Weeks</h1>
     <p class="lede"><a href="{{ $latest }}">Open the current week briefing →</a></p>
   </div>
 </div>
 {{- else -}}
 {{- $title := .Title -}}
+{{- $weekSlug := strings.TrimSuffix "/" (path.Base .RelPermalink) -}}
 <div class="wrap">
   <div class="hero week-hero">
+    {{ partial "crumb.html" (dict "section" "Weeks" "extra" $weekSlug) }}
     <h1>{{ $title }}</h1>
     <div class="week-range" id="week-range"></div>
     <p class="lede" id="week-lede"></p>
   </div>
-  {{ partial "start-here.html" (dict "here" "week") }}
   <div class="brief">
     <nav class="rail" aria-label="Previous weeks">
       {{- $cur := .RelPermalink -}}

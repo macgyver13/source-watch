@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>{{ if eq .Kind "home" }}Activity · {{ .Site.Title }}{{ else if and .Title (ne .Title .Site.Title) }}{{ .Title }} · {{ .Site.Title }}{{ else }}{{ .Site.Title }}{{ end }}</title>
+  <title>{{ if eq .Kind "home" }}{{ .Site.Title }}{{ else if and .Title (ne .Title .Site.Title) }}{{ .Title }} · {{ .Site.Title }}{{ else }}{{ .Site.Title }}{{ end }}</title>
   <meta name="description" content="{{ .Site.Params.description }}">
   <link rel="stylesheet" href="/style.css">
   <link rel="alternate" type="application/rss+xml" title="{{ .Site.Title }}" href="/feed.xml">
@@ -17,6 +17,7 @@
 </head>
 {{- $page := "other" -}}
 {{- if eq .Kind "home" }}{{ $page = "home" }}{{ end -}}
+{{- if eq .Section "activity" }}{{ $page = "activity" }}{{ end -}}
 {{- if eq .Section "projects" }}{{ $page = "projects" }}{{ end -}}
 {{- if eq .Section "sources" }}{{ $page = "sources" }}{{ end -}}
 {{- if eq .Section "weeks" }}{{ $page = "week" }}{{ end -}}
@@ -38,7 +39,7 @@
   <div class="wrap header-inner">
     <a class="wordmark" href="/">{{ .Site.Title }}</a>
     <nav>
-      <a{{ if eq $page "home" }} class="active"{{ end }} href="/">Activity</a>
+      <a{{ if eq $page "activity" }} class="active"{{ end }} href="/activity/">Activity</a>
       <a{{ if eq $page "projects" }} class="active"{{ end }} href="/projects/">Projects</a>
       <a{{ if eq $page "week" }} class="active"{{ end }} href="{{ $latestWeek }}">Weeks</a>
       <a{{ if eq $page "sources" }} class="active"{{ end }} href="/sources/">Sources</a>
@@ -54,6 +55,7 @@
           <path d="M4 4.5c8.4 0 15.5 7.1 15.5 15.5" stroke="currentColor" stroke-width="2.2" fill="none"/>
         </svg>
       </a>
+      <a class="json" href="/feed.json" title="JSON">JSON</a>
       <span class="chip">Not an endorsement</span>
       <span class="refreshed" id="refreshed" title=""> </span>
     </div>

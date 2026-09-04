@@ -158,7 +158,8 @@ def main() -> int:
     feed = json.loads((STATIC / "feed.json").read_text())
     items = feed.get("items", [])
 
-    write(CONTENT / "_index.md", fm("Activity"))
+    write(CONTENT / "_index.md", fm(str(watch.get("name") or "Source Watch")))
+    write(CONTENT / "activity" / "_index.md", fm("Activity"))
     write(CONTENT / "projects" / "_index.md", fm("Projects"))
     write(CONTENT / "sources" / "_index.md", fm("Sources"))
 
