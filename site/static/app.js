@@ -7,7 +7,7 @@
     github_pull_request: "pr",
     package_crate: "crate"
   };
-  var TAG_ALIAS = { "threshold-signatures": "threshold" };
+  var TAG_ALIAS = {};
   var GENERATED_SUMMARY = /^seeded monitored source for /i;
   var GENERATED_QUERY = /^github repository matched .+ live collector query:/i;
 
@@ -15,6 +15,7 @@
 
   var HIDDEN_TAGS = {};
   var PREFERRED_CHIPS = ["docs", "spec"];
+  var EXPLICIT_CHIPS = false;
 
   function applyWatch(raw) {
     raw = raw || {};
@@ -25,7 +26,8 @@
     if (raw.default_tag) hidden[String(raw.default_tag)] = true;
     HIDDEN_TAGS = hidden;
     var chips = raw.preferred_chips;
-    PREFERRED_CHIPS = (chips && chips.length) ? chips.slice() : ["docs", "spec"];
+    EXPLICIT_CHIPS = !!(chips && chips.length);
+    PREFERRED_CHIPS = EXPLICIT_CHIPS ? chips.slice() : ["docs", "spec"];
   }
 
   function esc(s) {
@@ -275,30 +277,35 @@
     root.innerHTML = html;
   }
 
-  function renderWeek(items, weekSlug) {
+  function renderWeek(allItems, weekSlug) {
     var parsed = parseWeekSlug(weekSlug);
-    items = itemsForWeek(items, weekSlug);
     if (parsed) {
       setText("week-range", formatWeekRange(parsed.year, parsed.week));
       document.querySelectorAll(".rail a[data-week]").forEach(function (a) {
-        var p = parseWeekSlug(a.getAttribute("data-week"));
+        var slug = a.getAttribute("data-week");
+        var p = parseWeekSlug(slug);
         if (!p) return;
+        var n = itemsForWeek(allItems, slug).length;
         var sub = a.querySelector(".sub");
         if (sub) sub.textContent = formatWeekRange(p.year, p.week);
+        var countEl = a.querySelector(".n");
+        if (countEl) countEl.textContent = String(n);
       });
     }
-    var cands = items.filter(isCandidate);
-    var prs = items.filter(function (i) { return i.source_type === "github_pull_request" && !isCandidate(i); });
-    var repos = items.filter(function (i) {
+    var items = itemsForWeek(allItems, weekSlug);
+    var cands = sortActivity(items.filter(isCandidate));
+    var prs = sortActivity(items.filter(function (i) { return i.source_type === "github_pull_request" && !isCandidate(i); }));
+    var repos = sortActivity(items.filter(function (i) {
       return !isCandidate(i) && (i.source_type === "github_repository" || i.source_type === "package_crate");
-    });
-    var docs = items.filter(function (i) { return i.source_type === "docs_page"; });
+    }));
+    var docs = sortActivity(items.filter(function (i) { return i.source_type === "docs_page"; }));
     var n = items.length;
     var lede =
       n === 0
         ? "Nothing new this ISO week."
         : n + " item" + (n === 1 ? "" : "s") + " showed up.";
     setText("week-lede", lede);
+
 
     function rows(list) {
       return list.map(function (item) {
@@ -352,6 +359,24 @@
     return "#";
   }
 
+  function sourceLinkLabel(item) {
+    if (item.source_type === "github_pull_request") {
+      var m = String(item.source_url || "").match(/\/pull\/(\d+)/);
+      return m ? "#" + m[1] : displayTitle(item);
+    }
+    var title = displayTitle(item);
+    if (item.source_type === "github_repository") {
+      var slash = title.lastIndexOf("/");
+      if (slash >= 0) return title.slice(slash + 1);
+    }
+    return title;
+  }
+
+  function sourceKind(item) {
+    return TYPE_DOT[item.source_type] || "repo";
+  }
+
+
   function renderAtlas(projects, items, sources) {
     var grid = document.getElementById("atlas-grid");
     var coverage = document.getElementById("atlas-coverage");
@@ -368,9 +393,11 @@
       });
     });
     var chipTags = preferred.filter(function (t) { return present[t]; });
-    Object.keys(present).forEach(function (t) {
-      if (chipTags.indexOf(t) === -1 && chipTags.length < 8) chipTags.push(t);
-    });
+    if (!EXPLICIT_CHIPS) {
+      Object.keys(present).forEach(function (t) {
+        if (chipTags.indexOf(t) === -1 && chipTags.length < 8) chipTags.push(t);
+      });
+    }
 
     var state = { q: "", tag: "all" };
 
@@ -408,12 +435,21 @@
         var nSrc = (p.sources || []).length || mine.length || 1;
         var when = p.activity_at || p.latest_discovered_at || p.discovered_at;
         var name = p.name;
+        var links = mine.slice().sort(function (a, b) {
+          var oa = a.source_type === "github_pull_request" ? 0 : 1;
+          var ob = b.source_type === "github_pull_request" ? 0 : 1;
+          return oa - ob || String(sourceLinkLabel(a)).localeCompare(sourceLinkLabel(b));
+        }).slice(0, 8).map(function (i) {
+          return '<a class="card-src" href="' + esc(i.source_url) + '" title="' + esc(displayTitle(i)) + '">' +
+            '<i class="dot ' + sourceKind(i) + '"></i>' + esc(sourceLinkLabel(i)) + "</a>";
+        }).join("");
         return (
           '<article class="card">' +
             '<div class="card-top">' +
               "<h3><a href=\"" + esc(projectHref(p, items)) + "\">" + esc(name) + "</a></h3>" +
             "</div>" +
             '<p class="what">' + esc(projectSummary(p, items)) + "</p>" +
+            (links ? '<div class="card-sources">' + links + "</div>" : "") +
             '<div class="card-foot">' +
               '<span class="time">' + esc(humanDate(when)) + "</span>" +
               '<span class="src">' + nSrc + " source" + (nSrc === 1 ? "" : "s") + "</span>" +
@@ -452,15 +488,58 @@
     var list = (sources.sources || []).slice().sort(function (a, b) {
       return String(a.name || "").localeCompare(String(b.name || ""));
     });
-    root.innerHTML = list.map(function (s) {
-      return (
-        '<div class="source-row">' +
-          '<a class="name" href="' + esc(s.url) + '">' + esc(s.name) + "</a>" +
-          '<span class="proj">' + esc(s.project || "") + "</span>" +
-        "</div>"
-      );
-    }).join("");
+    var state = { q: "", kind: "all" };
+    var chips = document.getElementById("source-chips");
+    var search = document.getElementById("source-search");
+    var kinds = ["repo", "pr", "docs", "crate"];
+
+    if (chips) {
+      chips.innerHTML =
+        '<span class="pill filter on" data-kind="all" role="button" tabindex="0">All</span>' +
+        kinds.map(function (k) {
+          return '<span class="pill filter" data-kind="' + k + '" role="button" tabindex="0">' + k + "</span>";
+        }).join("");
+    }
+
+    function paint() {
+      var shown = list.filter(function (s) {
+        var hay = ((s.name || "") + " " + (s.project || "") + " " + (s.source_type || "")).toLowerCase();
+        if (state.q && hay.indexOf(state.q) === -1) return false;
+        if (state.kind !== "all" && (TYPE_DOT[s.source_type] || "repo") !== state.kind) return false;
+        return true;
+      });
+      root.innerHTML = shown.map(function (s) {
+        var kind = TYPE_DOT[s.source_type] || "repo";
+        return (
+          '<div class="source-row">' +
+            '<span class="kind"><i class="dot ' + kind + '"></i>' + esc(kind) + "</span>" +
+            '<a class="name" href="' + esc(s.url) + '">' + esc(s.name) + "</a>" +
+            '<span class="proj">' + esc(s.project || "") + "</span>" +
+          "</div>"
+        );
+      }).join("") || '<p class="muted">No sources match.</p>';
+    }
+
+    if (chips) {
+      chips.addEventListener("click", function (ev) {
+        var pill = ev.target.closest("[data-kind]");
+        if (!pill) return;
+        state.kind = pill.getAttribute("data-kind") || "all";
+        chips.querySelectorAll(".pill.filter").forEach(function (el) {
+          el.classList.toggle("on", el === pill);
+        });
+        paint();
+      });
+    }
+    if (search) {
+      search.addEventListener("input", function () {
+        state.q = (search.value || "").trim().toLowerCase();
+        paint();
+      });
+    }
+    paint();
   }
+
 
   function boot(feed, projects, sources) {
     var items = feed.items || [];
