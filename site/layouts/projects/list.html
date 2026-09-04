@@ -1,6 +1,7 @@
 {{ define "main" }}
 <div class="wrap">
   <div class="hero">
+    {{ partial "crumb.html" (dict "section" "Projects") }}
     <h1>Project atlas</h1>
     <p class="lede">Coverage plus collector matches. Inclusion is a match, not a review.</p>
     <div class="toolbar">
@@ -8,7 +9,6 @@
       <div class="filters" id="atlas-chips" style="margin:0"></div>
     </div>
   </div>
-  {{ partial "start-here.html" (dict "here" "projects") }}
   <p class="coverage" id="atlas-coverage"><b>–</b> projects</p>
   <div class="legend">
     <span><i class="dot repo"></i> repo</span>

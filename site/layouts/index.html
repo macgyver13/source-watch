@@ -1,7 +1,8 @@
 {{ define "main" }}
 <div class="wrap">
   <div class="hero">
-    <h1>{{ with .Site.Params.description }}{{ . }}{{ else }}Public activity on tracked sources.{{ end }}</h1>
+    <h1>An open-source project, topic, and activity tracker.</h1>
+    <p class="lede">Orient yourself in recent work, then follow progress over time. Aggregated from public sources — inclusion is a match, not a review.</p>
     <div class="stats">
       <span class="stat"><b id="stat-sources">–</b> sources</span>
       <span class="stat"><b id="stat-projects">–</b> projects</span>
@@ -9,8 +10,12 @@
     </div>
   </div>
   {{ partial "start-here.html" (dict "here" "activity") }}
-  <section class="feed" id="activity-feed" aria-label="Latest activity">
-    <div class="feed-label">Latest activity</div>
+  {{ partial "topic-ledger.html" (dict "heading" true) }}
+  <section class="feed feed-teaser" id="activity-teaser" aria-label="Latest activity">
+    <div class="feed-head">
+      <span class="feed-label">Latest activity</span>
+      <a class="more" href="/activity/">All activity →</a>
+    </div>
     <p class="muted">Loading feed…</p>
   </section>
 </div>
