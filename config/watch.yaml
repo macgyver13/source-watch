@@ -1,10 +1,16 @@
-name: Example Watch
+name: Post-Quantum Watch
 base_url: https://example.com/
-description: Public activity on tracked sources.
-default_tag: example
+description: Public activity on BIP-360, P2MR, P2QRH, hash-based signatures, and related post-quantum Bitcoin work.
+default_tag: post-quantum
 preferred_chips:
-  - docs
-  - spec
+  - bip360
+  - p2mr
+  - p2qrh
+  - shrincs
+  - hash-based
+  - prawns
+  - isogeny
+  - bitcoin
 hidden_tags:
   - github
   - repository-discovery
@@ -12,7 +18,57 @@ hidden_tags:
   - pull-request
   - package
 relevance:
-  always_match: []   # accept if any of these appear in repo description/topics
-  required_any: []   # if non-empty, one of these must appear; empty = no required term
-  context_any: []    # if required_any is set AND this is non-empty, also need one of these
-topics: []           # optional extra Start-here tiles: [{title, slug, blurb, note}]
+  always_match:
+    - bip360
+    - bip-360
+    - p2qrh
+    - p2mr
+    - p2tsh
+    - bitcoinpqc
+    - post-quantum
+    - post quantum
+    - shrincs
+    - shrimps
+    - prawns
+    - isogeny
+    - sqisign
+    - slh-dsa
+    - sphincs
+  required_any:
+    - bip360
+    - bip-360
+    - p2qrh
+    - p2mr
+    - p2tsh
+    - bitcoinpqc
+    - post-quantum
+    - post quantum
+    - shrincs
+    - shrimps
+    - prawns
+    - isogeny
+    - sqisign
+    - slh-dsa
+    - sphincs
+  context_any: []
+topics:
+  - title: BIP-360
+    slug: bip360
+    blurb: Pay-to-Merkle-Root (P2MR), SegWit v2 script-tree outputs.
+    note: Current name of the quantum-resistant output type (was P2QRH and P2TSH).
+  - title: Hash-based signatures
+    slug: hash-based
+    blurb: SPHINCS+, SLH-DSA, XMSS, Winternitz, SHRINCS, PRAWNS.
+    note: Conservative PQ signatures that reuse Bitcoin's hash assumptions.
+  - title: SHRINCS
+    slug: shrincs
+    blurb: Stateful hash-based signatures with a stateless fallback.
+    note: ~324-byte signatures when state is intact.
+  - title: PRAWNS
+    slug: prawns
+    blurb: Threshold Winternitz signatures that look like ordinary HBSS.
+    note: PRF-Assisted Winternitz n-party Signatures.
+  - title: Isogeny
+    slug: isogeny
+    blurb: SQIsign / PRISM path toward HD wallets and silent payments.
+    note: Compact PQ crypto that keeps algebraic structure.

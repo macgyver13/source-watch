@@ -1,16 +1,1 @@
-{
-  "default_tag": "example",
-  "hidden_tags": [
-    "github",
-    "repository-discovery",
-    "candidate",
-    "pull-request",
-    "package"
-  ],
-  "name": "Example Watch",
-  "preferred_chips": [
-    "docs",
-    "spec"
-  ],
-  "topics": []
-}
+{"default_tag":"post-quantum","hidden_tags":["github","repository-discovery","candidate","pull-request","package"],"name":"Post-Quantum Watch","preferred_chips":["bip360","p2mr","p2qrh","shrincs","hash-based","prawns","isogeny","bitcoin"],"topics":[{"blurb":"Pay-to-Merkle-Root (P2MR), SegWit v2 script-tree outputs.","note":"Current name of the quantum-resistant output type (was P2QRH and P2TSH).","slug":"bip360","title":"BIP-360"},{"blurb":"SPHINCS+, SLH-DSA, XMSS, Winternitz, SHRINCS, PRAWNS.","note":"Conservative PQ signatures that reuse Bitcoin's hash assumptions.","slug":"hash-based","title":"Hash-based signatures"},{"blurb":"Stateful hash-based signatures with a stateless fallback.","note":"~324-byte signatures when state is intact.","slug":"shrincs","title":"SHRINCS"},{"blurb":"Threshold Winternitz signatures that look like ordinary HBSS.","note":"PRF-Assisted Winternitz n-party Signatures.","slug":"prawns","title":"PRAWNS"},{"blurb":"SQIsign / PRISM path toward HD wallets and silent payments.","note":"Compact PQ crypto that keeps algebraic structure.","slug":"isogeny","title":"Isogeny"}]}

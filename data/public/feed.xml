@@ -1,7 +1,343 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0"><channel>
-<title>Example Watch</title>
+<title>Post-Quantum Watch</title>
 <link>https://example.com/</link>
-<description>Public activity on tracked sources.</description>
-<lastBuildDate>Wed, 02 Sep 2026 16:23:48 +0000</lastBuildDate>
+<description>Public activity on BIP-360, P2MR, P2QRH, hash-based signatures, and related post-quantum Bitcoin work.</description>
+<lastBuildDate>Fri, 04 Sep 2026 14:04:31 +0000</lastBuildDate>
+<item>
+<title>A Post Quantum Migration Proposal</title>
+<link>https://groups.google.com/g/bitcoindev/c/uEaf4bj07rE/m/RMkPWnrSBwAJ</link>
+<guid isPermaLink="false">seed:bitcoindev-lopp-migration</guid>
+<description>Jameson Lopp three-phase migration plan building on P2QRH as the target PQ output type.</description>
+<pubDate>Fri, 04 Sep 2026 13:41:26 +0000</pubDate>
+</item>
+<item>
+<title>Trivial QC Signatures with Clean Upgrade Path</title>
+<link>https://groups.google.com/g/bitcoindev/c/8O857bRSVV8/m/j4ngMjlHCAAJ</link>
+<guid isPermaLink="false">seed:bitcoindev-corallo-qc-sigs</guid>
+<description>Matt Corallo opt-in Taproot script-path SPHINCS branch, disable key-path later.</description>
+<pubDate>Fri, 04 Sep 2026 13:41:26 +0000</pubDate>
+</item>
+<item>
+<title>Algorithm agility against quantum and classical attacks</title>
+<link>https://delvingbitcoin.org/t/algorithm-agility-to-defeat-quantum-and-classical-attacks-on-bitcoins-signature-algorithms/2241</link>
+<guid isPermaLink="false">seed:delving-algorithm-agility</guid>
+<description>Hunter Beast on keeping multiple PQ signature algorithms rather than a single scheme.</description>
+<pubDate>Fri, 04 Sep 2026 13:41:26 +0000</pubDate>
+</item>
+<item>
+<title>Hash-Based Signatures for Bitcoin's Post-Quantum Future</title>
+<link>https://groups.google.com/g/bitcoindev/c/gOfL5ag_bDU/m/SA0ufyWSCAAJ</link>
+<guid isPermaLink="false">seed:bitcoindev-hash-based-future</guid>
+<description>bitcoin-dev discussion of SPHINCS+, XMSS, LMS size/speed tradeoffs for Bitcoin.</description>
+<pubDate>Fri, 04 Sep 2026 13:41:26 +0000</pubDate>
+</item>
+<item>
+<title>SLH-DSA performance optimization</title>
+<link>https://groups.google.com/g/bitcoindev/c/LAll07BHwjw/m/jltgzKgDAwAJ</link>
+<guid isPermaLink="false">seed:bitcoindev-slh-dsa</guid>
+<description>SLH-DSA (SPHINCS+) size and verification optimizations for Bitcoin.</description>
+<pubDate>Fri, 04 Sep 2026 13:41:26 +0000</pubDate>
+</item>
+<item>
+<title>Winternitz OTS in LISP vs Script</title>
+<link>https://delvingbitcoin.org/t/winternitz-one-time-signatures-contrasting-between-lisp-and-script/1255</link>
+<guid isPermaLink="false">seed:delving-winternitz-lisp</guid>
+<description>ajtowns comparison of WOTS in Bitcoin Script vs Chia LISP.</description>
+<pubDate>Fri, 04 Sep 2026 13:41:26 +0000</pubDate>
+</item>
+<item>
+<title>Falcon post-quantum signature scheme</title>
+<link>https://groups.google.com/g/bitcoindev/c/PsClmK4Em1E/m/dJQj98KtAQAJ</link>
+<guid isPermaLink="false">seed:bitcoindev-falcon</guid>
+<description>bitcoin-dev discussion of Falcon lattice signatures for Bitcoin.</description>
+<pubDate>Fri, 04 Sep 2026 13:41:26 +0000</pubDate>
+</item>
+<item>
+<title>Post-quantum HD wallets with fallback SPHINCS keys</title>
+<link>https://groups.google.com/g/bitcoindev/c/5tLKm8RsrZ0/m/WE-R3z85AAAJ</link>
+<guid isPermaLink="false">seed:bitcoindev-hd-sphincs-fallback</guid>
+<description>Hybrid HD wallets committing to classical plus SPHINCS+ fallback keys.</description>
+<pubDate>Fri, 04 Sep 2026 13:41:26 +0000</pubDate>
+</item>
+<item>
+<title>Towards Post-Quantum Bitcoin using Dilithium</title>
+<link>https://cic.iacr.org/p/2/3/3</link>
+<guid isPermaLink="false">seed:cic-dilithium-bitcoin</guid>
+<description>Seck and Roux-Langlois on ML-DSA / DilithiumRK with BIP-32-compatible rerandomizable keys.</description>
+<pubDate>Fri, 04 Sep 2026 13:41:26 +0000</pubDate>
+</item>
+<item>
+<title>OP_CIV post-quantum signature aggregation</title>
+<link>https://groups.google.com/g/bitcoindev/c/oFbEQb_DB3I/m/9YiuCtweAgAJ</link>
+<guid isPermaLink="false">seed:bitcoindev-op-civ</guid>
+<description>Cross-input aggregation opcode adapted for PQ signature size overhead.</description>
+<pubDate>Fri, 04 Sep 2026 13:41:26 +0000</pubDate>
+</item>
+<item>
+<title>PQ provers for P2PKH outputs</title>
+<link>https://delvingbitcoin.org/t/pq-provers-for-p2pkh-outputs/2287</link>
+<guid isPermaLink="false">seed:delving-pq-provers-p2pkh</guid>
+<description>Oleksandr Kurbatov on STARK-style proofs to migrate exposed P2PKH without revealing the pubkey.</description>
+<pubDate>Fri, 04 Sep 2026 13:41:26 +0000</pubDate>
+</item>
+<item>
+<title>Post-quantum signatures and scaling with STARKs</title>
+<link>https://delvingbitcoin.org/t/post-quantum-signatures-and-scaling-bitcoin-with-starks/1584</link>
+<guid isPermaLink="false">seed:delving-starks-pq</guid>
+<description>Ethan Heilman on STARKs as PQ-secure verification and signature aggregation.</description>
+<pubDate>Fri, 04 Sep 2026 13:41:26 +0000</pubDate>
+</item>
+<item>
+<title>Post-quantum HD wallets, silent payments, thresholds</title>
+<link>https://delvingbitcoin.org/t/post-quantum-hd-wallets-silent-payments-key-aggregation-and-threshold-signatures/1854</link>
+<guid isPermaLink="false">seed:delving-pq-hd-wallets</guid>
+<description>conduition survey of which PQ schemes still support HD derivation, silent payments, and aggregation.</description>
+<pubDate>Fri, 04 Sep 2026 13:41:26 +0000</pubDate>
+</item>
+<item>
+<title>OP_CAT and Bitcoin's path to quantum resistance</title>
+<link>https://delvingbitcoin.org/t/op-cat-and-bitcoin-s-path-to-quantum-resistance/2207</link>
+<guid isPermaLink="false">seed:delving-op-cat-qr</guid>
+<description>Hunter Beast on Lamport/Winternitz verification in Script via OP_CAT.</description>
+<pubDate>Fri, 04 Sep 2026 13:41:26 +0000</pubDate>
+</item>
+<item>
+<title>OP_CAT enables Winternitz signatures</title>
+<link>https://groups.google.com/g/bitcoindev/c/Zx_NMqZH65Y/m/gidKXZTIAQAJ</link>
+<guid isPermaLink="false">seed:bitcoindev-op-cat-winternitz</guid>
+<description>Winternitz OTS verification using OP_CAT and existing opcodes.</description>
+<pubDate>Fri, 04 Sep 2026 13:41:26 +0000</pubDate>
+</item>
+<item>
+<title>Bitcoin and Quantum Computing</title>
+<link>https://delvingbitcoin.org/t/bitcoin-and-quantum-computing/1730</link>
+<guid isPermaLink="false">seed:delving-bitcoin-quantum</guid>
+<description>Shikhelman and Milton threat analysis of CRQCs against Bitcoin.</description>
+<pubDate>Fri, 04 Sep 2026 13:41:26 +0000</pubDate>
+</item>
+<item>
+<title>Taproot is post-quantum secure on script-path spends</title>
+<link>https://groups.google.com/g/bitcoindev/c/ydE5u5C0xVc/m/Xpxx_94IAgAJ</link>
+<guid isPermaLink="false">seed:bitcoindev-taproot-pq-scriptpath</guid>
+<description>Tim Ruffing et al. Taproot commitment remains binding if key-path is disabled.</description>
+<pubDate>Fri, 04 Sep 2026 13:41:26 +0000</pubDate>
+</item>
+<item>
+<title>Quantum Safe Bitcoin paper</title>
+<link>https://github.com/avihu28/Quantum-Safe-Bitcoin-Transactions/blob/main/paper/QSB.pdf</link>
+<guid isPermaLink="false">seed:qsb-paper</guid>
+<description>No-soft-fork quantum-safe Bitcoin transactions using existing consensus rules.</description>
+<pubDate>Fri, 04 Sep 2026 13:41:26 +0000</pubDate>
+</item>
+<item>
+<title>PRAWNS</title>
+<link>https://lclhost.org/blog/prawns/</link>
+<guid isPermaLink="false">seed:prawns-blog</guid>
+<description>PRF-Assisted Winternitz n-party signatures. Threshold HBSS that verifies as an ordinary Winternitz signature.</description>
+<pubDate>Sun, 02 Aug 2026 00:00:00 +0000</pubDate>
+</item>
+<item>
+<title>SHRINCS/shrincs-bip</title>
+<link>https://github.com/SHRINCS/shrincs-bip</link>
+<guid isPermaLink="false">seed:shrincs-bip</guid>
+<description>SHRINCS specification staging area.</description>
+<pubDate>Sun, 10 May 2026 00:23:40 +0000</pubDate>
+</item>
+<item>
+<title>Post Quantum Cryptography Group</title>
+<link>https://lclhost.org/blog/post-quantum-cryptography-group/</link>
+<guid isPermaLink="false">seed:localhost-pqc-group</guid>
+<description>Localhost + Boneh + Bünz group on conservative Bitcoin PQ primitives, including SHRINCS/SHRIMPS review.</description>
+<pubDate>Tue, 28 Apr 2026 00:00:00 +0000</pubDate>
+</item>
+<item>
+<title>Bitcoin post-quantum work tracker</title>
+<link>https://gist.github.com/Roasbeef/563f173fe44e2005e003a082716e586f</link>
+<guid isPermaLink="false">seed:roasbeef-pq-tracker</guid>
+<description>Living index of Bitcoin PQ output types, hash-based schemes, ZK migration, and papers.</description>
+<pubDate>Mon, 13 Apr 2026 00:00:00 +0000</pubDate>
+</item>
+<item>
+<title>Roasbeef/go-zkvm</title>
+<link>https://github.com/Roasbeef/go-zkvm</link>
+<guid isPermaLink="false">seed:roasbeef-go-zkvm</guid>
+<description>Go / TinyGo toolkit for RISC Zero zkVM guests used by the BIP-32 PQ proof demo.</description>
+<pubDate>Fri, 03 Apr 2026 23:42:32 +0000</pubDate>
+</item>
+<item>
+<title>Roasbeef/bip32-pq-zkp</title>
+<link>https://github.com/Roasbeef/bip32-pq-zkp</link>
+<guid isPermaLink="false">seed:roasbeef-bip32-pq-zkp</guid>
+<description>STARK proof that a Taproot key was BIP-32/BIP-86 derived, without revealing the seed.</description>
+<pubDate>Fri, 03 Apr 2026 23:42:31 +0000</pubDate>
+</item>
+<item>
+<title>avihu28/Quantum-Safe-Bitcoin-Transactions</title>
+<link>https://github.com/avihu28/Quantum-Safe-Bitcoin-Transactions</link>
+<guid isPermaLink="false">seed:avihu28-qsb</guid>
+<description>Quantum-safe Bitcoin transactions using existing consensus rules, no soft fork.</description>
+<pubDate>Fri, 27 Mar 2026 09:57:44 +0000</pubDate>
+</item>
+<item>
+<title>SHRIMPS</title>
+<link>https://delvingbitcoin.org/t/shrimps-2-5-kb-post-quantum-signatures-across-multiple-stateful-devices/2355</link>
+<guid isPermaLink="false">seed:delving-shrimps</guid>
+<description>Extends SHRINCS so multiple restored devices can still produce ~2.5 KB compact-path signatures.</description>
+<pubDate>Fri, 27 Mar 2026 00:00:00 +0000</pubDate>
+</item>
+<item>
+<title>Bitcoin Devs Should Be Learning Isogeny Cryptography</title>
+<link>https://conduition.io/cryptography/isogenies-intro/</link>
+<guid isPermaLink="false">seed:conduition-isogenies</guid>
+<description>Isogeny crypto (SQIsign, PRISM) as a compact PQ path that can keep HD wallets, tweaking, and silent payments.</description>
+<pubDate>Thu, 12 Mar 2026 00:00:00 +0000</pubDate>
+</item>
+<item>
+<title>Compact isogeny PQC for HD wallets</title>
+<link>https://delvingbitcoin.org/t/compact-isogeny-pqc-can-replace-hd-wallets-key-tweaking-silent-payments/2324</link>
+<guid isPermaLink="false">seed:delving-isogeny-pqc</guid>
+<description>Delving thread on SQIsign/PRISM isogenies as a drop-in for BIP-32, key tweaking, and silent payments.</description>
+<pubDate>Thu, 12 Mar 2026 00:00:00 +0000</pubDate>
+</item>
+<item>
+<title>BlockstreamResearch/shrincs-cpp</title>
+<link>https://github.com/BlockstreamResearch/shrincs-cpp</link>
+<guid isPermaLink="false">seed:blockstream-shrincs-cpp</guid>
+<description>C++ SHRINCS implementation. Stateful hash-based signatures with a stateless fallback.</description>
+<pubDate>Tue, 17 Feb 2026 09:14:26 +0000</pubDate>
+</item>
+<item>
+<title>BlockstreamResearch/shrincs-simplicity-verifier</title>
+<link>https://github.com/BlockstreamResearch/shrincs-simplicity-verifier</link>
+<guid isPermaLink="false">seed:blockstream-shrincs-simplicity</guid>
+<description>Simplicity verifier for SHRINCS.</description>
+<pubDate>Tue, 20 Jan 2026 11:07:23 +0000</pubDate>
+</item>
+<item>
+<title>SHRINCS</title>
+<link>https://delvingbitcoin.org/t/shrincs-324-byte-stateful-post-quantum-signatures-with-static-backups/2158</link>
+<guid isPermaLink="false">seed:delving-shrincs</guid>
+<description>324-byte stateful hash-based signatures with a SPHINCS+ stateless fallback and static seed backups.</description>
+<pubDate>Thu, 11 Dec 2025 00:00:00 +0000</pubDate>
+</item>
+<item>
+<title>Hash-based Signature Schemes for Bitcoin</title>
+<link>https://eprint.iacr.org/2025/2203</link>
+<guid isPermaLink="false">seed:eprint-hash-based-bitcoin</guid>
+<description>Kudinov and Nick report on SPHINCS+ variants and Bitcoin-specific parameters. SHRINCS is in the appendix.</description>
+<pubDate>Mon, 01 Dec 2025 00:00:00 +0000</pubDate>
+</item>
+<item>
+<title>Changes to BIP-360</title>
+<link>https://delvingbitcoin.org/t/changes-to-bip-360-pay-to-quantum-resistant-hash-p2qrh/1811</link>
+<guid isPermaLink="false">seed:delving-bip360-changes</guid>
+<description>Follow-up Delving thread on BIP-360 revisions, including the P2QRH to P2MR rename.</description>
+<pubDate>Mon, 07 Jul 2025 00:00:00 +0000</pubDate>
+</item>
+<item>
+<title>Post-Quantum Security of Bitcoin's Taproot</title>
+<link>https://eprint.iacr.org/2025/1307</link>
+<guid isPermaLink="false">seed:eprint-taproot-pq</guid>
+<description>Ruffing 2025. Taproot commitment is PQ-binding for script-path spends.</description>
+<pubDate>Tue, 01 Jul 2025 00:00:00 +0000</pubDate>
+</item>
+<item>
+<title>Post-quantum proposals for Bitcoin</title>
+<link>https://blog.projecteleven.com/posts/a-look-at-post-quantum-proposals-for-bitcoin</link>
+<guid isPermaLink="false">seed:project-eleven-pq-proposals</guid>
+<description>Project Eleven survey of Bitcoin post-quantum proposals, including BIP-360 / P2QRH.</description>
+<pubDate>Mon, 09 Jun 2025 00:00:00 +0000</pubDate>
+</item>
+<item>
+<title>starkware-bitcoin/s2morrow</title>
+<link>https://github.com/starkware-bitcoin/s2morrow</link>
+<guid isPermaLink="false">seed:starkware-s2morrow</guid>
+<description>STARK-based signature aggregation for Falcon and SPHINCS+.</description>
+<pubDate>Sun, 27 Apr 2025 17:35:58 +0000</pubDate>
+</item>
+<item>
+<title>cryptoquick/libbitcoinpqc</title>
+<link>https://github.com/cryptoquick/libbitcoinpqc</link>
+<guid isPermaLink="false">seed:cryptoquick-libbitcoinpqc</guid>
+<description>C library (Rust/Python bindings) for BIP-360 tapscript PQ signatures — ML-DSA-44 and SLH-DSA.</description>
+<pubDate>Thu, 20 Mar 2025 14:00:44 +0000</pubDate>
+</item>
+<item>
+<title>bip360.org</title>
+<link>https://bip360.org/</link>
+<guid isPermaLink="false">seed:bip360-org</guid>
+<description>Public explainer site for BIP-360 / P2MR.</description>
+<pubDate>Thu, 06 Mar 2025 22:09:50 +0000</pubDate>
+</item>
+<item>
+<title>cryptoquick/bip360.org</title>
+<link>https://github.com/cryptoquick/bip360.org</link>
+<guid isPermaLink="false">seed:cryptoquick-bip360-org</guid>
+<description>Source for the bip360.org explainer site.</description>
+<pubDate>Thu, 06 Mar 2025 22:09:50 +0000</pubDate>
+</item>
+<item>
+<title>Hash-Based Signature Schemes for Post-Quantum Bitcoin</title>
+<link>https://conduition.io/cryptography/quantum-hbs/</link>
+<guid isPermaLink="false">seed:conduition-hash-based</guid>
+<description>Landscape of quantum threats and hash-based signature schemes for Bitcoin.</description>
+<pubDate>Mon, 21 Oct 2024 00:00:00 +0000</pubDate>
+</item>
+<item>
+<title>BIP-360 Pay-to-Merkle-Root</title>
+<link>https://github.com/bitcoin/bips/blob/master/bip-0360.mediawiki</link>
+<guid isPermaLink="false">seed:bip-0360-spec</guid>
+<description>Official BIP-360 text. P2MR (formerly P2QRH / P2TSH) SegWit v2 script-tree output with the key-path spend removed.</description>
+<pubDate>Fri, 27 Sep 2024 16:08:30 +0000</pubDate>
+</item>
+<item>
+<title>bitcoin/bips</title>
+<link>https://github.com/bitcoin/bips</link>
+<guid isPermaLink="false">seed:bitcoin-bips</guid>
+<description>Official BIP repository. BIP-360 (P2MR) lives here after PR 1670 merged.</description>
+<pubDate>Fri, 27 Sep 2024 16:08:30 +0000</pubDate>
+</item>
+<item>
+<title>bitcoin/bips #1670</title>
+<link>https://github.com/bitcoin/bips/pull/1670</link>
+<guid isPermaLink="false">seed:bips-pr-1670</guid>
+<description>BIP 360 — Pay to Merkle Root (P2MR). Merged 2026-02-11.</description>
+<pubDate>Fri, 27 Sep 2024 16:08:30 +0000</pubDate>
+</item>
+<item>
+<title>Proposing a P2QRH BIP</title>
+<link>https://delvingbitcoin.org/t/proposing-a-p2qrh-bip-towards-a-quantum-resistant-soft-fork/956</link>
+<guid isPermaLink="false">seed:delving-p2qrh-proposal</guid>
+<description>Original Delving Bitcoin thread proposing P2QRH toward a quantum-resistant soft fork.</description>
+<pubDate>Sat, 08 Jun 2024 00:00:00 +0000</pubDate>
+</item>
+<item>
+<title>Protecting Quantum Procrastinators with Signature Lifting</title>
+<link>https://eprint.iacr.org/2023/362</link>
+<guid isPermaLink="false">seed:eprint-signature-lifting</guid>
+<description>Sattath and Wyborski. Lift pre-quantum signatures using BIP-32 OWFs; ZK seed lifting left open.</description>
+<pubDate>Wed, 01 Mar 2023 00:00:00 +0000</pubDate>
+</item>
+<item>
+<title>Making Classical Signatures Post-Quantum for Single Use</title>
+<link>https://eprint.iacr.org/2023/420</link>
+<guid isPermaLink="false">seed:eprint-classical-sigs-pq</guid>
+<description>Marco, Talayhan, Vaudenay. Generic single-use public-ledger transformation.</description>
+<pubDate>Wed, 01 Mar 2023 00:00:00 +0000</pubDate>
+</item>
+<item>
+<title>The Exact Security of BIP32 Wallets</title>
+<link>https://eprint.iacr.org/2021/1287</link>
+<guid isPermaLink="false">seed:eprint-bip32-security</guid>
+<description>Das et al. security model for HD wallet derivation.</description>
+<pubDate>Wed, 01 Sep 2021 00:00:00 +0000</pubDate>
+</item>
+<item>
+<title>Committing to Quantum Resistance</title>
+<link>https://eprint.iacr.org/2018/213</link>
+<guid isPermaLink="false">seed:eprint-committing-qr</guid>
+<description>Stewart et al. early Bitcoin commit-reveal defense against quantum theft.</description>
+<pubDate>Thu, 01 Feb 2018 00:00:00 +0000</pubDate>
+</item>
 </channel></rss>
