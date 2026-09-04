@@ -3,13 +3,6 @@
 This file is for an agent standing up or refreshing a watch instance.
 Humans can follow it too. Read `README.md` for product context.
 
-## Repo map
-
-| Ref | What it is |
-|---|---|
-| `main` | Blank reusable template. Empty seeds, empty feed. |
-| `preview/*` filled branches | Instance previews. Do **not** copy their `config/` or `data/` into the template or another instance. |
-
 This template is the starting point for any instance. Domain names, tags, and seeds belong in the instance fork, not here.
 
 ## Do not
