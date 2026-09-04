@@ -23,7 +23,7 @@ This template is the starting point for any instance. Domain names, tags, and se
 
 1. Fork this repo, or branch from `main`.
 2. Fill `config/watch.yaml`: name, `base_url` (the `*.pages.dev` host once known), description, `default_tag`, preferred chips, hidden tags, `relevance` (`always_match` / `required_any` / `context_any`), optional topics.
-3. Fill `config/source-seeds.yaml` with this instance's docs, repos, PRs, crates, and optional `live_collectors.github_repository_searches`.
+3. Fill `config/source-seeds.yaml` with this instance's docs, repos, PRs, crates, and optional live collectors (`github_repository_searches`, `delving_topic_searches`, `delving_category_listings`).
 4. Optional per seed:
    - `discovered_at` — ISO time the source appeared (tracker issue `created_at`, or leave unset so live GitHub uses repo `created_at`). Weeks use this.
    - `activity_at` — last known movement. Live refresh overwrites if GitHub is newer.
@@ -38,7 +38,7 @@ python3 -m unittest discover -s tests -v
 hugo --source site --minify
 ```
 
-Seed-only (no GitHub HTTP):
+Seed-only (no GitHub or Delving HTTP):
 
 ```bash
 python3 scripts/build_seed_feed.py --seed-only
@@ -66,7 +66,7 @@ hugo server --source site
 
 Open http://localhost:1313/. Empty seeds still render the chrome with an empty feed.
 
-Live GitHub timestamps and repository searches:
+Live GitHub timestamps, repository searches, and Delving topic collectors:
 
 ```bash
 GITHUB_TOKEN=$(gh auth token) python3 scripts/build_seed_feed.py
@@ -84,11 +84,11 @@ Stop with Ctrl-C. `hugo server` does not run the Python pipeline.
 | `activity_at` | Last real movement | Home feed, project cards, week row timestamps |
 | `observed_at` | Last crawl | Not shown as the event time |
 
-Live GitHub search hits: `discovered_at` = repo `created_at`, `activity_at` = `pushed_at`. Do not use crawl time as discovery.
+Live GitHub search hits: `discovered_at` = repo `created_at`, `activity_at` = `pushed_at`. Live Delving hits: `discovered_at` = topic `created_at`, `activity_at` = `last_posted_at`. Do not use crawl time as discovery.
 
 ## Candidate discovery
 
-`live_collectors.github_repository_searches` run GitHub repo search at build time. Hits that pass `watch.yaml` `relevance` become feed items with `status: candidate` and `event_type: source_discovered`. They are public matches, not the accepted seeded catalog. To promote one, add it under `seeded_sources` and rebuild.
+`live_collectors.github_repository_searches`, `delving_topic_searches`, and `delving_category_listings` run at build time. Hits that pass `watch.yaml` `relevance` become feed items with `status: candidate` and `event_type: source_discovered`. They are public matches, not the accepted seeded catalog. To promote one, add it under `seeded_sources` and rebuild. Delving search-only topics that age out of `max_results` may freeze `activity_at`; that is accepted.
 
 ## UI this engine adds
 

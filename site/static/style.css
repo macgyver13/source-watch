@@ -532,6 +532,7 @@ body[data-page="home"] .hero { padding: 28px 0 8px; }
 .dot.docs { background: #8a8a8a; border-color: #8a8a8a; }
 .dot.pr { background: #6a6a6a; border-color: #9a9a9a; }
 .dot.crate { background: #b0b0b0; border-color: #b0b0b0; }
+.dot.topic { background: #7a7a7a; border-color: #9a9a9a; }
 .src {
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   font-size: 11px;

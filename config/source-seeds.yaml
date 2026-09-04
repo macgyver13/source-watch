@@ -11,6 +11,9 @@
 #   live_activity:  false to skip GitHub pushed_at on noisy monorepos
 #                   (pair with github_pull_requests for the real PRs).
 # Live GitHub searches use repo created_at as discovered_at.
+# Live Delving collectors use topic created_at / last_posted_at.
+# Category listings take a numeric id or parent/slug/id path
+# (example: 12 or implementation/wg-silent-payments/12). Slug alone 404s.
 #
 # Example:
 # seeded_sources:
@@ -39,6 +42,24 @@
 #       query: 'topic:documentation archived:false'
 #       max_results: 5
 #       tags: [example, github, candidate, repository-discovery]
+#   delving_topic_searches:
+#     - id: example-delving-frost
+#       query: 'frost in:title'
+#       max_results: 5
+#       tags: [example, delving, candidate, topic-discovery]
+#     - id: example-delving-silent-payments
+#       query: '"silent payments" in:title'
+#       max_results: 5
+#       tags: [example, delving, candidate, topic-discovery]
+#     - id: example-delving-quantum
+#       query: 'quantum in:title'
+#       max_results: 5
+#       tags: [example, delving, candidate, topic-discovery]
+#   delving_category_listings:
+#     - id: example-delving-category
+#       category: 12
+#       max_results: 10
+#       tags: [example, delving, candidate, topic-discovery]
 
 
 seeded_sources:
@@ -49,3 +70,5 @@ seeded_sources:
 
 live_collectors:
   github_repository_searches: []
+  delving_topic_searches: []
+  delving_category_listings: []
