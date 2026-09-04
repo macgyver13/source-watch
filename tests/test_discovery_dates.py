@@ -276,16 +276,16 @@ class DiscoveryDateTests(unittest.TestCase):
                 (out / "sources.json").write_text(json.dumps({"sources": []}))
 
                 def fake_github(path: str):
-                    if path == "/repos/bitcoin/bitcoin/pulls/35301":
+                    if path == "/repos/example/monorepo/pulls/42":
                         return {"updated_at": "2026-09-03T16:48:49Z", "merged_at": None}
                     return {}
 
                 cfg = {"seeded_sources": {"github_pull_requests": [{
-                    "id": "bitcoin-pr-35301",
-                    "name": "bitcoin/bitcoin #35301",
-                    "url": "https://github.com/bitcoin/bitcoin/pull/35301",
-                    "project": "Bitcoin Core",
-                    "tags": ["silent-payments"],
+                    "id": "example-pr-42",
+                    "name": "example/monorepo #42",
+                    "url": "https://github.com/example/monorepo/pull/42",
+                    "project": "Example Core",
+                    "tags": ["docs"],
                     "discovered_at": "2025-08-29T19:44:02Z",
                     "activity_at": "2026-05-29T18:55:54Z",
                 }]}}
@@ -294,7 +294,7 @@ class DiscoveryDateTests(unittest.TestCase):
                 )
                 self.assertEqual(items[0]["discovered_at"], "2025-08-29T19:44:02Z")
                 self.assertEqual(items[0]["activity_at"], "2026-09-03T16:48:49Z")
-                self.assertEqual(projects["bitcoin-core"]["activity_at"], "2026-09-03T16:48:49Z")
+                self.assertEqual(projects["example-core"]["activity_at"], "2026-09-03T16:48:49Z")
             finally:
                 build_seed_feed.OUT = old_out
 
@@ -312,10 +312,10 @@ class DiscoveryDateTests(unittest.TestCase):
                     return {"pushed_at": "2026-09-03T13:50:46Z"}
 
                 cfg = {"seeded_sources": {"github_repositories": [{
-                    "id": "bitcoin-bitcoin",
-                    "repo": "bitcoin/bitcoin",
-                    "project": "Bitcoin Core",
-                    "tags": ["silent-payments"],
+                    "id": "example-monorepo",
+                    "repo": "example/monorepo",
+                    "project": "Example Core",
+                    "tags": ["docs"],
                     "discovered_at": "2025-08-26T17:54:03Z",
                     "activity_at": "2026-05-29T18:55:54Z",
                     "live_activity": False,
@@ -339,15 +339,15 @@ class DiscoveryDateTests(unittest.TestCase):
                 (out / "sources.json").write_text(json.dumps({"sources": []}))
 
                 def fake_github(path: str):
-                    if path == "/repos/bitcoin-core/secp256k1":
+                    if path == "/repos/example/lib":
                         return {"pushed_at": "2026-08-30T02:45:54Z"}
                     return {}
 
                 cfg = {"seeded_sources": {"github_repositories": [{
-                    "id": "bitcoin-core-secp256k1",
-                    "repo": "bitcoin-core/secp256k1",
-                    "project": "secp256k1",
-                    "tags": ["silent-payments"],
+                    "id": "example-lib",
+                    "repo": "example/lib",
+                    "project": "Example Lib",
+                    "tags": ["docs"],
                     "discovered_at": "2025-08-25T21:07:36Z",
                     "activity_at": "2026-07-23T13:30:03Z",
                 }]}}

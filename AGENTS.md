@@ -8,28 +8,27 @@ Humans can follow it too. Read `README.md` for product context.
 | Ref | What it is |
 |---|---|
 | `main` | Blank reusable template. Empty seeds, empty feed. |
-| `preview/reusable-engine` | Engine + UI from the Silent Payments preview, **without** that instance's config or feed. Pull this. |
-| `preview/silent-payments` | Filled Silent Payments Watch. Do **not** copy its `config/` or `data/` into another instance. |
-| [macgyver13/frost-watch](https://github.com/macgyver13/frost-watch) | Live FROST instance at https://frost-watch.pages.dev/ |
+| `preview/reusable-engine` | Engine + UI without a filled instance's config or feed. Merge this into `main`. |
+| `preview/*` filled branches | Instance previews. Do **not** copy their `config/` or `data/` into the template or another instance. |
 
-`preview/reusable-engine` is the branch to merge into `main` or to start a FROST (or any) instance from.
+This template is the starting point for any instance. Domain names, tags, and seeds belong in the instance fork, not here.
 
 ## Do not
 
-- Copy `feed.json`, `items.jsonl`, `projects.json`, `sources.json`, or week pages from frost-watch or silent-payments into a new instance.
+- Copy `feed.json`, `items.jsonl`, `projects.json`, `sources.json`, or week pages from a filled instance into a new one.
 - Create a **Cloudflare Worker**. Use **legacy Pages** (`Continue to Pages` at the bottom of Create application).
-- Point Pages production at `preview/silent-payments` if this repo is meant to stay a template.
-- Put domain tags (FROST, BIP-352, …) in the template `config/`. Those belong in the instance fork.
+- Point Pages production at a filled preview branch if this repo is meant to stay a template.
+- Put domain tags in the template `config/`. Those belong in the instance fork.
 
-## Stand up a FROST Watch from this engine
+## Stand up an instance
 
-1. Branch from `preview/reusable-engine` (or merge it onto a fork of `main`).
-2. Fill `config/watch.yaml` from frost-watch identity: name, `base_url` (the `*.pages.dev` host once known), description, `default_tag: frost`, preferred chips, hidden tags, `relevance` (always_match / required_any / context_any). Copy those knobs from frost-watch, not from silent-payments.
-3. Fill `config/source-seeds.yaml` with FROST docs, repos, PRs, crates, and `live_collectors.github_repository_searches`. Start from frost-watch seeds if they are current; do not start from silent-payments seeds.
+1. Fork this repo, or branch from `preview/reusable-engine` / `main` after that merge.
+2. Fill `config/watch.yaml`: name, `base_url` (the `*.pages.dev` host once known), description, `default_tag`, preferred chips, hidden tags, `relevance` (`always_match` / `required_any` / `context_any`), optional topics.
+3. Fill `config/source-seeds.yaml` with this instance's docs, repos, PRs, crates, and optional `live_collectors.github_repository_searches`.
 4. Optional per seed:
    - `discovered_at` — ISO time the source appeared (tracker issue `created_at`, or leave unset so live GitHub uses repo `created_at`). Weeks use this.
    - `activity_at` — last known movement. Live refresh overwrites if GitHub is newer.
-   - `live_activity: false` — skip `pushed_at` on noisy monorepos (`bitcoin/bitcoin`, firmware trees). Add `github_pull_requests` for the PRs that actually matter.
+   - `live_activity: false` — skip `pushed_at` on noisy monorepos. Add `github_pull_requests` for the PRs that actually matter.
 5. Generate artifacts (never commit another project's feed):
 
 ```bash
@@ -46,28 +45,37 @@ Seed-only (no GitHub HTTP):
 python3 scripts/build_seed_feed.py --seed-only
 ```
 
-6. Cloudflare Pages (same as frost-watch):
+`config/source-seeds.yaml` is the pipeline input. Cloudflare Pages only runs Hugo from `site/` and serves whatever is already in `site/static/`. Changing seeds does nothing on the deployed site until you run the pipeline and commit the generated artifacts.
+
+6. Cloudflare Pages:
    - Create application → **Continue to Pages** (legacy).
    - Repo: this instance. Production branch: the instance's `main`.
    - Root `site`, build `hugo --minify -b $CF_PAGES_URL`, output `public`.
    - `HUGO_VERSION=0.164.0` on Production **and** Preview.
    - After the hostname exists, set `config/watch.yaml` `base_url` to `https://<project>.pages.dev/` and re-sync Hugo.
 
-## Port this engine into existing frost-watch
+## Host locally
 
-Keep frost-watch `config/`, `data/public/`, and `site/static/{feed,items,projects,sources,watch}.*`.
+Needs Python 3, PyYAML (`pip3 install pyyaml`), and Hugo (`hugo version`). Pages pins `HUGO_VERSION=0.164.0`; a current extended build is fine locally.
 
-Take from `preview/reusable-engine`:
+```bash
+python3 scripts/build_seed_feed.py --seed-only
+python3 scripts/sync_hugo_content.py
+python3 scripts/verify_public_artifacts.py
+hugo server --source site
+```
 
-- `scripts/build_seed_feed.py`
-- `scripts/sync_hugo_content.py`
-- `tests/`
-- `site/static/app.js`
-- `site/static/style.css`
-- `site/layouts/weeks/list.html`
-- `site/layouts/sources/list.html`
+Open http://localhost:1313/. Empty seeds still render the chrome with an empty feed.
 
-Then run the pipeline **in frost-watch** so FROST dates/feeds stay FROST.
+Live GitHub timestamps and repository searches:
+
+```bash
+GITHUB_TOKEN=$(gh auth token) python3 scripts/build_seed_feed.py
+python3 scripts/sync_hugo_content.py
+hugo server --source site
+```
+
+Stop with Ctrl-C. `hugo server` does not run the Python pipeline.
 
 ## Dates
 
@@ -79,6 +87,10 @@ Then run the pipeline **in frost-watch** so FROST dates/feeds stay FROST.
 
 Live GitHub search hits: `discovered_at` = repo `created_at`, `activity_at` = `pushed_at`. Do not use crawl time as discovery.
 
+## Candidate discovery
+
+`live_collectors.github_repository_searches` run GitHub repo search at build time. Hits that pass `watch.yaml` `relevance` become feed items with `status: candidate` and `event_type: source_discovered`. They are public matches, not the accepted seeded catalog. To promote one, add it under `seeded_sources` and rebuild.
+
 ## UI this engine adds
 
 - Project cards list linked sources (PRs as `#123` → that PR).
@@ -88,8 +100,8 @@ Live GitHub search hits: `discovered_at` = repo `created_at`, `activity_at` = `p
 
 ## Checks before you stop
 
-- `config/watch.yaml` name is the instance (FROST Watch), not Example Watch or Silent Payments Watch.
-- `config/source-seeds.yaml` has no silent-payments seeds or BIP-352 search list unless this **is** that instance.
+- `config/watch.yaml` name is this instance, not Example Watch.
+- `config/source-seeds.yaml` has this instance's sources only.
 - `python3 -m unittest discover -s tests -v` passes.
 - `site/static/watch.json` chips match `config/watch.yaml`.
 - Pages project type is Pages (`*.pages.dev`), not a Worker.

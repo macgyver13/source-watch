@@ -7,13 +7,7 @@
     github_pull_request: "pr",
     package_crate: "crate"
   };
-  var TAG_ALIAS = {
-    "threshold-signatures": "threshold",
-    "bip-352": "bip352",
-    "bip-375": "bip375",
-    "bip-376": "bip376",
-    "bip-392": "bip392"
-  };
+  var TAG_ALIAS = {};
   var GENERATED_SUMMARY = /^seeded monitored source for /i;
   var GENERATED_QUERY = /^github repository matched .+ live collector query:/i;
 

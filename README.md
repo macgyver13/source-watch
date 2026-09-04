@@ -2,8 +2,6 @@
 
 Source Watch is a feed-first static public-source tracker. Fill the config, generate artifacts, and host the Hugo site on Cloudflare Pages or GitHub Pages. No Workers.
 
-Originally extracted from frost-watch.
-
 Primary artifacts:
 
 - `feed.json` — canonical latest structured feed
@@ -25,16 +23,32 @@ Committed `feed.json`, `feed.xml`, `items.jsonl`, `projects.json`, and `sources.
 4. Run the local pipeline below so `site/static/` has fresh artifacts.
 5. Point Cloudflare Pages **or** GitHub Pages at `site/`.
 
-Agent-oriented stand-up (FROST Watch first): see `AGENTS.md`.
+Seeds are build-time input. Pages/Hugo only compile `site/` and serve the JSON already in `site/static/`. Editing `config/source-seeds.yaml` does not change a deployed site until you run the pipeline and commit those artifacts.
+
+Agent-oriented stand-up: see `AGENTS.md`.
 
 This repo is not marked as a GitHub template yet, and it does not ship a GitHub Actions workflow. Refresh the feed locally (or with your own CI) until those are added.
-
 
 ## Scope
 
 This project aggregates public source metadata and activity. Inclusion is not endorsement, technical review, security assessment, production-readiness judgment, or a canonical roadmap.
 
-## Local development
+## Host locally
+
+Needs Python 3, [PyYAML](https://pyyaml.org/) (`pip3 install pyyaml`), and [Hugo](https://gohugo.io/). Pages pins `HUGO_VERSION=0.164.0`; a current extended build is fine locally.
+
+```bash
+python3 scripts/build_seed_feed.py --seed-only
+python3 scripts/sync_hugo_content.py
+python3 scripts/verify_public_artifacts.py
+hugo server --source site
+```
+
+Open http://localhost:1313/. Empty seeds still render the site chrome with an empty feed.
+
+`hugo server` does not run the Python pipeline. Re-run the scripts after config or seed changes, then refresh the browser.
+
+## Local pipeline
 
 ```bash
 python3 scripts/build_seed_feed.py
@@ -45,8 +59,10 @@ hugo --source site --minify
 
 `python3 scripts/build_seed_feed.py` refreshes seeded GitHub repo/PR
 `activity_at` timestamps and runs `live_collectors.github_repository_searches`.
-Each collector emits candidate `source_discovered` items alongside seeds.
-Discovery dates on seeds stay put; activity moves if GitHub is newer.
+Each collector emits **candidate** `source_discovered` items alongside seeds.
+A candidate is a GitHub search hit that passed `watch.yaml` `relevance`; it is
+not yet in the accepted `seeded_sources` catalog. Discovery dates on seeds stay
+put; activity moves if GitHub is newer.
 
 Set `GITHUB_TOKEN` or `GH_TOKEN` for authenticated GitHub calls (higher rate
 limits). Unauthenticated calls work but are tightly rate-limited.
@@ -57,7 +73,6 @@ Seed-only (no GitHub HTTP):
 python3 scripts/build_seed_feed.py --seed-only
 # or: SOURCE_WATCH_SKIP_LIVE=1 python3 scripts/build_seed_feed.py
 ```
-
 
 ## Cloudflare Pages
 
@@ -79,10 +94,8 @@ directory.
 
 ## Config
 
-- `config/watch.yaml` — instance identity: name, base URL, description, default tag, preferred chips, hidden tags, relevance rules, optional topic tiles.
-- `config/source-seeds.yaml` — seeded sources and live collectors.
-- `config/publish-rules.yaml` — publication rules and banned assessment terms.
-- `config/tag-vocabulary.yaml` — suggested tags for the instance.
+- `config/watch.yaml` — instance identity: name, base URL, description, default tag, preferred chips, hidden tags, relevance rules, optional topic tiles. Chips, hidden tags, and name ship in `watch.json` for the client. `relevance` filters live GitHub search hits (`always_match` short-circuits accept; `required_any` / `context_any` must appear in the repo description or topics).
+- `config/source-seeds.yaml` — seeded sources and live collectors. Pipeline input only; not read at request time.
 
 ## Tests
 
