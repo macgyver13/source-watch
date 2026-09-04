@@ -5,7 +5,8 @@
     docs_page: "docs",
     github_repository: "repo",
     github_pull_request: "pr",
-    package_crate: "crate"
+    package_crate: "crate",
+    delving_topic: "topic"
   };
   var TAG_ALIAS = {};
   var GENERATED_SUMMARY = /^seeded monitored source for /i;
@@ -164,6 +165,7 @@
     if (kind === "package_crate") return "Published crate: " + title + ".";
     if (kind === "docs_page") return "Public documentation: " + title + ".";
     if (kind === "github_repository") return "Public repository: " + title + ".";
+    if (kind === "delving_topic") return "Delving Bitcoin topic: " + title + ".";
     return title;
   }
 
@@ -540,7 +542,7 @@
     var state = { q: "", kind: "all" };
     var chips = document.getElementById("source-chips");
     var search = document.getElementById("source-search");
-    var kinds = ["repo", "pr", "docs", "crate"];
+    var kinds = ["repo", "pr", "docs", "crate", "topic"];
 
     if (chips) {
       chips.innerHTML =

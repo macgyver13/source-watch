@@ -2,6 +2,17 @@
 title: "Source types"
 ---
 
+## delving_topic
+
+- [Silent Payments coinbase](https://delvingbitcoin.org/t/silent-payments-coinbase/2833)
+- [Silent Payments Sender - BIP352 plugin for Electrum](https://delvingbitcoin.org/t/silent-payments-sender-bip352-plugin-for-electrum/2743)
+- [Compact Isogeny PQC can replace HD wallets, key-tweaking, silent payments](https://delvingbitcoin.org/t/compact-isogeny-pqc-can-replace-hd-wallets-key-tweaking-silent-payments/2324)
+- [Silent Payments notifications via Nostr](https://delvingbitcoin.org/t/silent-payments-notifications-via-nostr/2203)
+- [BIP352 private key formats](https://delvingbitcoin.org/t/bip352-private-key-formats/2080)
+- [Post-Quantum HD-Wallets, Silent Payments, Key Aggregation, and Threshold Signatures](https://delvingbitcoin.org/t/post-quantum-hd-wallets-silent-payments-key-aggregation-and-threshold-signatures/1854)
+- [Silent Payments: Light Client Protocol](https://delvingbitcoin.org/t/silent-payments-light-client-protocol/891)
+- [BIP352: PSBT support](https://delvingbitcoin.org/t/bip352-psbt-support/877)
+
 ## docs_page
 
 - [Silent Payments Bindings rust-secp256k1](https://gitea.bitcoin.ninja/rust-bitcoin/rust-secp256k1/pulls/909)
@@ -17,6 +28,7 @@ title: "Source types"
 
 ## github_repository
 
+- [benjamin-jarvie/butlers-playground](https://github.com/benjamin-jarvie/butlers-playground)
 - [bitsagarob/blindbit-v1-shim](https://github.com/bitsagarob/blindbit-v1-shim)
 - [bitsagarob/spcommit-checkpoint-startos](https://github.com/bitsagarob/spcommit-checkpoint-startos)
 - [azeemshaik025/silent-payments](https://github.com/azeemshaik025/silent-payments)

@@ -319,3 +319,21 @@ live_collectors:
       query: 'bip-392 archived:false'
       max_results: 10
       tags: [silent-payments, bip-392, github, candidate, repository-discovery]
+  delving_topic_searches:
+    - id: delving-silent-payments-title
+      query: '"silent payments" in:title'
+      max_results: 10
+      tags: [silent-payments, delving, candidate, topic-discovery]
+    - id: delving-bip352-title
+      query: 'bip352 in:title'
+      max_results: 10
+      tags: [silent-payments, bip352, delving, candidate, topic-discovery]
+    - id: delving-silentpayments
+      query: silentpayments
+      max_results: 10
+      tags: [silent-payments, delving, candidate, topic-discovery]
+  delving_category_listings:
+    - id: delving-wg-silent-payments
+      category: 12
+      max_results: 30
+      tags: [silent-payments, delving, candidate, topic-discovery]

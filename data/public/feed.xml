@@ -3,7 +3,14 @@
 <title>Silent Payments Watch</title>
 <link>https://example.com/</link>
 <description>Public activity on Silent Payments and related work.</description>
-<lastBuildDate>Thu, 03 Sep 2026 21:38:04 +0000</lastBuildDate>
+<lastBuildDate>Fri, 04 Sep 2026 20:36:05 +0000</lastBuildDate>
+<item>
+<title>benjamin-jarvie/butlers-playground</title>
+<link>https://github.com/benjamin-jarvie/butlers-playground</link>
+<guid isPermaLink="false">gh-search:github-silent-payments-repo-discovery:benjamin-jarvie-butlers-playground</guid>
+<description>Corky plus everything else: codex32 backups, BIP39, SeedQR, silent payments later. The signer itself lives at benjamin-jarvie/corky with zero code that touches your key.</description>
+<pubDate>Fri, 04 Sep 2026 06:57:21 +0000</pubDate>
+</item>
 <item>
 <title>bitsagarob/blindbit-v1-shim</title>
 <link>https://github.com/bitsagarob/blindbit-v1-shim</link>
@@ -40,6 +47,13 @@
 <pubDate>Mon, 24 Aug 2026 21:03:04 +0000</pubDate>
 </item>
 <item>
+<title>Silent Payments coinbase</title>
+<link>https://delvingbitcoin.org/t/silent-payments-coinbase/2833</link>
+<guid isPermaLink="false">delving-search:delving-silent-payments-title:2833</guid>
+<description>...hat all transactions from that xpub would be revealed. Not ideal if your aim is privacy. It recently occurred to me that https://bips.dev/352/ BIP352 Silent Payments (SP) could be used, since a receiver (miner in this case) has a static public SP address. The rest of this post outlines how I believe this could be...</description>
+<pubDate>Mon, 24 Aug 2026 19:42:41 +0000</pubDate>
+</item>
+<item>
 <title>Blockstream/Jade</title>
 <link>https://github.com/Blockstream/Jade</link>
 <guid isPermaLink="false">seed:blockstream-jade</guid>
@@ -59,6 +73,13 @@
 <guid isPermaLink="false">gh-search:github-silent-payments-repo-discovery:ozarumoto-paranoia-signer</guid>
 <description>Offline Bitcoin wallet with BIP-352 silent payments, MuSig2 3-of-3 vaults, and quantum-link signing — paranoid by design</description>
 <pubDate>Thu, 06 Aug 2026 20:11:16 +0000</pubDate>
+</item>
+<item>
+<title>Silent Payments Sender - BIP352 plugin for Electrum</title>
+<link>https://delvingbitcoin.org/t/silent-payments-sender-bip352-plugin-for-electrum/2743</link>
+<guid isPermaLink="false">delving-search:delving-silent-payments-title:2743</guid>
+<description>Source code: https://github.com/ZenulAbidin/electrum-silent-payments-sender/ This is a plugin I made that adds support for BIP352 Silent Payments into Electrum desktop. Currently, it lets Electrum users send to Silent Payment addresses. I have tested the plugin and made sure that it works with...</description>
+<pubDate>Sun, 26 Jul 2026 15:30:35 +0000</pubDate>
 </item>
 <item>
 <title>echennells/silent-receipts</title>
@@ -166,6 +187,13 @@
 <pubDate>Mon, 16 Mar 2026 02:28:12 +0000</pubDate>
 </item>
 <item>
+<title>Compact Isogeny PQC can replace HD wallets, key-tweaking, silent payments</title>
+<link>https://delvingbitcoin.org/t/compact-isogeny-pqc-can-replace-hd-wallets-key-tweaking-silent-payments/2324</link>
+<guid isPermaLink="false">delving-search:delving-silent-payments-title:2324</guid>
+<description>...ublicly-known constant \text{End}(E_0) to find an updated secret isogeny \varphi' : E_0 \rightarrow E' . This same approach can be reused to recreate silent payments and taproot-style key tweaking (commitment inside a pubkey). Multisignature isogeny schemes that can compete with SQIsign and PRISM for compactness a...</description>
+<pubDate>Thu, 12 Mar 2026 18:27:28 +0000</pubDate>
+</item>
+<item>
 <title>Silent Payments Bindings rust-secp256k1</title>
 <link>https://gitea.bitcoin.ninja/rust-bitcoin/rust-secp256k1/pulls/909</link>
 <guid isPermaLink="false">seed:rust-secp256k1-sp-bindings</guid>
@@ -178,6 +206,13 @@
 <guid isPermaLink="false">gh-search:github-bip-352-repo-discovery:shrec-ultrafastsecp256k1</guid>
 <description>Ultra high-performance secp256k1 ECC engine | Python, Node.js, Rust, Go, C#, Swift, Java bindings | CUDA, Metal, OpenCL GPU | ECDSA, Schnorr, FROST, MuSig2, BIP-352 | 15+ platforms</description>
 <pubDate>Mon, 02 Feb 2026 13:29:44 +0000</pubDate>
+</item>
+<item>
+<title>Silent Payments notifications via Nostr</title>
+<link>https://delvingbitcoin.org/t/silent-payments-notifications-via-nostr/2203</link>
+<guid isPermaLink="false">delving-search:delving-silent-payments-title:2203</guid>
+<description>This write-up has the goal to discuss the approach of sending notifications for incoming Silent Payments transactions via Nostr. The design is an extension of the discussions around &quot;Stealth addresses using nostr&quot; which had a Nostr-only approach. The des...</description>
+<pubDate>Thu, 15 Jan 2026 23:00:09 +0000</pubDate>
 </item>
 <item>
 <title>FreeOnlineUser/bip375-test-tools</title>
@@ -206,6 +241,13 @@
 <guid isPermaLink="false">seed:coldcard-pr-587</guid>
 <description>Add Silent Payments Support.</description>
 <pubDate>Wed, 26 Nov 2025 14:57:08 +0000</pubDate>
+</item>
+<item>
+<title>BIP352 private key formats</title>
+<link>https://delvingbitcoin.org/t/bip352-private-key-formats/2080</link>
+<guid isPermaLink="false">delving-search:delving-bip352-title:2080</guid>
+<description>...ic combo. I was thinking of all sorts of hacks, like using the xpub chaincode as the scan private (LOL) but obviously this breaks a lot of stuff with BIP352 so I binned the idea. I think it would be a good idea to define a string format for: B_scan + B_m (currently defined in BIP352) b_scan + B_spend (for...</description>
+<pubDate>Sat, 25 Oct 2025 00:43:40 +0000</pubDate>
 </item>
 <item>
 <title>levinster82/bip352-js</title>
@@ -348,11 +390,32 @@
 <pubDate>Mon, 25 Aug 2025 20:45:15 +0000</pubDate>
 </item>
 <item>
+<title>Post-Quantum HD-Wallets, Silent Payments, Key Aggregation, and Threshold Signatures</title>
+<link>https://delvingbitcoin.org/t/post-quantum-hd-wallets-silent-payments-key-aggregation-and-threshold-signatures/1854</link>
+<guid isPermaLink="false">delving-search:delving-silent-payments-title:1854</guid>
+<description>...Dilithium sig. Taken together, these papers indicate there is nothing inherently blocking lattice‑based post‑quantum replacements for BIP‑32, BIP‑352 silent payments, MuSig, or FROST.</description>
+<pubDate>Sun, 20 Jul 2025 18:30:46 +0000</pubDate>
+</item>
+<item>
 <title>BitPolito/silent-payments</title>
 <link>https://github.com/BitPolito/silent-payments</link>
 <guid isPermaLink="false">gh-search:github-bip352-repo-discovery:bitpolito-silent-payments</guid>
 <description>Silent Payments BIP352 implementation</description>
 <pubDate>Tue, 01 Apr 2025 09:39:06 +0000</pubDate>
+</item>
+<item>
+<title>Silent Payments: Light Client Protocol</title>
+<link>https://delvingbitcoin.org/t/silent-payments-light-client-protocol/891</link>
+<guid isPermaLink="false">delving-search:delving-silent-payments-title:891</guid>
+<description>During the development of a couple light clients I jotted down some notes and created a very early draft for a https://github.com/setavenger/BIP0352-light-client-specification Light Client Specification . The appendix of the SP BIP was used as a basis for this. The specification was designed with...</description>
+<pubDate>Tue, 21 May 2024 09:15:50 +0000</pubDate>
+</item>
+<item>
+<title>BIP352: PSBT support</title>
+<link>https://delvingbitcoin.org/t/bip352-psbt-support/877</link>
+<guid isPermaLink="false">delving-search:delving-bip352-title:877</guid>
+<description>...ng. The label tweak (if used) would already be added to the shared_secret_tweak . Alternatively, we could create new field(s), something like PSBT_IN_BIP352_TWEAK , for example. Not sure if its possible to update the existing BIP174/370 or if we would need a new BIP for this. Sending This is a bit more co...</description>
+<pubDate>Fri, 17 May 2024 11:48:32 +0000</pubDate>
 </item>
 <item>
 <title>cygnet3/rust-silentpayments</title>

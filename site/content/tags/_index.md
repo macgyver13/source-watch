@@ -6,6 +6,10 @@ title: "Tags"
 
 - [shrec/UltrafastSecp256k1](https://github.com/shrec/UltrafastSecp256k1)
 
+## announcement
+
+- [Silent Payments Sender - BIP352 plugin for Electrum](https://delvingbitcoin.org/t/silent-payments-sender-bip352-plugin-for-electrum/2743)
+
 ## arm64
 
 - [shrec/UltrafastSecp256k1](https://github.com/shrec/UltrafastSecp256k1)
@@ -27,8 +31,10 @@ title: "Tags"
 - [echennells/silent-receipts](https://github.com/echennells/silent-receipts)
 - [kkdao/kiss-bdk](https://github.com/kkdao/kiss-bdk)
 - [theStack/bip352-signet-scan-worstcase](https://github.com/theStack/bip352-signet-scan-worstcase)
+- [BIP352 private key formats](https://delvingbitcoin.org/t/bip352-private-key-formats/2080)
 - [levinster82/bip352-js](https://github.com/levinster82/bip352-js)
 - [BitPolito/silent-payments](https://github.com/BitPolito/silent-payments)
+- [BIP352: PSBT support](https://delvingbitcoin.org/t/bip352-psbt-support/877)
 - [21-DOT-DEV/swift-secp256k1](https://github.com/21-DOT-DEV/swift-secp256k1)
 
 ## bip353
@@ -62,13 +68,16 @@ title: "Tags"
 
 ## candidate
 
+- [benjamin-jarvie/butlers-playground](https://github.com/benjamin-jarvie/butlers-playground)
 - [bitsagarob/blindbit-v1-shim](https://github.com/bitsagarob/blindbit-v1-shim)
 - [bitsagarob/spcommit-checkpoint-startos](https://github.com/bitsagarob/spcommit-checkpoint-startos)
 - [azeemshaik025/silent-payments](https://github.com/azeemshaik025/silent-payments)
 - [diogo-ck/silentscan](https://github.com/diogo-ck/silentscan)
 - [bitsagarob/payment-name-startos](https://github.com/bitsagarob/payment-name-startos)
+- [Silent Payments coinbase](https://delvingbitcoin.org/t/silent-payments-coinbase/2833)
 - [Coinfidential/dkgkit](https://github.com/Coinfidential/dkgkit)
 - [OZARUMOTO/PARANOIA-SIGNER](https://github.com/OZARUMOTO/PARANOIA-SIGNER)
+- [Silent Payments Sender - BIP352 plugin for Electrum](https://delvingbitcoin.org/t/silent-payments-sender-bip352-plugin-for-electrum/2743)
 - [echennells/silent-receipts](https://github.com/echennells/silent-receipts)
 - [kkdao/kiss-bdk](https://github.com/kkdao/kiss-bdk)
 - [ponthief/thrilla](https://github.com/ponthief/thrilla)
@@ -76,10 +85,16 @@ title: "Tags"
 - [shuv-amp/sp-differ](https://github.com/shuv-amp/sp-differ)
 - [theStack/bip352-signet-scan-worstcase](https://github.com/theStack/bip352-signet-scan-worstcase)
 - [securitybrahh/silentpayments-electrum](https://github.com/securitybrahh/silentpayments-electrum)
+- [Compact Isogeny PQC can replace HD wallets, key-tweaking, silent payments](https://delvingbitcoin.org/t/compact-isogeny-pqc-can-replace-hd-wallets-key-tweaking-silent-payments/2324)
 - [shrec/UltrafastSecp256k1](https://github.com/shrec/UltrafastSecp256k1)
+- [Silent Payments notifications via Nostr](https://delvingbitcoin.org/t/silent-payments-notifications-via-nostr/2203)
 - [FreeOnlineUser/bip375-test-tools](https://github.com/FreeOnlineUser/bip375-test-tools)
+- [BIP352 private key formats](https://delvingbitcoin.org/t/bip352-private-key-formats/2080)
 - [levinster82/bip352-js](https://github.com/levinster82/bip352-js)
+- [Post-Quantum HD-Wallets, Silent Payments, Key Aggregation, and Threshold Signatures](https://delvingbitcoin.org/t/post-quantum-hd-wallets-silent-payments-key-aggregation-and-threshold-signatures/1854)
 - [BitPolito/silent-payments](https://github.com/BitPolito/silent-payments)
+- [Silent Payments: Light Client Protocol](https://delvingbitcoin.org/t/silent-payments-light-client-protocol/891)
+- [BIP352: PSBT support](https://delvingbitcoin.org/t/bip352-psbt-support/877)
 - [cygnet3/rust-silentpayments](https://github.com/cygnet3/rust-silentpayments)
 - [21-DOT-DEV/swift-secp256k1](https://github.com/21-DOT-DEV/swift-secp256k1)
 
@@ -96,6 +111,17 @@ title: "Tags"
 ## cuda
 
 - [shrec/UltrafastSecp256k1](https://github.com/shrec/UltrafastSecp256k1)
+
+## delving
+
+- [Silent Payments coinbase](https://delvingbitcoin.org/t/silent-payments-coinbase/2833)
+- [Silent Payments Sender - BIP352 plugin for Electrum](https://delvingbitcoin.org/t/silent-payments-sender-bip352-plugin-for-electrum/2743)
+- [Compact Isogeny PQC can replace HD wallets, key-tweaking, silent payments](https://delvingbitcoin.org/t/compact-isogeny-pqc-can-replace-hd-wallets-key-tweaking-silent-payments/2324)
+- [Silent Payments notifications via Nostr](https://delvingbitcoin.org/t/silent-payments-notifications-via-nostr/2203)
+- [BIP352 private key formats](https://delvingbitcoin.org/t/bip352-private-key-formats/2080)
+- [Post-Quantum HD-Wallets, Silent Payments, Key Aggregation, and Threshold Signatures](https://delvingbitcoin.org/t/post-quantum-hd-wallets-silent-payments-key-aggregation-and-threshold-signatures/1854)
+- [Silent Payments: Light Client Protocol](https://delvingbitcoin.org/t/silent-payments-light-client-protocol/891)
+- [BIP352: PSBT support](https://delvingbitcoin.org/t/bip352-psbt-support/877)
 
 ## digital-signatures
 
@@ -132,6 +158,7 @@ title: "Tags"
 
 ## github
 
+- [benjamin-jarvie/butlers-playground](https://github.com/benjamin-jarvie/butlers-playground)
 - [bitsagarob/blindbit-v1-shim](https://github.com/bitsagarob/blindbit-v1-shim)
 - [bitsagarob/spcommit-checkpoint-startos](https://github.com/bitsagarob/spcommit-checkpoint-startos)
 - [azeemshaik025/silent-payments](https://github.com/azeemshaik025/silent-payments)
@@ -189,6 +216,10 @@ title: "Tags"
 
 - [shrec/UltrafastSecp256k1](https://github.com/shrec/UltrafastSecp256k1)
 
+## post-quantum
+
+- [Post-Quantum HD-Wallets, Silent Payments, Key Aggregation, and Threshold Signatures](https://delvingbitcoin.org/t/post-quantum-hd-wallets-silent-payments-key-aggregation-and-threshold-signatures/1854)
+
 ## privacy
 
 - [bitsagarob/payment-name-startos](https://github.com/bitsagarob/payment-name-startos)
@@ -196,6 +227,10 @@ title: "Tags"
 ## protocol-implementation
 
 - [azeemshaik025/silent-payments](https://github.com/azeemshaik025/silent-payments)
+
+## psbt
+
+- [BIP352: PSBT support](https://delvingbitcoin.org/t/bip352-psbt-support/877)
 
 ## pull-request
 
@@ -216,6 +251,7 @@ title: "Tags"
 
 ## repository-discovery
 
+- [benjamin-jarvie/butlers-playground](https://github.com/benjamin-jarvie/butlers-playground)
 - [bitsagarob/blindbit-v1-shim](https://github.com/bitsagarob/blindbit-v1-shim)
 - [bitsagarob/spcommit-checkpoint-startos](https://github.com/bitsagarob/spcommit-checkpoint-startos)
 - [azeemshaik025/silent-payments](https://github.com/azeemshaik025/silent-payments)
@@ -268,14 +304,17 @@ title: "Tags"
 
 ## silent-payments
 
+- [benjamin-jarvie/butlers-playground](https://github.com/benjamin-jarvie/butlers-playground)
 - [bitsagarob/blindbit-v1-shim](https://github.com/bitsagarob/blindbit-v1-shim)
 - [bitsagarob/spcommit-checkpoint-startos](https://github.com/bitsagarob/spcommit-checkpoint-startos)
 - [azeemshaik025/silent-payments](https://github.com/azeemshaik025/silent-payments)
 - [diogo-ck/silentscan](https://github.com/diogo-ck/silentscan)
 - [bitsagarob/payment-name-startos](https://github.com/bitsagarob/payment-name-startos)
+- [Silent Payments coinbase](https://delvingbitcoin.org/t/silent-payments-coinbase/2833)
 - [Blockstream/Jade](https://github.com/Blockstream/Jade)
 - [Coinfidential/dkgkit](https://github.com/Coinfidential/dkgkit)
 - [OZARUMOTO/PARANOIA-SIGNER](https://github.com/OZARUMOTO/PARANOIA-SIGNER)
+- [Silent Payments Sender - BIP352 plugin for Electrum](https://delvingbitcoin.org/t/silent-payments-sender-bip352-plugin-for-electrum/2743)
 - [echennells/silent-receipts](https://github.com/echennells/silent-receipts)
 - [kkdao/kiss-bdk](https://github.com/kkdao/kiss-bdk)
 - [ponthief/thrilla](https://github.com/ponthief/thrilla)
@@ -291,12 +330,15 @@ title: "Tags"
 - [nunchuk-io/libnunchuk](https://github.com/nunchuk-io/libnunchuk)
 - [SatoshiPortal/bullbitcoin-mobile](https://github.com/SatoshiPortal/bullbitcoin-mobile)
 - [securitybrahh/silentpayments-electrum](https://github.com/securitybrahh/silentpayments-electrum)
+- [Compact Isogeny PQC can replace HD wallets, key-tweaking, silent payments](https://delvingbitcoin.org/t/compact-isogeny-pqc-can-replace-hd-wallets-key-tweaking-silent-payments/2324)
 - [Silent Payments Bindings rust-secp256k1](https://gitea.bitcoin.ninja/rust-bitcoin/rust-secp256k1/pulls/909)
 - [shrec/UltrafastSecp256k1](https://github.com/shrec/UltrafastSecp256k1)
+- [Silent Payments notifications via Nostr](https://delvingbitcoin.org/t/silent-payments-notifications-via-nostr/2203)
 - [FreeOnlineUser/bip375-test-tools](https://github.com/FreeOnlineUser/bip375-test-tools)
 - [cygnet3/spdk](https://github.com/cygnet3/spdk)
 - [Coldcard/firmware](https://github.com/Coldcard/firmware)
 - [Coldcard/firmware #587](https://github.com/Coldcard/firmware/pull/587)
+- [BIP352 private key formats](https://delvingbitcoin.org/t/bip352-private-key-formats/2080)
 - [levinster82/bip352-js](https://github.com/levinster82/bip352-js)
 - [setavenger/blindbit-desktop](https://github.com/setavenger/blindbit-desktop)
 - [romanz/electrs](https://github.com/romanz/electrs)
@@ -317,7 +359,10 @@ title: "Tags"
 - [bitcoin-core/secp256k1](https://github.com/bitcoin-core/secp256k1)
 - [bitcoin-core/secp256k1 #1765](https://github.com/bitcoin-core/secp256k1/pull/1765)
 - [silent-payments/BIP0352-index-server-specification](https://github.com/silent-payments/BIP0352-index-server-specification)
+- [Post-Quantum HD-Wallets, Silent Payments, Key Aggregation, and Threshold Signatures](https://delvingbitcoin.org/t/post-quantum-hd-wallets-silent-payments-key-aggregation-and-threshold-signatures/1854)
 - [BitPolito/silent-payments](https://github.com/BitPolito/silent-payments)
+- [Silent Payments: Light Client Protocol](https://delvingbitcoin.org/t/silent-payments-light-client-protocol/891)
+- [BIP352: PSBT support](https://delvingbitcoin.org/t/bip352-psbt-support/877)
 - [cygnet3/rust-silentpayments](https://github.com/cygnet3/rust-silentpayments)
 - [21-DOT-DEV/swift-secp256k1](https://github.com/21-DOT-DEV/swift-secp256k1)
 
@@ -353,9 +398,25 @@ title: "Tags"
 
 - [21-DOT-DEV/swift-secp256k1](https://github.com/21-DOT-DEV/swift-secp256k1)
 
+## topic-discovery
+
+- [Silent Payments coinbase](https://delvingbitcoin.org/t/silent-payments-coinbase/2833)
+- [Silent Payments Sender - BIP352 plugin for Electrum](https://delvingbitcoin.org/t/silent-payments-sender-bip352-plugin-for-electrum/2743)
+- [Compact Isogeny PQC can replace HD wallets, key-tweaking, silent payments](https://delvingbitcoin.org/t/compact-isogeny-pqc-can-replace-hd-wallets-key-tweaking-silent-payments/2324)
+- [Silent Payments notifications via Nostr](https://delvingbitcoin.org/t/silent-payments-notifications-via-nostr/2203)
+- [BIP352 private key formats](https://delvingbitcoin.org/t/bip352-private-key-formats/2080)
+- [Post-Quantum HD-Wallets, Silent Payments, Key Aggregation, and Threshold Signatures](https://delvingbitcoin.org/t/post-quantum-hd-wallets-silent-payments-key-aggregation-and-threshold-signatures/1854)
+- [Silent Payments: Light Client Protocol](https://delvingbitcoin.org/t/silent-payments-light-client-protocol/891)
+- [BIP352: PSBT support](https://delvingbitcoin.org/t/bip352-psbt-support/877)
+
 ## typescript
 
 - [azeemshaik025/silent-payments](https://github.com/azeemshaik025/silent-payments)
+
+## wallet
+
+- [Silent Payments: Light Client Protocol](https://delvingbitcoin.org/t/silent-payments-light-client-protocol/891)
+- [BIP352: PSBT support](https://delvingbitcoin.org/t/bip352-psbt-support/877)
 
 ## webassembly
 
