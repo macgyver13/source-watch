@@ -8,7 +8,6 @@ Humans can follow it too. Read `README.md` for product context.
 | Ref | What it is |
 |---|---|
 | `main` | Blank reusable template. Empty seeds, empty feed. |
-| `preview/reusable-engine` | Engine + UI without a filled instance's config or feed. Merge this into `main`. |
 | `preview/*` filled branches | Instance previews. Do **not** copy their `config/` or `data/` into the template or another instance. |
 
 This template is the starting point for any instance. Domain names, tags, and seeds belong in the instance fork, not here.
@@ -22,7 +21,7 @@ This template is the starting point for any instance. Domain names, tags, and se
 
 ## Stand up an instance
 
-1. Fork this repo, or branch from `preview/reusable-engine` / `main` after that merge.
+1. Fork this repo, or branch from `main`.
 2. Fill `config/watch.yaml`: name, `base_url` (the `*.pages.dev` host once known), description, `default_tag`, preferred chips, hidden tags, `relevance` (`always_match` / `required_any` / `context_any`), optional topics.
 3. Fill `config/source-seeds.yaml` with this instance's docs, repos, PRs, crates, and optional `live_collectors.github_repository_searches`.
 4. Optional per seed:
