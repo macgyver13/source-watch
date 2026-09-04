@@ -1,4 +1,4 @@
 ---
-title: "Example Watch"
+title: "Post-Quantum Watch"
 ---
 
