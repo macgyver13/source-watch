@@ -7,13 +7,7 @@
     github_pull_request: "pr",
     package_crate: "crate"
   };
-  var TAG_ALIAS = {
-    "threshold-signatures": "threshold",
-    "bip-352": "bip352",
-    "bip-375": "bip375",
-    "bip-376": "bip376",
-    "bip-392": "bip392"
-  };
+  var TAG_ALIAS = {};
   var GENERATED_SUMMARY = /^seeded monitored source for /i;
   var GENERATED_QUERY = /^github repository matched .+ live collector query:/i;
 
@@ -258,15 +252,43 @@
     setText("stat-new", String(weekNew));
   }
 
+  function topicQuery() {
+    try {
+      return new URLSearchParams(window.location.search).get("topic") || "";
+    } catch (e) {
+      return "";
+    }
+  }
+
+  function itemMatchesTopic(item, slug) {
+    if (!slug) return true;
+    var key = String(slug).toLowerCase();
+    var tags = item.tags || [];
+    for (var i = 0; i < tags.length; i++) {
+      if (String(tags[i]).toLowerCase() === key) return true;
+    }
+    return String(item.project || "").toLowerCase() === key;
+  }
+
+  function fillTopicCounts(items) {
+    document.querySelectorAll("[data-topic-count]").forEach(function (el) {
+      var slug = el.getAttribute("data-topic-count") || "";
+      var n = items.filter(function (item) { return itemMatchesTopic(item, slug); }).length;
+      el.textContent = String(n);
+    });
+  }
+
   function renderFeed(items) {
     var root = document.getElementById("activity-feed");
     if (!root) return;
+    var topic = topicQuery();
+    var list = topic ? items.filter(function (item) { return itemMatchesTopic(item, topic); }) : items;
     var html = '<div class="feed-label">Latest activity</div>';
-    if (!items.length) {
+    if (!list.length) {
       root.innerHTML = html + '<p class="muted">No activity yet.</p>';
       return;
     }
-    sortActivity(items).forEach(function (item) {
+    sortActivity(list).forEach(function (item) {
       var tags = topicTags(item, 3).map(function (t) {
         return '<span class="tag">' + esc(t) + "</span>";
       }).join("");
@@ -278,6 +300,27 @@
           "<p>" + esc(displaySummary(item)) + "</p>" +
           '<div class="item-meta"><span class="proj">' + esc(item.project || "") + '</span><span class="time" title="' + esc(formatStamp(itemDate(item))) + '">' + esc(humanDate(itemDate(item))) + "</span></div>" +
           (tags ? '<div class="tags">' + tags + "</div>" : "") +
+        "</article>";
+    });
+    root.innerHTML = html;
+  }
+
+  function renderTeaser(items) {
+    var root = document.getElementById("activity-teaser");
+    if (!root) return;
+    var head = root.querySelector(".feed-head");
+    var list = sortActivity(items).slice(0, 2);
+    var html = head ? head.outerHTML : "";
+    if (!list.length) {
+      root.innerHTML = html + '<p class="muted">No activity yet.</p>';
+      return;
+    }
+    list.forEach(function (item) {
+      html +=
+        '<article class="item">' +
+          "<h3><a href=\"" + esc(item.source_url) + "\">" + esc(displayTitle(item)) + "</a></h3>" +
+          "<p>" + esc(displaySummary(item)) + "</p>" +
+          '<div class="item-meta"><span class="proj">' + esc(item.project || "") + '</span><span class="time" title="' + esc(formatStamp(itemDate(item))) + '">' + esc(humanDate(itemDate(item))) + "</span></div>" +
         "</article>";
     });
     root.innerHTML = html;
@@ -551,8 +594,10 @@
     var items = feed.items || [];
     fillRefresh(feed.generated_at);
     fillStartCounts(feed, projects, sources);
+    fillTopicCounts(items);
     var page = currentPage();
-    if (page === "home") renderFeed(items);
+    if (page === "home") renderTeaser(items);
+    if (page === "activity") renderFeed(items);
     if (page === "week") renderWeek(items, document.body.getAttribute("data-week") || "");
     if (page === "projects") renderAtlas(projects.projects || [], items, sources);
     if (page === "sources") renderSources(sources);
@@ -577,7 +622,7 @@
     }
     boot(res[0], res[1], res[2]);
   }).catch(function () {
-    var el = document.getElementById("activity-feed") || document.getElementById("atlas-grid") || document.getElementById("week-groups") || document.getElementById("source-list");
+    var el = document.getElementById("activity-feed") || document.getElementById("activity-teaser") || document.getElementById("atlas-grid") || document.getElementById("week-groups") || document.getElementById("source-list");
     if (el) el.innerHTML = '<p class="muted">Could not load live feed artifacts.</p>';
   });
 })();

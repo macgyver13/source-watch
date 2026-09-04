@@ -5,8 +5,6 @@
     {{- $latestWeek = .RelPermalink -}}
   {{- end -}}
 {{- end -}}
-{{- $watch := site.Data.watch | default dict -}}
-{{- $topics := $watch.topics | default slice -}}
 <section class="start" aria-label="Start here">
   <div class="start-label">Start here</div>
   <div class="start-grid">
@@ -15,7 +13,7 @@
       <div class="d">What showed up this ISO week.</div>
       <div class="n" data-count="week-new">new this week</div>
     </a>
-    <a class="start-tile{{ if eq $here "activity" }} here{{ end }}" href="/">
+    <a class="start-tile{{ if eq $here "activity" }} here{{ end }}" href="/activity/">
       <div class="k">Latest activity <i>→</i></div>
       <div class="d">Public-source feed, unranked.</div>
       <div class="n" data-count="sources">sources</div>
@@ -24,18 +22,6 @@
       <div class="k">Projects <i>→</i></div>
       <div class="d">Tracked work, grouped by project.</div>
       <div class="n" data-count="projects">projects</div>
-    </a>
-    {{- range $topics }}
-    <a class="start-tile{{ if eq $here "topic" }} here{{ end }}" href="/topics/{{ .slug }}/">
-      <div class="k">{{ .title }} <i>→</i></div>
-      {{- with .blurb }}<div class="d">{{ . }}</div>{{- end }}
-      {{- with .note }}<div class="n">{{ . }}</div>{{ end }}
-    </a>
-    {{- end }}
-    <a class="start-tile{{ if eq $here "feeds" }} here{{ end }}" href="/feed.json">
-      <div class="k">Feeds <i>→</i></div>
-      <div class="d">Machine-readable copies of this index.</div>
-      <div class="n">JSON · RSS</div>
     </a>
   </div>
 </section>

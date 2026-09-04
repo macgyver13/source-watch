@@ -5,27 +5,17 @@
 <div class="wrap">
   {{- if $isRoot -}}
   <div class="hero">
+    {{ partial "crumb.html" (dict "section" "Topics") }}
     <h1>Topics</h1>
-    <p class="lede">Working notes attached to this watch index.</p>
+    <p class="lede">{{ if gt (len $topics) 0 }}{{ len $topics }} tracked term{{ if ne (len $topics) 1 }}s{{ end }}. The name opens its working notes; the count opens filtered activity.{{ else }}Add topics in <code>config/watch.yaml</code> to create a topic ledger.{{ end }}</p>
   </div>
-  {{ partial "start-here.html" (dict "here" "topic") }}
-  <div class="prose">
-    {{- if gt (len $topics) 0 }}
-    <ul>
-      {{- range $topics }}
-      <li><a href="/topics/{{ .slug }}/">{{ .title }}</a></li>
-      {{- end }}
-    </ul>
-    {{- else }}
-    <p>Add topics in <code>config/watch.yaml</code> to create extra Start-here tiles and topic pages.</p>
-    {{- end }}
-  </div>
+  {{ partial "topic-ledger.html" (dict "heading" false) }}
   {{- else -}}
   <div class="hero">
+    {{ partial "crumb.html" (dict "section" "Topics" "extra" .Title) }}
     <h1>{{ .Title }}</h1>
     {{- with .Params.blurb }}<p class="lede">{{ . }}</p>{{ end }}
   </div>
-  {{ partial "start-here.html" (dict "here" "topic") }}
   <div class="prose">
     {{ .Content }}
   </div>

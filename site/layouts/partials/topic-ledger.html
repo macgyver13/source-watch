@@ -1,0 +1,26 @@
+{{- $watch := site.Data.watch | default dict -}}
+{{- $topics := $watch.topics | default slice -}}
+{{- if gt (len $topics) 0 }}
+<section class="ledger" aria-label="Topics">
+  {{- if .heading }}
+  <div class="ledger-head">
+    <span class="feed-label">Topics</span>
+    <span class="ledger-help">What this index tracks, and what each term means.</span>
+    <a class="more" href="/topics/">All topics →</a>
+  </div>
+  {{- end }}
+  <div class="ledger-table">
+    <div class="ledger-row ledger-cols">
+      <span>Topic</span><span>Covers</span><span>Note</span><span class="n">Items</span>
+    </div>
+    {{- range $topics }}
+    <div class="ledger-row">
+      <a class="topic-name" href="/topics/{{ .slug }}/">{{ .title }}</a>
+      <span class="covers">{{ .blurb }}</span>
+      <span class="note-cell">{{ .note }}</span>
+      <a class="n" href="/activity/?topic={{ .slug }}" data-topic-count="{{ .slug }}">–</a>
+    </div>
+    {{- end }}
+  </div>
+</section>
+{{- end }}
