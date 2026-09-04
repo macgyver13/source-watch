@@ -1,11 +1,11 @@
 baseURL = "https://example.com/"
 locale = "en-us"
-title = "Example Watch"
+title = "FROST Watch"
 enableRobotsTXT = true
 disablePathToLower = true
 
 [params]
-  description = "Public activity on tracked sources."
+  description = "Public activity on FROST, MuSig2, and related threshold signing."
 
 [markup]
   [markup.goldmark]

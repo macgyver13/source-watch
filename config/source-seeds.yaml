@@ -1,6 +1,7 @@
 # Seeded sources and live collectors for this watch instance.
 # Identity (name, base_url, description, default_tag, chips, topics, relevance)
 # lives in config/watch.yaml. This file is only seeds + collectors.
+# This file is for preview/frost only; do not merge to main.
 #
 # Leave these lists empty for a blank fork. Add entries, then run
 # scripts/build_seed_feed.py to fill site/static artifacts.
@@ -69,6 +70,22 @@ seeded_sources:
   crates: []
 
 live_collectors:
-  github_repository_searches: []
-  delving_topic_searches: []
+  github_repository_searches:
+    - id: github-frost-bitcoin-repo-discovery
+      query: 'frost bitcoin threshold archived:false'
+      max_results: 10
+      tags: [frost, github, candidate, repository-discovery]
+    - id: github-musig2-repo-discovery
+      query: 'musig2 archived:false'
+      max_results: 10
+      tags: [musig2, github, candidate, repository-discovery]
+  delving_topic_searches:
+    - id: delving-frost
+      query: frost
+      max_results: 10
+      tags: [frost, delving, candidate, topic-discovery]
+    - id: delving-musig2
+      query: musig2
+      max_results: 10
+      tags: [musig2, delving, candidate, topic-discovery]
   delving_category_listings: []

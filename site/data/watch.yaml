@@ -1,18 +1,28 @@
-name: Example Watch
+name: FROST Watch
 base_url: https://example.com/
-description: Public activity on tracked sources.
-default_tag: example
+description: Public activity on FROST, MuSig2, and related threshold signing.
+default_tag: frost
 preferred_chips:
-  - docs
-  - spec
+  - musig2
+  - threshold
+  - bitcoin
 hidden_tags:
   - github
   - repository-discovery
   - candidate
   - pull-request
   - package
+  - delving
+  - topic-discovery
 relevance:
-  always_match: []   # accept if any of these appear in repo description/topics
-  required_any: []   # if non-empty, one of these must appear; empty = no required term
-  context_any: []    # if required_any is set AND this is non-empty, also need one of these
-topics: []           # optional extra Start-here tiles: [{title, slug, blurb, note}]
+  always_match:
+    - frost
+    - musig2
+    - musig
+  required_any:
+    - frost
+    - musig2
+    - musig
+    - threshold
+  context_any: []
+topics: []

@@ -1,7 +1,266 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0"><channel>
-<title>Example Watch</title>
+<title>FROST Watch</title>
 <link>https://example.com/</link>
-<description>Public activity on tracked sources.</description>
-<lastBuildDate>Wed, 02 Sep 2026 16:23:48 +0000</lastBuildDate>
+<description>Public activity on FROST, MuSig2, and related threshold signing.</description>
+<lastBuildDate>Fri, 04 Sep 2026 20:37:10 +0000</lastBuildDate>
+<item>
+<title>Institutional Grade Spending Policies for Statechains</title>
+<link>https://delvingbitcoin.org/t/institutional-grade-spending-policies-for-statechains/2874</link>
+<guid isPermaLink="false">delving-search:delving-musig2:2874</guid>
+<description>...blished approval processes need. The approach below combines B oolean circuit L ogic I ntegrated into the S ingle K ey (BLISK) with the blind-signed, MuSig2-based statechain transfer protocol. It turns out that this requires almost no change to the MercuryLayer specification, and keeps BLISK entirely on t...</description>
+<pubDate>Fri, 04 Sep 2026 16:17:32 +0000</pubDate>
+</item>
+<item>
+<title>808bits/zig-mpc</title>
+<link>https://github.com/808bits/zig-mpc</link>
+<guid isPermaLink="false">gh-search:github-frost-bitcoin-repo-discovery:808bits-zig-mpc</guid>
+<description>Threshold signing in Zig with no trusted dealer: the private key never exists anywhere, at any point. FROST over ed25519, secp256k1 and taproot, plus CGGMP24 threshold ECDSA.</description>
+<pubDate>Sat, 15 Aug 2026 23:01:19 +0000</pubDate>
+</item>
+<item>
+<title>Coinfidential/dkgkit</title>
+<link>https://github.com/Coinfidential/dkgkit</link>
+<guid isPermaLink="false">gh-search:github-musig2-repo-discovery:coinfidential-dkgkit</guid>
+<description>Threshold cryptography core — FROST DKG, signing, resharing and redistribution. Rust → wasm. MuSig2 tree and BIP-352 are targets, not code</description>
+<pubDate>Sat, 08 Aug 2026 04:33:20 +0000</pubDate>
+</item>
+<item>
+<title>OZARUMOTO/PARANOIA-SIGNER</title>
+<link>https://github.com/OZARUMOTO/PARANOIA-SIGNER</link>
+<guid isPermaLink="false">gh-search:github-musig2-repo-discovery:ozarumoto-paranoia-signer</guid>
+<description>Offline Bitcoin wallet with BIP-352 silent payments, MuSig2 3-of-3 vaults, and quantum-link signing — paranoid by design</description>
+<pubDate>Thu, 06 Aug 2026 20:11:16 +0000</pubDate>
+</item>
+<item>
+<title>PQC output type discussion</title>
+<link>https://delvingbitcoin.org/t/pqc-output-type-discussion/2749</link>
+<guid isPermaLink="false">delving-search:delving-frost:2749</guid>
+<description>...l ECC opcodes are inside PKH constructions, and no actual EC points are shared. It is not compatible with xpub sharing, MuSig, adapter signatures, or FROST.</description>
+<pubDate>Mon, 27 Jul 2026 21:20:53 +0000</pubDate>
+</item>
+<item>
+<title>systemslibrarian/crypto-lab-musig-gate</title>
+<link>https://github.com/systemslibrarian/crypto-lab-musig-gate</link>
+<guid isPermaLink="false">gh-search:github-musig2-repo-discovery:systemslibrarian-crypto-lab-musig-gate</guid>
+<description>Browser-based MuSig2 demo — BIP-327 over secp256k1. n signers aggregate their public keys into one key and their nonces into one nonce, producing a single Schnorr signature indistinguishable from a lone signer's. Real curve arithmetic. No backend.</description>
+<pubDate>Tue, 21 Jul 2026 23:33:48 +0000</pubDate>
+</item>
+<item>
+<title>nostrocket/cheget</title>
+<link>https://github.com/nostrocket/cheget</link>
+<guid isPermaLink="false">gh-search:github-frost-bitcoin-repo-discovery:nostrocket-cheget</guid>
+<description>Rust CLI letting a majority-of-N group control one Bitcoin Taproot address (FROST threshold Schnorr signatures). Full DKG. No single party ever holds the full key. Membership rotates off-chain while retaining the same onchain address. Spends look like single-sig.</description>
+<pubDate>Mon, 13 Jul 2026 06:19:02 +0000</pubDate>
+</item>
+<item>
+<title>Privately running wallet privacy heuristics on your own UTXOs without needing to run your own node</title>
+<link>https://delvingbitcoin.org/t/privately-running-wallet-privacy-heuristics-on-your-own-utxos-without-needing-to-run-your-own-node/2625</link>
+<guid isPermaLink="false">delving-search:delving-frost:2625</guid>
+<description>...n is operationally expensive. PK_server being a constant is a security choice, but rotating v currently needs a new trusted setup. The planned fix is FROST threshold management of v , and no FROST code exists yet. An OHTTP fallback is planned but not built. Tor .onion is the only privacy transport implem...</description>
+<pubDate>Sat, 20 Jun 2026 18:56:54 +0000</pubDate>
+</item>
+<item>
+<title>K-of-N threshhold key generation scheme by limited shared secrets</title>
+<link>https://delvingbitcoin.org/t/k-of-n-threshhold-key-generation-scheme-by-limited-shared-secrets/2623</link>
+<guid isPermaLink="false">delving-search:delving-frost:2623</guid>
+<description>Introduction The FROST scheme is based on Verifiable Secret Sharing, where signers first perform Shamir Secret Sharing in homomorphic space, then each signer stores the gen...</description>
+<pubDate>Sat, 20 Jun 2026 06:52:59 +0000</pubDate>
+</item>
+<item>
+<title>BEULAHEVANJALIN/bip-nested-musig2</title>
+<link>https://github.com/BEULAHEVANJALIN/bip-nested-musig2</link>
+<guid isPermaLink="false">gh-search:github-musig2-repo-discovery:beulahevanjalin-bip-nested-musig2</guid>
+<description>Reference bip implemenation for nested musig</description>
+<pubDate>Sat, 06 Jun 2026 14:38:33 +0000</pubDate>
+</item>
+<item>
+<title>privkeyio/keep-startos</title>
+<link>https://github.com/privkeyio/keep-startos</link>
+<guid isPermaLink="false">gh-search:github-frost-bitcoin-repo-discovery:privkeyio-keep-startos</guid>
+<description>Always-on FROST threshold co-signer node for Nostr and Bitcoin, packaged for StartOS</description>
+<pubDate>Mon, 25 May 2026 01:58:21 +0000</pubDate>
+</item>
+<item>
+<title>0xciph3r/btc-custody</title>
+<link>https://github.com/0xciph3r/btc-custody</link>
+<guid isPermaLink="false">gh-search:github-frost-bitcoin-repo-discovery:0xciph3r-btc-custody</guid>
+<description>Production-grade Bitcoin custody system: HSM (PKCS#11), FROST/MuSig2 threshold signing, hot/cold wallet, policy engine, PSBT air-gapped workflows</description>
+<pubDate>Fri, 22 May 2026 13:07:21 +0000</pubDate>
+</item>
+<item>
+<title>mwaddip/otzi-headless</title>
+<link>https://github.com/mwaddip/otzi-headless</link>
+<guid isPermaLink="false">gh-search:github-frost-bitcoin-repo-discovery:mwaddip-otzi-headless</guid>
+<description>Headless daemon variant of Ötzi — automated ML-DSA + FROST threshold signing over OPNet Bitcoin L1.</description>
+<pubDate>Thu, 23 Apr 2026 14:01:59 +0000</pubDate>
+</item>
+<item>
+<title># CAAS: A Continuous Adversarial Audit Standard for secp256k1 Libraries</title>
+<link>https://delvingbitcoin.org/t/caas-a-continuous-adversarial-audit-standard-for-secp256k1-libraries/2416</link>
+<guid isPermaLink="false">delving-search:delving-frost:2416</guid>
+<description>...tal), embedded platform support (ESP32, STM32), and full Bitcoin protocol coverage (ECDSA, Schnorr BIP-340, BIP-352 Silent Payments, BIP-324, MuSig2, FROST). Craig Raw integrated the library into [Frigate]( https://github.com/sparrowwallet/frigate ) for BIP-352 Silent Payments scanning. This post describ...</description>
+<pubDate>Tue, 14 Apr 2026 01:44:13 +0000</pubDate>
+</item>
+<item>
+<title>Towards A K-of-N Lightning Network Node</title>
+<link>https://delvingbitcoin.org/t/towards-a-k-of-n-lightning-network-node/2395</link>
+<guid isPermaLink="false">delving-search:delving-frost:2395</guid>
+<description>...th all that latency down under. K-of-N MuSig2? While MuSig2 (and Nested MuSig2) are designed as n-of-n signing protocols, I should note that &quot;k-of-n&quot; FROST is really a Verifiable Shamir Secret Sharing scheme that ultimately uses much of the MuSig2 signing protocol for actual signing. That is, instead of...</description>
+<pubDate>Wed, 08 Apr 2026 09:00:30 +0000</pubDate>
+</item>
+<item>
+<title>UltrafastSecp256k1 v3.3</title>
+<link>https://delvingbitcoin.org/t/ultrafastsecp256k1-v3-3/2346</link>
+<guid isPermaLink="false">delving-search:delving-frost:2346</guid>
+<description>...message == false - **Determinism**: Same (key, msg) - &amp;gt; identical signature - **Low-S**: All signatures satisfy BIP-62 low-S requirement ### [27/55] FROST Reference KAT Vectors -- 9 sub-tests 1. Lagrange coefficient mathematical properties 2. FROST DKG determinism with fixed seeds 3. FROST DKG Feldman V...</description>
+<pubDate>Fri, 20 Mar 2026 00:48:07 +0000</pubDate>
+</item>
+<item>
+<title>shrec/UltrafastSecp256k1</title>
+<link>https://github.com/shrec/UltrafastSecp256k1</link>
+<guid isPermaLink="false">gh-search:github-musig2-repo-discovery:shrec-ultrafastsecp256k1</guid>
+<description>Ultra high-performance secp256k1 ECC engine | Python, Node.js, Rust, Go, C#, Swift, Java bindings | CUDA, Metal, OpenCL GPU | ECDSA, Schnorr, FROST, MuSig2, BIP-352 | 15+ platforms</description>
+<pubDate>Mon, 02 Feb 2026 13:29:44 +0000</pubDate>
+</item>
+<item>
+<title>BLISK: Boolean circuit Logic Integrated into the Single Key</title>
+<link>https://delvingbitcoin.org/t/blisk-boolean-circuit-logic-integrated-into-the-single-key/2217</link>
+<guid isPermaLink="false">delving-search:delving-musig2:2217</guid>
+<description>...h boolean logic. We'd love feedback and ideas! TL; DR. Bitcoin mainly gives two ways to express &quot;who can spend&quot;: Threshold / multisignatures (FROST / MuSig2): great privacy and efficiency, but they fundamentally express only cardinality ( k-of-n ). Scripts: more expressive, but limited in practice, and th...</description>
+<pubDate>Mon, 26 Jan 2026 23:23:43 +0000</pubDate>
+</item>
+<item>
+<title>privkeyio/keep-android</title>
+<link>https://github.com/privkeyio/keep-android</link>
+<guid isPermaLink="false">gh-search:github-frost-bitcoin-repo-discovery:privkeyio-keep-android</guid>
+<description>Android app for FROST threshold signing with NIP-55 support</description>
+<pubDate>Sat, 24 Jan 2026 22:21:13 +0000</pubDate>
+</item>
+<item>
+<title>privkeyio/keep-esp32</title>
+<link>https://github.com/privkeyio/keep-esp32</link>
+<guid isPermaLink="false">gh-search:github-frost-bitcoin-repo-discovery:privkeyio-keep-esp32</guid>
+<description>Air-gapped FROST threshold signing device</description>
+<pubDate>Sat, 27 Dec 2025 15:24:44 +0000</pubDate>
+</item>
+<item>
+<title>Private Key Handover</title>
+<link>https://delvingbitcoin.org/t/private-key-handover/2098</link>
+<guid isPermaLink="false">delving-search:delving-musig2:2098</guid>
+<description>...path to claim the funds without further participation of any other party. In our HTLC motivating example, the keyspend path of the HTLC would be the MuSig2 of the ephemeral keys of the offeror and acceptor, and in the happy path, the acceptor gives the offeror the preimage directly (instead of onchain) a...</description>
+<pubDate>Tue, 11 Nov 2025 04:06:55 +0000</pubDate>
+</item>
+<item>
+<title>MultiChannel and MultiPTLC: Towards A Global High-Availability Consistent/Partition-Tolerant Database For Bitcoin Payments</title>
+<link>https://delvingbitcoin.org/t/multichannel-and-multiptlc-towards-a-global-high-availability-consistent-partition-tolerant-database-for-bitcoin-payments/1983</link>
+<guid isPermaLink="false">delving-search:delving-frost:1983</guid>
+<description>...where it is needed, or to cooperatively exit before the tree times out, or else you pay more onchain fees. (Note: as there is currently no proof that FROST-in-MuSig2 is safe, we should use explicit SCRIPT-based checking of two signatures, one of which is the end user signature, the other being the FROST...</description>
+<pubDate>Sun, 14 Sep 2025 21:43:32 +0000</pubDate>
+</item>
+<item>
+<title>Chain Code Delegation: Private Access Control for Bitcoin Keys</title>
+<link>https://delvingbitcoin.org/t/chain-code-delegation-private-access-control-for-bitcoin-keys/1837</link>
+<guid isPermaLink="false">delving-search:delving-frost:1837</guid>
+<description>...articipated in the transaction. One solution to this problem is to forgo the use of Script and instead use multiparty computation (MPC), such as with FROST, as described by Nick Farrow [0]. Another solution is to use disjoint spending paths with Tapscript. For example, a 2-of-3 can be expressed in a Taps...</description>
+<pubDate>Tue, 15 Jul 2025 00:38:32 +0000</pubDate>
+</item>
+<item>
+<title>stars-labs/starlab-mpc</title>
+<link>https://github.com/stars-labs/starlab-mpc</link>
+<guid isPermaLink="false">gh-search:github-frost-bitcoin-repo-discovery:stars-labs-starlab-mpc</guid>
+<description>FROST threshold-signature MPC engine — Rust SDK + headless CLI + terminal UI + WebRTC signal server. Multi-device wallets (DKG + threshold signing) for Ethereum, Solana, Bitcoin; no single device holds the key.</description>
+<pubDate>Sun, 27 Apr 2025 14:29:38 +0000</pubDate>
+</item>
+<item>
+<title>ZK-gossip for lightning channel announcements</title>
+<link>https://delvingbitcoin.org/t/zk-gossip-for-lightning-channel-announcements/1407</link>
+<guid isPermaLink="false">delving-search:delving-musig2:1407</guid>
+<description>...5) See Elle's deep dive here: Updates to the Gossip 1.75 proposal post LN summit meeting . Tl;dr: a new channel_announcement_2 message that carries a Musig2 signature proving the two nodes control a certain UTXO. An example channel_announcement_2 : { &quot;ChainHash&quot;: &quot;000000000019d6689c085ae165831e934ff763ae4...</description>
+<pubDate>Tue, 28 Jan 2025 13:04:49 +0000</pubDate>
+</item>
+<item>
+<title>Challenge: Covenants for Braidpool</title>
+<link>https://delvingbitcoin.org/t/challenge-covenants-for-braidpool/1370</link>
+<guid isPermaLink="false">delving-search:delving-frost:1370</guid>
+<description>...pool/braidpool Braidpool (A decentralized mining pool) will need to custody coinbase rewards across multiple blocks. For this I have proposed using a FROST federation which signs two chained transactions RCA and UHPO for this: Coinbase → RCA → UHPO https://github.com/braidpool/braidpool/blob/6bc7785c7ee6...</description>
+<pubDate>Mon, 06 Jan 2025 20:15:05 +0000</pubDate>
+</item>
+<item>
+<title>Radpool: Decentralised Mining Pool With Futures Contracts For Payouts</title>
+<link>https://delvingbitcoin.org/t/radpool-decentralised-mining-pool-with-futures-contracts-for-payouts/1262</link>
+<guid isPermaLink="false">delving-search:delving-frost:1262</guid>
+<description>...ners based on the miner's hashrate. These contracts are settled at fixed, well known intervals. MSPs with enough hashrate generate attestations using FROST threshold signatures to settle these DLC contracts. The MSPs in turn get the payout from the coinbase of the pool's blocks using PPLNS. The MSPs thus...</description>
+<pubDate>Sat, 16 Nov 2024 14:58:04 +0000</pubDate>
+</item>
+<item>
+<title>State minimization in MuSig2 signing sessions</title>
+<link>https://delvingbitcoin.org/t/state-minimization-in-musig2-signing-sessions/626</link>
+<guid isPermaLink="false">delving-search:delving-musig2:626</guid>
+<description>...ig() , with the signer producing the pubnonce/signature for all the inputs at once. Therefore, in the flow of BIP-0327, you would expect at least one MuSig2 signing session per input to be active at the same time. In the context of hardware signing device support, that's somewhat problematic: it would req...</description>
+<pubDate>Fri, 01 Mar 2024 09:07:44 +0000</pubDate>
+</item>
+<item>
+<title>azuchi/frostrb</title>
+<link>https://github.com/azuchi/frostrb</link>
+<guid isPermaLink="false">gh-search:github-frost-bitcoin-repo-discovery:azuchi-frostrb</guid>
+<description>Ruby implementations of Two-Round Threshold Schnorr Signatures with FROST.</description>
+<pubDate>Fri, 09 Feb 2024 07:05:46 +0000</pubDate>
+</item>
+<item>
+<title>luxfi/threshold</title>
+<link>https://github.com/luxfi/threshold</link>
+<guid isPermaLink="false">gh-search:github-frost-bitcoin-repo-discovery:luxfi-threshold</guid>
+<description>▼ LUX multiparty CGGMP21, FROST, LSS protocol and other threshold signature schemes.</description>
+<pubDate>Fri, 15 Dec 2023 20:36:03 +0000</pubDate>
+</item>
+<item>
+<title>How many nonce reuse before exposing your Musig2 private key?</title>
+<link>https://delvingbitcoin.org/t/how-many-nonce-reuse-before-exposing-your-musig2-private-key/217</link>
+<guid isPermaLink="false">delving-search:delving-musig2:217</guid>
+<description>The https://github.com/bitcoin/bips/blob/e918b50731397872ad2922a1b08a5a4cd1d6d546/bip-0327.mediawiki Musig2 BIP says that signing two distinct messages with the same secnonce exposes your private key. While I know we must absolutely not reuse secnonces , I...</description>
+<pubDate>Thu, 23 Nov 2023 15:02:56 +0000</pubDate>
+</item>
+<item>
+<title>Is static Musig2 key with a variable tweak safe?</title>
+<link>https://delvingbitcoin.org/t/is-static-musig2-key-with-a-variable-tweak-safe/215</link>
+<guid isPermaLink="false">delving-search:delving-musig2:215</guid>
+<description>I'd like to create taproot addresses where the key path is using musig2 with a script path that contains a refund script, that can be spent with a single key after a delay: key path: user_key + server_key script path: use...</description>
+<pubDate>Thu, 23 Nov 2023 11:06:55 +0000</pubDate>
+</item>
+<item>
+<title>paulmillr/scure-btc-signer</title>
+<link>https://github.com/paulmillr/scure-btc-signer</link>
+<guid isPermaLink="false">gh-search:github-musig2-repo-discovery:paulmillr-scure-btc-signer</guid>
+<description>Audited &amp; minimal library for creating, signing &amp; decoding Bitcoin transactions.</description>
+<pubDate>Tue, 30 Aug 2022 04:15:34 +0000</pubDate>
+</item>
+<item>
+<title>btclib-org/btclib-secp256k1</title>
+<link>https://github.com/btclib-org/btclib-secp256k1</link>
+<guid isPermaLink="false">gh-search:github-musig2-repo-discovery:btclib-org-btclib-secp256k1</guid>
+<description>Python bindings to libsecp256k1</description>
+<pubDate>Wed, 10 Nov 2021 16:22:06 +0000</pubDate>
+</item>
+<item>
+<title>21-DOT-DEV/swift-secp256k1</title>
+<link>https://github.com/21-DOT-DEV/swift-secp256k1</link>
+<guid isPermaLink="false">gh-search:github-musig2-repo-discovery:21-dot-dev-swift-secp256k1</guid>
+<description>Swift cryptography library for Bitcoin and Nostr. ECDSA, Schnorr, ECDH, and zero-knowledge proofs on secp256k1. Apple platforms and Linux.</description>
+<pubDate>Sun, 05 Jul 2020 07:26:05 +0000</pubDate>
+</item>
+<item>
+<title>btclib-org/btclib</title>
+<link>https://github.com/btclib-org/btclib</link>
+<guid isPermaLink="false">gh-search:github-musig2-repo-discovery:btclib-org-btclib</guid>
+<description>A Python library for 'bitcoin cryptography'</description>
+<pubDate>Wed, 16 May 2018 09:08:50 +0000</pubDate>
+</item>
+<item>
+<title>BlockstreamResearch/secp256k1-zkp</title>
+<link>https://github.com/BlockstreamResearch/secp256k1-zkp</link>
+<guid isPermaLink="false">gh-search:github-musig2-repo-discovery:blockstreamresearch-secp256k1-zkp</guid>
+<description>A fork of libsecp256k1 with support for advanced and experimental features such as Confidential Assets and MuSig2</description>
+<pubDate>Tue, 09 Jun 2015 07:19:49 +0000</pubDate>
+</item>
 </channel></rss>
