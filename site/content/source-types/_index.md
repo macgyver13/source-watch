@@ -19,6 +19,9 @@ title: "Source types"
 
 ## github_pull_request
 
+- [macgyver13/source-watch #7](https://github.com/macgyver13/source-watch/pull/7)
+- [gregoryjkramer/entropylab #6](https://github.com/gregoryjkramer/entropylab/pull/6)
+- [Conxian/conxius-wallet #534](https://github.com/Conxian/conxius-wallet/pull/534)
 - [Conxian/conxius-wallet #533](https://github.com/Conxian/conxius-wallet/pull/533)
 - [btclib-org/btclib-secp256k1 #817](https://github.com/btclib-org/btclib-secp256k1/pull/817)
 - [btclib-org/btclib-secp256k1 #816](https://github.com/btclib-org/btclib-secp256k1/pull/816)
@@ -30,16 +33,10 @@ title: "Source types"
 - [lifofifoX/saffron #7](https://github.com/lifofifoX/saffron/pull/7)
 - [btclib-org/btclib-secp256k1 #797](https://github.com/btclib-org/btclib-secp256k1/pull/797)
 - [anondevdrop/anoncommerce #13](https://github.com/anondevdrop/anoncommerce/pull/13)
-- [Conxian/conxius-wallet #528](https://github.com/Conxian/conxius-wallet/pull/528)
-- [Conxian/conxius-wallet #527](https://github.com/Conxian/conxius-wallet/pull/527)
 - [Conxian/conxian-gateway #372](https://github.com/Conxian/conxian-gateway/pull/372)
-- [OogaBoogaX/entropylab #386](https://github.com/OogaBoogaX/entropylab/pull/386)
-- [barrydeen/wisp-ios #459](https://github.com/barrydeen/wisp-ios/pull/459)
 - [OogaBoogaX/entropylab #378](https://github.com/OogaBoogaX/entropylab/pull/378)
-- [OogaBoogaX/entropylab #377](https://github.com/OogaBoogaX/entropylab/pull/377)
-- [OogaBoogaX/entropylab #319](https://github.com/OogaBoogaX/entropylab/pull/319)
+- [cygnet3/spdk #168](https://github.com/cygnet3/spdk/pull/168)
 - [bitcoin/bips #2276](https://github.com/bitcoin/bips/pull/2276)
-- [bitcoin-core/secp256k1 #1929](https://github.com/bitcoin-core/secp256k1/pull/1929)
 - [BitmapAsset/block-genomics-nexus #175](https://github.com/BitmapAsset/block-genomics-nexus/pull/175)
 - [diybitcoinhardware/embit #152](https://github.com/diybitcoinhardware/embit/pull/152)
 - [macgyver13/bip375-examples #2](https://github.com/macgyver13/bip375-examples/pull/2)
@@ -50,6 +47,7 @@ title: "Source types"
 - [shrec/UltrafastSecp256k1 #384](https://github.com/shrec/UltrafastSecp256k1/pull/384)
 - [bitcoin/bips #2257](https://github.com/bitcoin/bips/pull/2257)
 - [bitcoin/bips #2256](https://github.com/bitcoin/bips/pull/2256)
+- [CypherCommons/shroud #143](https://github.com/CypherCommons/shroud/pull/143)
 - [GautamBytes/psbt-interop-lab #36](https://github.com/GautamBytes/psbt-interop-lab/pull/36)
 - [GautamBytes/psbt-interop-lab #31](https://github.com/GautamBytes/psbt-interop-lab/pull/31)
 - [GautamBytes/psbt-interop-lab #27](https://github.com/GautamBytes/psbt-interop-lab/pull/27)
@@ -59,6 +57,7 @@ title: "Source types"
 - [bitcoin/bips #2207](https://github.com/bitcoin/bips/pull/2207)
 - [bitcoinaustria/kassiber #315](https://github.com/bitcoinaustria/kassiber/pull/315)
 - [Coldcard/firmware #683](https://github.com/Coldcard/firmware/pull/683)
+- [cygnet3/spdk #141](https://github.com/cygnet3/spdk/pull/141)
 - [sethforprivacy/silentpaymentsxyz #42](https://github.com/sethforprivacy/silentpaymentsxyz/pull/42)
 - [bitcoin/bips #2149](https://github.com/bitcoin/bips/pull/2149)
 - [bitcoin/bips #2135](https://github.com/bitcoin/bips/pull/2135)
@@ -76,6 +75,7 @@ title: "Source types"
 
 ## github_repository
 
+- [louneskmt/spaghetti](https://github.com/louneskmt/spaghetti)
 - [benjamin-jarvie/butlers-playground](https://github.com/benjamin-jarvie/butlers-playground)
 - [bitsagarob/blindbit-v1-shim](https://github.com/bitsagarob/blindbit-v1-shim)
 - [bitsagarob/spcommit-checkpoint-startos](https://github.com/bitsagarob/spcommit-checkpoint-startos)

@@ -1,8 +1,23 @@
+# Seeded sources and live collectors for this watch instance.
+# Identity (name, base_url, description, default_tag, chips, topics, relevance)
+# lives in config/watch.yaml. This file is only seeds + collectors.
 # This file is for preview/silent-payments only; do not merge to main.
 # Silent Payments Watch — preview/silent-payments only.
 # discovered_at = silent-payments/roadmap issue created_at
 # activity_at = issue updated_at (latest when one seed maps to several issues)
 # github_pull_request_searches find PRs even when the parent repo is already seeded.
+#
+# Optional per seed:
+#   discovered_at:  ISO timestamp; weeks and "new" sort use this (stable).
+#   activity_at:    ISO timestamp; latest-activity views use this.
+#   live_activity:  false to skip GitHub pushed_at on noisy monorepos
+#                   (pair with github_pull_requests for the real PRs).
+# Live GitHub searches use repo created_at as discovered_at.
+# Live GitHub PR searches use pull created_at / updated_at. A seeded
+# parent repo does not hide matching PRs.
+# Live Delving collectors use topic created_at / last_posted_at.
+# Category listings take a numeric id or parent/slug/id path
+# (example: 12 or implementation/wg-silent-payments/12). Slug alone 404s.
 
 
 seeded_sources:

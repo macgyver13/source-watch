@@ -164,8 +164,8 @@
     if (kind === "github_pull_request") return "Tracked pull request: " + title + ".";
     if (kind === "package_crate") return "Published crate: " + title + ".";
     if (kind === "docs_page") return "Public documentation: " + title + ".";
-    if (kind === "github_repository") return "Public repository: " + title + ".";
     if (kind === "delving_topic") return "Delving Bitcoin topic: " + title + ".";
+    if (kind === "github_repository") return "Public repository: " + title + ".";
     return title;
   }
 

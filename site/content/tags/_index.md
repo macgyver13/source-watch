@@ -16,8 +16,10 @@ title: "Tags"
 
 ## bip-352
 
+- [Conxian/conxius-wallet #534](https://github.com/Conxian/conxius-wallet/pull/534)
+- [Conxian/conxius-wallet #533](https://github.com/Conxian/conxius-wallet/pull/533)
 - [Conxian/conxian-gateway #372](https://github.com/Conxian/conxian-gateway/pull/372)
-- [barrydeen/wisp-ios #459](https://github.com/barrydeen/wisp-ios/pull/459)
+- [diybitcoinhardware/embit #152](https://github.com/diybitcoinhardware/embit/pull/152)
 - [Coinfidential/dkgkit](https://github.com/Coinfidential/dkgkit)
 - [shuv-amp/sp-differ](https://github.com/shuv-amp/sp-differ)
 - [shrec/UltrafastSecp256k1](https://github.com/shrec/UltrafastSecp256k1)
@@ -26,24 +28,20 @@ title: "Tags"
 
 - [bitcoin/bips #2207](https://github.com/bitcoin/bips/pull/2207)
 
-## bip-376
-
-- [diybitcoinhardware/embit #152](https://github.com/diybitcoinhardware/embit/pull/152)
-
 ## bip340
 
 - [21-DOT-DEV/swift-secp256k1](https://github.com/21-DOT-DEV/swift-secp256k1)
 
 ## bip352
 
-- [OogaBoogaX/entropylab #386](https://github.com/OogaBoogaX/entropylab/pull/386)
+- [gregoryjkramer/entropylab #6](https://github.com/gregoryjkramer/entropylab/pull/6)
+- [btclib-org/btclib-secp256k1 #797](https://github.com/btclib-org/btclib-secp256k1/pull/797)
 - [OogaBoogaX/entropylab #378](https://github.com/OogaBoogaX/entropylab/pull/378)
-- [OogaBoogaX/entropylab #377](https://github.com/OogaBoogaX/entropylab/pull/377)
-- [OogaBoogaX/entropylab #319](https://github.com/OogaBoogaX/entropylab/pull/319)
 - [azeemshaik025/silent-payments](https://github.com/azeemshaik025/silent-payments)
 - [bitsagarob/payment-name-startos](https://github.com/bitsagarob/payment-name-startos)
 - [shrec/UltrafastSecp256k1 #384](https://github.com/shrec/UltrafastSecp256k1/pull/384)
 - [bitcoin/bips #2256](https://github.com/bitcoin/bips/pull/2256)
+- [CypherCommons/shroud #143](https://github.com/CypherCommons/shroud/pull/143)
 - [echennells/silent-receipts](https://github.com/echennells/silent-receipts)
 - [kkdao/kiss-bdk](https://github.com/kkdao/kiss-bdk)
 - [theStack/bip352-signet-scan-worstcase](https://github.com/theStack/bip352-signet-scan-worstcase)
@@ -109,6 +107,10 @@ title: "Tags"
 
 ## candidate
 
+- [macgyver13/source-watch #7](https://github.com/macgyver13/source-watch/pull/7)
+- [gregoryjkramer/entropylab #6](https://github.com/gregoryjkramer/entropylab/pull/6)
+- [Conxian/conxius-wallet #534](https://github.com/Conxian/conxius-wallet/pull/534)
+- [louneskmt/spaghetti](https://github.com/louneskmt/spaghetti)
 - [Conxian/conxius-wallet #533](https://github.com/Conxian/conxius-wallet/pull/533)
 - [btclib-org/btclib-secp256k1 #817](https://github.com/btclib-org/btclib-secp256k1/pull/817)
 - [btclib-org/btclib-secp256k1 #816](https://github.com/btclib-org/btclib-secp256k1/pull/816)
@@ -120,17 +122,11 @@ title: "Tags"
 - [lifofifoX/saffron #7](https://github.com/lifofifoX/saffron/pull/7)
 - [btclib-org/btclib-secp256k1 #797](https://github.com/btclib-org/btclib-secp256k1/pull/797)
 - [anondevdrop/anoncommerce #13](https://github.com/anondevdrop/anoncommerce/pull/13)
-- [Conxian/conxius-wallet #528](https://github.com/Conxian/conxius-wallet/pull/528)
-- [Conxian/conxius-wallet #527](https://github.com/Conxian/conxius-wallet/pull/527)
 - [Conxian/conxian-gateway #372](https://github.com/Conxian/conxian-gateway/pull/372)
-- [OogaBoogaX/entropylab #386](https://github.com/OogaBoogaX/entropylab/pull/386)
-- [barrydeen/wisp-ios #459](https://github.com/barrydeen/wisp-ios/pull/459)
 - [OogaBoogaX/entropylab #378](https://github.com/OogaBoogaX/entropylab/pull/378)
-- [OogaBoogaX/entropylab #377](https://github.com/OogaBoogaX/entropylab/pull/377)
-- [OogaBoogaX/entropylab #319](https://github.com/OogaBoogaX/entropylab/pull/319)
+- [cygnet3/spdk #168](https://github.com/cygnet3/spdk/pull/168)
 - [bitcoin/bips #2276](https://github.com/bitcoin/bips/pull/2276)
 - [benjamin-jarvie/butlers-playground](https://github.com/benjamin-jarvie/butlers-playground)
-- [bitcoin-core/secp256k1 #1929](https://github.com/bitcoin-core/secp256k1/pull/1929)
 - [BitmapAsset/block-genomics-nexus #175](https://github.com/BitmapAsset/block-genomics-nexus/pull/175)
 - [bitsagarob/blindbit-v1-shim](https://github.com/bitsagarob/blindbit-v1-shim)
 - [diybitcoinhardware/embit #152](https://github.com/diybitcoinhardware/embit/pull/152)
@@ -147,6 +143,7 @@ title: "Tags"
 - [shrec/UltrafastSecp256k1 #384](https://github.com/shrec/UltrafastSecp256k1/pull/384)
 - [bitcoin/bips #2257](https://github.com/bitcoin/bips/pull/2257)
 - [bitcoin/bips #2256](https://github.com/bitcoin/bips/pull/2256)
+- [CypherCommons/shroud #143](https://github.com/CypherCommons/shroud/pull/143)
 - [GautamBytes/psbt-interop-lab #36](https://github.com/GautamBytes/psbt-interop-lab/pull/36)
 - [GautamBytes/psbt-interop-lab #31](https://github.com/GautamBytes/psbt-interop-lab/pull/31)
 - [GautamBytes/psbt-interop-lab #27](https://github.com/GautamBytes/psbt-interop-lab/pull/27)
@@ -160,6 +157,7 @@ title: "Tags"
 - [bitcoinaustria/kassiber #435](https://github.com/bitcoinaustria/kassiber/pull/435)
 - [bitcoin/bips #2207](https://github.com/bitcoin/bips/pull/2207)
 - [bitcoinaustria/kassiber #315](https://github.com/bitcoinaustria/kassiber/pull/315)
+- [cygnet3/spdk #141](https://github.com/cygnet3/spdk/pull/141)
 - [sethforprivacy/silentpaymentsxyz #42](https://github.com/sethforprivacy/silentpaymentsxyz/pull/42)
 - [bitcoin/bips #2149](https://github.com/bitcoin/bips/pull/2149)
 - [bitcoin/bips #2135](https://github.com/bitcoin/bips/pull/2135)
@@ -244,6 +242,10 @@ title: "Tags"
 
 ## github
 
+- [macgyver13/source-watch #7](https://github.com/macgyver13/source-watch/pull/7)
+- [gregoryjkramer/entropylab #6](https://github.com/gregoryjkramer/entropylab/pull/6)
+- [Conxian/conxius-wallet #534](https://github.com/Conxian/conxius-wallet/pull/534)
+- [louneskmt/spaghetti](https://github.com/louneskmt/spaghetti)
 - [Conxian/conxius-wallet #533](https://github.com/Conxian/conxius-wallet/pull/533)
 - [btclib-org/btclib-secp256k1 #817](https://github.com/btclib-org/btclib-secp256k1/pull/817)
 - [btclib-org/btclib-secp256k1 #816](https://github.com/btclib-org/btclib-secp256k1/pull/816)
@@ -255,17 +257,11 @@ title: "Tags"
 - [lifofifoX/saffron #7](https://github.com/lifofifoX/saffron/pull/7)
 - [btclib-org/btclib-secp256k1 #797](https://github.com/btclib-org/btclib-secp256k1/pull/797)
 - [anondevdrop/anoncommerce #13](https://github.com/anondevdrop/anoncommerce/pull/13)
-- [Conxian/conxius-wallet #528](https://github.com/Conxian/conxius-wallet/pull/528)
-- [Conxian/conxius-wallet #527](https://github.com/Conxian/conxius-wallet/pull/527)
 - [Conxian/conxian-gateway #372](https://github.com/Conxian/conxian-gateway/pull/372)
-- [OogaBoogaX/entropylab #386](https://github.com/OogaBoogaX/entropylab/pull/386)
-- [barrydeen/wisp-ios #459](https://github.com/barrydeen/wisp-ios/pull/459)
 - [OogaBoogaX/entropylab #378](https://github.com/OogaBoogaX/entropylab/pull/378)
-- [OogaBoogaX/entropylab #377](https://github.com/OogaBoogaX/entropylab/pull/377)
-- [OogaBoogaX/entropylab #319](https://github.com/OogaBoogaX/entropylab/pull/319)
+- [cygnet3/spdk #168](https://github.com/cygnet3/spdk/pull/168)
 - [bitcoin/bips #2276](https://github.com/bitcoin/bips/pull/2276)
 - [benjamin-jarvie/butlers-playground](https://github.com/benjamin-jarvie/butlers-playground)
-- [bitcoin-core/secp256k1 #1929](https://github.com/bitcoin-core/secp256k1/pull/1929)
 - [BitmapAsset/block-genomics-nexus #175](https://github.com/BitmapAsset/block-genomics-nexus/pull/175)
 - [bitsagarob/blindbit-v1-shim](https://github.com/bitsagarob/blindbit-v1-shim)
 - [diybitcoinhardware/embit #152](https://github.com/diybitcoinhardware/embit/pull/152)
@@ -281,6 +277,7 @@ title: "Tags"
 - [shrec/UltrafastSecp256k1 #384](https://github.com/shrec/UltrafastSecp256k1/pull/384)
 - [bitcoin/bips #2257](https://github.com/bitcoin/bips/pull/2257)
 - [bitcoin/bips #2256](https://github.com/bitcoin/bips/pull/2256)
+- [CypherCommons/shroud #143](https://github.com/CypherCommons/shroud/pull/143)
 - [GautamBytes/psbt-interop-lab #36](https://github.com/GautamBytes/psbt-interop-lab/pull/36)
 - [GautamBytes/psbt-interop-lab #31](https://github.com/GautamBytes/psbt-interop-lab/pull/31)
 - [GautamBytes/psbt-interop-lab #27](https://github.com/GautamBytes/psbt-interop-lab/pull/27)
@@ -293,6 +290,7 @@ title: "Tags"
 - [bitcoinaustria/kassiber #435](https://github.com/bitcoinaustria/kassiber/pull/435)
 - [bitcoin/bips #2207](https://github.com/bitcoin/bips/pull/2207)
 - [bitcoinaustria/kassiber #315](https://github.com/bitcoinaustria/kassiber/pull/315)
+- [cygnet3/spdk #141](https://github.com/cygnet3/spdk/pull/141)
 - [sethforprivacy/silentpaymentsxyz #42](https://github.com/sethforprivacy/silentpaymentsxyz/pull/42)
 - [bitcoin/bips #2149](https://github.com/bitcoin/bips/pull/2149)
 - [bitcoin/bips #2135](https://github.com/bitcoin/bips/pull/2135)
@@ -329,16 +327,19 @@ title: "Tags"
 
 ## merged
 
+- [macgyver13/source-watch #7](https://github.com/macgyver13/source-watch/pull/7)
+- [Conxian/conxius-wallet #534](https://github.com/Conxian/conxius-wallet/pull/534)
 - [btclib-org/btclib-secp256k1 #817](https://github.com/btclib-org/btclib-secp256k1/pull/817)
 - [btclib-org/btclib-secp256k1 #816](https://github.com/btclib-org/btclib-secp256k1/pull/816)
+- [bitcoin-core/secp256k1 #1932](https://github.com/bitcoin-core/secp256k1/pull/1932)
 - [btclib-org/btclib-secp256k1 #814](https://github.com/btclib-org/btclib-secp256k1/pull/814)
 - [btclib-org/btclib-secp256k1 #812](https://github.com/btclib-org/btclib-secp256k1/pull/812)
 - [btclib-org/btclib-secp256k1 #806](https://github.com/btclib-org/btclib-secp256k1/pull/806)
 - [btclib-org/btclib-secp256k1 #797](https://github.com/btclib-org/btclib-secp256k1/pull/797)
-- [OogaBoogaX/entropylab #377](https://github.com/OogaBoogaX/entropylab/pull/377)
-- [OogaBoogaX/entropylab #319](https://github.com/OogaBoogaX/entropylab/pull/319)
+- [cygnet3/spdk #168](https://github.com/cygnet3/spdk/pull/168)
 - [bitcoindevkit/bdk-sp #76](https://github.com/bitcoindevkit/bdk-sp/pull/76)
 - [btclib-org/btclib #1336](https://github.com/btclib-org/btclib/pull/1336)
+- [CypherCommons/shroud #143](https://github.com/CypherCommons/shroud/pull/143)
 - [GautamBytes/psbt-interop-lab #36](https://github.com/GautamBytes/psbt-interop-lab/pull/36)
 - [GautamBytes/psbt-interop-lab #31](https://github.com/GautamBytes/psbt-interop-lab/pull/31)
 - [GautamBytes/psbt-interop-lab #27](https://github.com/GautamBytes/psbt-interop-lab/pull/27)
@@ -401,6 +402,9 @@ title: "Tags"
 
 ## pull-request-discovery
 
+- [macgyver13/source-watch #7](https://github.com/macgyver13/source-watch/pull/7)
+- [gregoryjkramer/entropylab #6](https://github.com/gregoryjkramer/entropylab/pull/6)
+- [Conxian/conxius-wallet #534](https://github.com/Conxian/conxius-wallet/pull/534)
 - [Conxian/conxius-wallet #533](https://github.com/Conxian/conxius-wallet/pull/533)
 - [btclib-org/btclib-secp256k1 #817](https://github.com/btclib-org/btclib-secp256k1/pull/817)
 - [btclib-org/btclib-secp256k1 #816](https://github.com/btclib-org/btclib-secp256k1/pull/816)
@@ -412,16 +416,10 @@ title: "Tags"
 - [lifofifoX/saffron #7](https://github.com/lifofifoX/saffron/pull/7)
 - [btclib-org/btclib-secp256k1 #797](https://github.com/btclib-org/btclib-secp256k1/pull/797)
 - [anondevdrop/anoncommerce #13](https://github.com/anondevdrop/anoncommerce/pull/13)
-- [Conxian/conxius-wallet #528](https://github.com/Conxian/conxius-wallet/pull/528)
-- [Conxian/conxius-wallet #527](https://github.com/Conxian/conxius-wallet/pull/527)
 - [Conxian/conxian-gateway #372](https://github.com/Conxian/conxian-gateway/pull/372)
-- [OogaBoogaX/entropylab #386](https://github.com/OogaBoogaX/entropylab/pull/386)
-- [barrydeen/wisp-ios #459](https://github.com/barrydeen/wisp-ios/pull/459)
 - [OogaBoogaX/entropylab #378](https://github.com/OogaBoogaX/entropylab/pull/378)
-- [OogaBoogaX/entropylab #377](https://github.com/OogaBoogaX/entropylab/pull/377)
-- [OogaBoogaX/entropylab #319](https://github.com/OogaBoogaX/entropylab/pull/319)
+- [cygnet3/spdk #168](https://github.com/cygnet3/spdk/pull/168)
 - [bitcoin/bips #2276](https://github.com/bitcoin/bips/pull/2276)
-- [bitcoin-core/secp256k1 #1929](https://github.com/bitcoin-core/secp256k1/pull/1929)
 - [BitmapAsset/block-genomics-nexus #175](https://github.com/BitmapAsset/block-genomics-nexus/pull/175)
 - [diybitcoinhardware/embit #152](https://github.com/diybitcoinhardware/embit/pull/152)
 - [macgyver13/bip375-examples #2](https://github.com/macgyver13/bip375-examples/pull/2)
@@ -432,12 +430,14 @@ title: "Tags"
 - [shrec/UltrafastSecp256k1 #384](https://github.com/shrec/UltrafastSecp256k1/pull/384)
 - [bitcoin/bips #2257](https://github.com/bitcoin/bips/pull/2257)
 - [bitcoin/bips #2256](https://github.com/bitcoin/bips/pull/2256)
+- [CypherCommons/shroud #143](https://github.com/CypherCommons/shroud/pull/143)
 - [GautamBytes/psbt-interop-lab #36](https://github.com/GautamBytes/psbt-interop-lab/pull/36)
 - [GautamBytes/psbt-interop-lab #31](https://github.com/GautamBytes/psbt-interop-lab/pull/31)
 - [GautamBytes/psbt-interop-lab #27](https://github.com/GautamBytes/psbt-interop-lab/pull/27)
 - [bitcoinaustria/kassiber #435](https://github.com/bitcoinaustria/kassiber/pull/435)
 - [bitcoin/bips #2207](https://github.com/bitcoin/bips/pull/2207)
 - [bitcoinaustria/kassiber #315](https://github.com/bitcoinaustria/kassiber/pull/315)
+- [cygnet3/spdk #141](https://github.com/cygnet3/spdk/pull/141)
 - [sethforprivacy/silentpaymentsxyz #42](https://github.com/sethforprivacy/silentpaymentsxyz/pull/42)
 - [bitcoin/bips #2149](https://github.com/bitcoin/bips/pull/2149)
 - [bitcoin/bips #2135](https://github.com/bitcoin/bips/pull/2135)
@@ -457,6 +457,7 @@ title: "Tags"
 
 ## repository-discovery
 
+- [louneskmt/spaghetti](https://github.com/louneskmt/spaghetti)
 - [benjamin-jarvie/butlers-playground](https://github.com/benjamin-jarvie/butlers-playground)
 - [bitsagarob/blindbit-v1-shim](https://github.com/bitsagarob/blindbit-v1-shim)
 - [bitsagarob/spcommit-checkpoint-startos](https://github.com/bitsagarob/spcommit-checkpoint-startos)
@@ -510,6 +511,10 @@ title: "Tags"
 
 ## silent-payments
 
+- [macgyver13/source-watch #7](https://github.com/macgyver13/source-watch/pull/7)
+- [gregoryjkramer/entropylab #6](https://github.com/gregoryjkramer/entropylab/pull/6)
+- [Conxian/conxius-wallet #534](https://github.com/Conxian/conxius-wallet/pull/534)
+- [louneskmt/spaghetti](https://github.com/louneskmt/spaghetti)
 - [Conxian/conxius-wallet #533](https://github.com/Conxian/conxius-wallet/pull/533)
 - [btclib-org/btclib-secp256k1 #817](https://github.com/btclib-org/btclib-secp256k1/pull/817)
 - [btclib-org/btclib-secp256k1 #816](https://github.com/btclib-org/btclib-secp256k1/pull/816)
@@ -521,17 +526,11 @@ title: "Tags"
 - [lifofifoX/saffron #7](https://github.com/lifofifoX/saffron/pull/7)
 - [btclib-org/btclib-secp256k1 #797](https://github.com/btclib-org/btclib-secp256k1/pull/797)
 - [anondevdrop/anoncommerce #13](https://github.com/anondevdrop/anoncommerce/pull/13)
-- [Conxian/conxius-wallet #528](https://github.com/Conxian/conxius-wallet/pull/528)
-- [Conxian/conxius-wallet #527](https://github.com/Conxian/conxius-wallet/pull/527)
 - [Conxian/conxian-gateway #372](https://github.com/Conxian/conxian-gateway/pull/372)
-- [OogaBoogaX/entropylab #386](https://github.com/OogaBoogaX/entropylab/pull/386)
-- [barrydeen/wisp-ios #459](https://github.com/barrydeen/wisp-ios/pull/459)
 - [OogaBoogaX/entropylab #378](https://github.com/OogaBoogaX/entropylab/pull/378)
-- [OogaBoogaX/entropylab #377](https://github.com/OogaBoogaX/entropylab/pull/377)
-- [OogaBoogaX/entropylab #319](https://github.com/OogaBoogaX/entropylab/pull/319)
+- [cygnet3/spdk #168](https://github.com/cygnet3/spdk/pull/168)
 - [bitcoin/bips #2276](https://github.com/bitcoin/bips/pull/2276)
 - [benjamin-jarvie/butlers-playground](https://github.com/benjamin-jarvie/butlers-playground)
-- [bitcoin-core/secp256k1 #1929](https://github.com/bitcoin-core/secp256k1/pull/1929)
 - [BitmapAsset/block-genomics-nexus #175](https://github.com/BitmapAsset/block-genomics-nexus/pull/175)
 - [bitsagarob/blindbit-v1-shim](https://github.com/bitsagarob/blindbit-v1-shim)
 - [diybitcoinhardware/embit #152](https://github.com/diybitcoinhardware/embit/pull/152)
@@ -549,6 +548,7 @@ title: "Tags"
 - [bitcoin/bips #2257](https://github.com/bitcoin/bips/pull/2257)
 - [bitcoin/bips #2256](https://github.com/bitcoin/bips/pull/2256)
 - [Blockstream/Jade](https://github.com/Blockstream/Jade)
+- [CypherCommons/shroud #143](https://github.com/CypherCommons/shroud/pull/143)
 - [GautamBytes/psbt-interop-lab #36](https://github.com/GautamBytes/psbt-interop-lab/pull/36)
 - [GautamBytes/psbt-interop-lab #31](https://github.com/GautamBytes/psbt-interop-lab/pull/31)
 - [GautamBytes/psbt-interop-lab #27](https://github.com/GautamBytes/psbt-interop-lab/pull/27)
@@ -566,6 +566,7 @@ title: "Tags"
 - [bitcoin/bips #2207](https://github.com/bitcoin/bips/pull/2207)
 - [bitcoinaustria/kassiber #315](https://github.com/bitcoinaustria/kassiber/pull/315)
 - [Coldcard/firmware #683](https://github.com/Coldcard/firmware/pull/683)
+- [cygnet3/spdk #141](https://github.com/cygnet3/spdk/pull/141)
 - [selfcustody/krux](https://github.com/selfcustody/krux)
 - [setavenger/blindbit-rs](https://github.com/setavenger/blindbit-rs)
 - [sethforprivacy/silentpaymentsxyz #42](https://github.com/sethforprivacy/silentpaymentsxyz/pull/42)

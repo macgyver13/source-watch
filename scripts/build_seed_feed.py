@@ -284,6 +284,7 @@ def search_github_pull_requests(query: str, max_results: int = 10) -> list[dict]
 
 
 
+
 def github_get_json(path: str) -> dict | None:
     request = Request(f"{GITHUB_API}{path}", headers=github_headers())
     try:
@@ -1012,7 +1013,6 @@ def build_items(
             sources[source["id"]] = source
             append_or_replace_project(projects, project)
 
-
     seen_prs = {key for key in (github_pr_key(item.get("source_url", "")) for item in items) if key}
     repo_projects: dict[str, str] = {}
     for item in items:
@@ -1060,6 +1060,7 @@ def build_items(
             append_or_replace_project(projects, project)
             if repo_full.lower() and repo_full.lower() not in repo_projects:
                 repo_projects[repo_full.lower()] = project_name
+
 
     seen_topics = {key for key in (delving_topic_key(item.get("source_url", "")) for item in items) if key}
 

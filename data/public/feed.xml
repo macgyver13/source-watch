@@ -3,11 +3,39 @@
 <title>Silent Payments Watch</title>
 <link>https://example.com/</link>
 <description>Public activity on Silent Payments and related work.</description>
-<lastBuildDate>Mon, 07 Sep 2026 17:49:01 +0000</lastBuildDate>
+<lastBuildDate>Tue, 08 Sep 2026 13:13:19 +0000</lastBuildDate>
+<item>
+<title>macgyver13/source-watch #7</title>
+<link>https://github.com/macgyver13/source-watch/pull/7</link>
+<guid isPermaLink="false">gh-pr-search:github-silent-payments-pr-discovery:macgyver13-source-watch-7</guid>
+<description>Add GitHub pull-request live collector</description>
+<pubDate>Tue, 08 Sep 2026 13:03:04 +0000</pubDate>
+</item>
+<item>
+<title>gregoryjkramer/entropylab #6</title>
+<link>https://github.com/gregoryjkramer/entropylab/pull/6</link>
+<guid isPermaLink="false">gh-pr-search:github-bip352-pr-discovery:gregoryjkramer-entropylab-6</guid>
+<description>Detect PSBT taproot derivation lies (Cycle C)</description>
+<pubDate>Tue, 08 Sep 2026 04:06:48 +0000</pubDate>
+</item>
+<item>
+<title>Conxian/conxius-wallet #534</title>
+<link>https://github.com/Conxian/conxius-wallet/pull/534</link>
+<guid isPermaLink="false">gh-pr-search:github-bip-352-pr-discovery:conxian-conxius-wallet-534</guid>
+<description>chore(deps): migrate secp256k1 0.31.1 -&gt; 0.33.1 (silent-payments)</description>
+<pubDate>Mon, 07 Sep 2026 18:15:53 +0000</pubDate>
+</item>
+<item>
+<title>louneskmt/spaghetti</title>
+<link>https://github.com/louneskmt/spaghetti</link>
+<guid isPermaLink="false">gh-search:github-silent-payments-repo-discovery:louneskmt-spaghetti</guid>
+<description>SPaghetti [sounds like Silent Payments vanity]</description>
+<pubDate>Mon, 07 Sep 2026 18:08:05 +0000</pubDate>
+</item>
 <item>
 <title>Conxian/conxius-wallet #533</title>
 <link>https://github.com/Conxian/conxius-wallet/pull/533</link>
-<guid isPermaLink="false">gh-pr-search:github-silent-payments-pr-discovery:conxian-conxius-wallet-533</guid>
+<guid isPermaLink="false">gh-pr-search:github-bip-352-pr-discovery:conxian-conxius-wallet-533</guid>
 <description>chore(deps): migrate secp256k1 0.31.1 -&gt; 0.33.1 (silent-payments)</description>
 <pubDate>Mon, 07 Sep 2026 17:10:55 +0000</pubDate>
 </item>
@@ -42,7 +70,7 @@
 <item>
 <title>btclib-org/btclib-secp256k1 #812</title>
 <link>https://github.com/btclib-org/btclib-secp256k1/pull/812</link>
-<guid isPermaLink="false">gh-pr-search:github-silent-payments-pr-discovery:btclib-org-btclib-secp256k1-812</guid>
+<guid isPermaLink="false">gh-pr-search:github-silentpayments-pr-discovery:btclib-org-btclib-secp256k1-812</guid>
 <description>The module flag lists name every module, the ones off included (closes #792)</description>
 <pubDate>Mon, 07 Sep 2026 15:28:27 +0000</pubDate>
 </item>
@@ -70,7 +98,7 @@
 <item>
 <title>btclib-org/btclib-secp256k1 #797</title>
 <link>https://github.com/btclib-org/btclib-secp256k1/pull/797</link>
-<guid isPermaLink="false">gh-pr-search:github-silentpayments-pr-discovery:btclib-org-btclib-secp256k1-797</guid>
+<guid isPermaLink="false">gh-pr-search:github-bip352-pr-discovery:btclib-org-btclib-secp256k1-797</guid>
 <description>The `secp256k1-zkp` pin moves past the 0.8.0 sync (closes #777)</description>
 <pubDate>Mon, 07 Sep 2026 11:09:19 +0000</pubDate>
 </item>
@@ -82,39 +110,11 @@
 <pubDate>Mon, 07 Sep 2026 03:11:36 +0000</pubDate>
 </item>
 <item>
-<title>Conxian/conxius-wallet #528</title>
-<link>https://github.com/Conxian/conxius-wallet/pull/528</link>
-<guid isPermaLink="false">gh-pr-search:github-silent-payments-pr-discovery:conxian-conxius-wallet-528</guid>
-<description>build(deps): bump secp256k1 from 0.31.1 to 0.33.1 in /native/silent-payments-jni</description>
-<pubDate>Sun, 06 Sep 2026 15:42:34 +0000</pubDate>
-</item>
-<item>
-<title>Conxian/conxius-wallet #527</title>
-<link>https://github.com/Conxian/conxius-wallet/pull/527</link>
-<guid isPermaLink="false">gh-pr-search:github-silent-payments-pr-discovery:conxian-conxius-wallet-527</guid>
-<description>build(deps): bump secp256k1 from 0.31.1 to 0.33.1 in /native/silent-payments</description>
-<pubDate>Sun, 06 Sep 2026 15:42:31 +0000</pubDate>
-</item>
-<item>
 <title>Conxian/conxian-gateway #372</title>
 <link>https://github.com/Conxian/conxian-gateway/pull/372</link>
 <guid isPermaLink="false">gh-pr-search:github-bip-352-pr-discovery:conxian-conxian-gateway-372</guid>
 <description>chore(deps): bump the rust-dependencies group with 2 updates</description>
 <pubDate>Sun, 06 Sep 2026 07:24:58 +0000</pubDate>
-</item>
-<item>
-<title>OogaBoogaX/entropylab #386</title>
-<link>https://github.com/OogaBoogaX/entropylab/pull/386</link>
-<guid isPermaLink="false">gh-pr-search:github-bip352-pr-discovery:oogaboogax-entropylab-386</guid>
-<description>[abandoned] incomplete SECURITY-only stub</description>
-<pubDate>Sun, 06 Sep 2026 02:01:49 +0000</pubDate>
-</item>
-<item>
-<title>barrydeen/wisp-ios #459</title>
-<link>https://github.com/barrydeen/wisp-ios/pull/459</link>
-<guid isPermaLink="false">gh-pr-search:github-bip-352-pr-discovery:barrydeen-wisp-ios-459</guid>
-<description>feat(profile): NIP-A3 payment targets</description>
-<pubDate>Sat, 05 Sep 2026 19:52:38 +0000</pubDate>
 </item>
 <item>
 <title>OogaBoogaX/entropylab #378</title>
@@ -124,18 +124,11 @@
 <pubDate>Sat, 05 Sep 2026 16:25:19 +0000</pubDate>
 </item>
 <item>
-<title>OogaBoogaX/entropylab #377</title>
-<link>https://github.com/OogaBoogaX/entropylab/pull/377</link>
-<guid isPermaLink="false">gh-pr-search:github-bip352-pr-discovery:oogaboogax-entropylab-377</guid>
-<description>SP send: validate BIP-352 input keys and spend taproot inputs with the output key</description>
-<pubDate>Sat, 05 Sep 2026 16:19:55 +0000</pubDate>
-</item>
-<item>
-<title>OogaBoogaX/entropylab #319</title>
-<link>https://github.com/OogaBoogaX/entropylab/pull/319</link>
-<guid isPermaLink="false">gh-pr-search:github-bip352-pr-discovery:oogaboogax-entropylab-319</guid>
-<description>Validate BIP352 input private keys</description>
-<pubDate>Sat, 05 Sep 2026 00:02:35 +0000</pubDate>
+<title>cygnet3/spdk #168</title>
+<link>https://github.com/cygnet3/spdk/pull/168</link>
+<guid isPermaLink="false">gh-pr-search:github-silentpayments-pr-discovery:cygnet3-spdk-168</guid>
+<description>feat(silentpayments): Make generate_recipient_pubkeys more flexible</description>
+<pubDate>Fri, 04 Sep 2026 12:24:23 +0000</pubDate>
 </item>
 <item>
 <title>bitcoin/bips #2276</title>
@@ -150,13 +143,6 @@
 <guid isPermaLink="false">gh-search:github-silent-payments-repo-discovery:benjamin-jarvie-butlers-playground</guid>
 <description>Corky plus everything else: codex32 backups, BIP39, SeedQR, silent payments later. The signer itself lives at benjamin-jarvie/corky with zero code that touches your key.</description>
 <pubDate>Fri, 04 Sep 2026 06:57:21 +0000</pubDate>
-</item>
-<item>
-<title>bitcoin-core/secp256k1 #1929</title>
-<link>https://github.com/bitcoin-core/secp256k1/pull/1929</link>
-<guid isPermaLink="false">gh-pr-search:github-silentpayments-pr-discovery:bitcoin-core-secp256k1-1929</guid>
-<description>silentpayments: perform tweak addition with actual scalars</description>
-<pubDate>Fri, 04 Sep 2026 03:07:13 +0000</pubDate>
 </item>
 <item>
 <title>BitmapAsset/block-genomics-nexus #175</title>
@@ -175,7 +161,7 @@
 <item>
 <title>diybitcoinhardware/embit #152</title>
 <link>https://github.com/diybitcoinhardware/embit/pull/152</link>
-<guid isPermaLink="false">gh-pr-search:github-bip-376-pr-discovery:diybitcoinhardware-embit-152</guid>
+<guid isPermaLink="false">gh-pr-search:github-bip-352-pr-discovery:diybitcoinhardware-embit-152</guid>
 <description>PSBTv2 (BIP-370) support and PSBT hardening</description>
 <pubDate>Wed, 02 Sep 2026 16:54:25 +0000</pubDate>
 </item>
@@ -276,6 +262,13 @@
 <guid isPermaLink="false">seed:blockstream-jade</guid>
 <description>Blockstream Jade repository listed for Silent Payment PSBT support in Jade and libwally-core.</description>
 <pubDate>Fri, 14 Aug 2026 14:56:39 +0000</pubDate>
+</item>
+<item>
+<title>CypherCommons/shroud #143</title>
+<link>https://github.com/CypherCommons/shroud/pull/143</link>
+<guid isPermaLink="false">gh-pr-search:github-bip352-pr-discovery:cyphercommons-shroud-143</guid>
+<description>Contacts Support</description>
+<pubDate>Wed, 12 Aug 2026 11:43:30 +0000</pubDate>
 </item>
 <item>
 <title>GautamBytes/psbt-interop-lab #36</title>
@@ -395,6 +388,13 @@
 <guid isPermaLink="false">seed:coldcard-pr-683</guid>
 <description>Add MuSig2 + Silent Payments.</description>
 <pubDate>Wed, 01 Jul 2026 14:56:21 +0000</pubDate>
+</item>
+<item>
+<title>cygnet3/spdk #141</title>
+<link>https://github.com/cygnet3/spdk/pull/141</link>
+<guid isPermaLink="false">gh-pr-search:github-silentpayments-pr-discovery:cygnet3-spdk-141</guid>
+<description>Refactor/silentpayments transaction shared secret</description>
+<pubDate>Thu, 18 Jun 2026 08:52:57 +0000</pubDate>
 </item>
 <item>
 <title>selfcustody/krux</title>
@@ -581,7 +581,7 @@
 <item>
 <title>levinster82/bip352-js</title>
 <link>https://github.com/levinster82/bip352-js</link>
-<guid isPermaLink="false">gh-search:github-silent-payments-repo-discovery:levinster82-bip352-js</guid>
+<guid isPermaLink="false">gh-search:github-silentpayments-repo-discovery:levinster82-bip352-js</guid>
 <description>Simple js bip352 library for bitcoin silent payment address derivation</description>
 <pubDate>Wed, 08 Oct 2025 23:07:41 +0000</pubDate>
 </item>
