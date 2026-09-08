@@ -1,11 +1,11 @@
 baseURL = "https://example.com/"
 locale = "en-us"
-title = "Example Watch"
+title = "Silent Payments Watch"
 enableRobotsTXT = true
 disablePathToLower = true
 
 [params]
-  description = "Public activity on tracked sources."
+  description = "Public activity on Silent Payments and related work."
 
 [markup]
   [markup.goldmark]

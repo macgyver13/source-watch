@@ -1,89 +1,429 @@
 # Seeded sources and live collectors for this watch instance.
-# Identity (name, base_url, description, default_tag, chips, topics, relevance,
-# discovered_after) lives in config/watch.yaml. This file is only seeds + collectors.
-#
-# Leave these lists empty for a blank fork. Add entries, then run
-# scripts/build_seed_feed.py to fill site/static artifacts.
+# Identity (name, base_url, description, default_tag, chips, topics, relevance)
+# lives in config/watch.yaml. This file is only seeds + collectors.
+# This file is for preview/silent-payments only; do not merge to main.
+# Silent Payments Watch — preview/silent-payments only.
+# discovered_at = silent-payments/roadmap issue created_at
+# activity_at = issue updated_at (latest when one seed maps to several issues)
+# github_pull_request_searches find PRs even when the parent repo is already seeded.
 #
 # Optional per seed:
 #   discovered_at:  ISO timestamp; weeks use this. Live GitHub created_at
-#                   overwrites this for seeded repos/PRs on or after
-#                   watch.yaml discovered_after (unset = no floor).
+#                   overwrites this for seeded repos/PRs.
 #   activity_at:    ISO timestamp; latest-activity views use this.
 #   live_activity:  false to skip GitHub pushed_at on noisy monorepos
 #                   (pair with github_pull_requests for the real PRs).
-#                   created_at is still used for discovery unless it is
-#                   before discovered_after.
-# Seeded GitHub repos/PRs take live created_at as discovered_at when that
-# stamp is on or after discovered_after; older created_at keeps the seed date.
-# Live GitHub searches use repo created_at as discovered_at (hits before
-# discovered_after are dropped).
+#                   created_at is still used for discovery.
+# Seeded GitHub repos/PRs take live created_at as discovered_at.
+# Live GitHub searches use repo created_at as discovered_at.
 # Live GitHub PR searches use pull created_at / updated_at. A seeded
 # parent repo does not hide matching PRs.
 # Live Delving collectors use topic created_at / last_posted_at.
 # Category listings take a numeric id or parent/slug/id path
 # (example: 12 or implementation/wg-silent-payments/12). Slug alone 404s.
-#
-# Example:
-# seeded_sources:
-#   docs_pages:
-#     - id: example-docs
-#       name: Example docs
-#       url: https://example.com/docs
-#       project: Example
-#       tags: [docs]
-#       summary: A page this watch should track.
-#   github_repositories:
-#     - id: example-repo
-#       repo: example/repo
-#       project: Example
-#       tags: [docs]
-#       summary: A repository this watch should track.
-#   github_pull_requests:
-#     - id: example-pr
-#       name: "example/repo #1"
-#       url: https://github.com/example/repo/pull/1
-#       project: Example
-#       tags: [docs, pull-request]
-# live_collectors:
-#   github_repository_searches:
-#     - id: example-search
-#       query: 'topic:documentation archived:false'
-#       max_results: 5
-#       tags: [example, github, candidate, repository-discovery]
-#   github_pull_request_searches:
-#     - id: example-pr-search
-#       query: 'topic:documentation is:pr'
-#       max_results: 5
-#       tags: [example, github, candidate, pull-request-discovery]
-#   delving_topic_searches:
-#     - id: example-delving-frost
-#       query: 'frost in:title'
-#       max_results: 5
-#       tags: [example, delving, candidate, topic-discovery]
-#     - id: example-delving-silent-payments
-#       query: '"silent payments" in:title'
-#       max_results: 5
-#       tags: [example, delving, candidate, topic-discovery]
-#     - id: example-delving-quantum
-#       query: 'quantum in:title'
-#       max_results: 5
-#       tags: [example, delving, candidate, topic-discovery]
-#   delving_category_listings:
-#     - id: example-delving-category
-#       category: 12
-#       max_results: 10
-#       tags: [example, delving, candidate, topic-discovery]
 
 
 seeded_sources:
-  docs_pages: []
-  github_repositories: []
-  github_pull_requests: []
+  docs_pages:
+    - id: rust-secp256k1-sp-bindings
+      name: Silent Payments Bindings rust-secp256k1
+      url: https://gitea.bitcoin.ninja/rust-bitcoin/rust-secp256k1/pulls/909
+      project: rust-secp256k1
+      tags: [silent-payments]
+      summary: Feature-gated silentpayments module for rust-secp256k1, based on bitcoin-core/secp256k1 pull 1765.
+      discovered_at: "2026-02-03T15:54:14Z"
+      activity_at: "2026-05-29T18:56:49Z"
+      roadmap_issue: 53
+  github_repositories:
+    - id: bip0352-index-server-specification
+      repo: silent-payments/BIP0352-index-server-specification
+      project: Indexing Server Spec
+      tags: [silent-payments]
+      summary: Specification repository defining a BIP-352 Silent Payments indexing server.
+      discovered_at: "2025-08-25T20:45:15Z"
+      activity_at: "2025-08-28T21:21:53Z"
+      roadmap_issue: 1
+    - id: setavenger-blindbit-oracle
+      repo: setavenger/blindbit-oracle
+      project: BlindBit-Oracle
+      tags: [silent-payments]
+      summary: Go Silent Payments indexing oracle, including v1 and v2 faster client sync and gRPC work.
+      discovered_at: "2025-08-25T21:28:19Z"
+      activity_at: "2026-04-20T13:32:36Z"
+      roadmap_issue: [3, 8]
+    - id: bitcoin-bitcoin
+      repo: bitcoin/bitcoin
+      project: Bitcoin Core
+      tags: [silent-payments]
+      summary: Bitcoin Core repository for Silent Payments foundation PR 35301 and wallet send/receive PRs 35302 and 32966.
+      discovered_at: "2025-08-26T17:54:03Z"
+      activity_at: "2026-05-29T18:55:54Z"
+      roadmap_issue: [6, 7, 32]
+      live_activity: false
+    - id: bitcoin-core-secp256k1
+      repo: bitcoin-core/secp256k1
+      project: secp256k1
+      tags: [silent-payments]
+      summary: libsecp256k1 silentpayments module from PR 1765, merged to master.
+      discovered_at: "2025-08-25T21:07:36Z"
+      activity_at: "2026-07-23T13:30:03Z"
+      roadmap_issue: 2
+
+    - id: romanz-bindex-rs
+      repo: romanz/bindex-rs
+      project: bindex-rs
+      tags: [silent-payments]
+      summary: Bitcoin indexing library with a BIP-352 tweak index pull request.
+      discovered_at: "2025-08-28T01:33:09Z"
+      activity_at: "2026-04-23T17:34:38Z"
+      roadmap_issue: 21
+    - id: setavenger-bip0352-light-client-specification
+      repo: setavenger/BIP0352-light-client-specification
+      project: Light Client Spec
+      tags: [silent-payments]
+      summary: Work-in-progress specification for a BIP-352 Silent Payments light client.
+      discovered_at: "2025-08-28T16:17:50Z"
+      activity_at: "2025-08-28T20:12:30Z"
+      roadmap_issue: 23
+    - id: setavenger-go-bip352
+      repo: setavenger/go-bip352
+      project: go-bip352
+      tags: [silent-payments]
+      summary: Go library for BIP-352 elliptic-curve computations, output creation, and scanning.
+      discovered_at: "2025-08-29T17:13:25Z"
+      activity_at: "2025-08-29T20:19:59Z"
+      roadmap_issue: 26
+    - id: diybitcoinhardware-embit
+      repo: diybitcoinhardware/embit
+      project: embit
+      tags: [silent-payments]
+      summary: Python Bitcoin library with Silent Payments implementation in pull request 145.
+      discovered_at: "2025-08-29T18:11:44Z"
+      activity_at: "2026-08-10T16:01:30Z"
+      roadmap_issue: 28
+      live_activity: false
+    - id: bluewallet-silentpayments
+      repo: BlueWallet/SilentPayments
+      project: BlueWallet SilentPayments
+      tags: [silent-payments]
+      summary: TypeScript Silent Payments library used for BlueWallet receive support.
+      discovered_at: "2025-08-29T20:10:24Z"
+      activity_at: "2025-08-29T20:14:04Z"
+      roadmap_issue: 34
+    - id: seedsigner-seedsigner
+      repo: SeedSigner/seedsigner
+      project: SeedSigner
+      tags: [silent-payments]
+      summary: SeedSigner firmware for Silent Payments signing with Sparrow as coordinator (PRs 949 and 769).
+      discovered_at: "2025-08-29T20:46:19Z"
+      activity_at: "2026-08-10T15:59:01Z"
+      roadmap_issue: 36
+      live_activity: false
+    - id: romanz-electrs
+      repo: romanz/electrs
+      project: electrs
+      tags: [silent-payments]
+      summary: Electrs repository listed for a BIP-352 silent payments index option.
+      discovered_at: "2025-08-29T20:55:43Z"
+      activity_at: "2026-04-03T20:29:24Z"
+      roadmap_issue: 37
+    - id: setavenger-blindbit-desktop
+      repo: setavenger/blindbit-desktop
+      project: BlindBit-Desktop
+      tags: [silent-payments]
+      summary: Go desktop wallet combining BlindBit scan and wallet CLI for BIP-352 Silent Payments.
+      discovered_at: "2025-09-30T14:20:16Z"
+      activity_at: "2025-11-02T15:59:06Z"
+      roadmap_issue: 42
+    - id: coldcard-firmware
+      repo: Coldcard/firmware
+      project: Coldcard
+      tags: [silent-payments]
+      summary: Coldcard firmware listed for Silent Payments and BIP 375 support.
+      discovered_at: "2025-11-26T15:00:48Z"
+      activity_at: "2025-11-26T15:01:02Z"
+      roadmap_issue: 45
+      live_activity: false
+
+    - id: cygnet3-spdk
+      repo: cygnet3/spdk
+      project: Silent Payment Dev Kit
+      tags: [silent-payments]
+      summary: Rust library for building Silent Payment wallets, including scanning and transaction signing.
+      discovered_at: "2026-01-05T23:12:48Z"
+      activity_at: "2026-03-18T22:52:27Z"
+      roadmap_issue: 50
+    - id: satoshiportal-bullbitcoin-mobile
+      repo: SatoshiPortal/bullbitcoin-mobile
+      project: Bull Bitcoin Wallet
+      tags: [silent-payments]
+      summary: Bull Bitcoin mobile wallet repository tracked for Silent Payment support.
+      discovered_at: "2026-03-18T22:50:49Z"
+      activity_at: "2026-03-18T22:51:01Z"
+      roadmap_issue: 54
+    - id: nunchuk-io-libnunchuk
+      repo: nunchuk-io/libnunchuk
+      project: Nunchuk
+      tags: [silent-payments]
+      summary: libnunchuk repository tracked for Silent Payments send support.
+      discovered_at: "2026-03-18T22:59:11Z"
+      activity_at: "2026-03-18T22:59:23Z"
+      roadmap_issue: 55
+    - id: kernel-node-kernel-node
+      repo: kernel-node/kernel-node
+      project: kernel-node
+      tags: [silent-payments]
+      summary: kernel-node listed for BIP-352 receiver-side scanning and wallet support.
+      discovered_at: "2026-04-29T14:21:04Z"
+      activity_at: "2026-04-29T14:21:20Z"
+      roadmap_issue: 57
+    - id: caravan-bitcoin-caravan
+      repo: caravan-bitcoin/caravan
+      project: Unchained Capital / Caravan
+      tags: [silent-payments]
+      summary: Caravan wallet listed for Silent Payments send support using PSBT BIP-375.
+      discovered_at: "2026-04-29T14:39:15Z"
+      activity_at: "2026-04-29T14:39:37Z"
+      roadmap_issue: 58
+    - id: setavenger-blindbit-rs
+      repo: setavenger/blindbit-rs
+      project: Friglet Personal Scanner
+      tags: [silent-payments]
+      summary: Personalized Silent Payments scanner exposing an Electrum TCP server and HTTP API.
+      discovered_at: "2026-05-29T19:06:24Z"
+      activity_at: "2026-05-29T19:06:44Z"
+      roadmap_issue: 59
+    - id: selfcustody-krux
+      repo: selfcustody/krux
+      project: Krux
+      tags: [silent-payments]
+      summary: Open-source signing-device firmware with a Silent Payments feature branch.
+      discovered_at: "2026-06-03T18:04:13Z"
+      activity_at: "2026-06-19T21:41:44Z"
+      roadmap_issue: 60
+    - id: guggero-btcutil-js
+      repo: guggero/btcutil-js
+      project: btcutil-js
+      tags: [silent-payments]
+      summary: JavaScript/TypeScript Bitcoin utility library with BIP-352 Silent Payments scanning via WebAssembly.
+      discovered_at: "2026-07-21T18:23:10Z"
+      activity_at: "2026-07-21T18:24:17Z"
+      roadmap_issue: 61
+    - id: blockstream-jade
+      repo: Blockstream/Jade
+      project: Jade / Libwally
+      tags: [silent-payments]
+      summary: Blockstream Jade repository listed for Silent Payment PSBT support in Jade and libwally-core.
+      discovered_at: "2026-08-14T14:56:39Z"
+      activity_at: "2026-08-14T14:56:55Z"
+      roadmap_issue: 62
+    - id: bitcoindevkit-bdk-sp
+      repo: bitcoindevkit/bdk-sp
+      project: BDK SP crate
+      tags: [silent-payments]
+      summary: "Experimental BDK Silent Payments integration (roadmap #13)."
+      discovered_at: "2025-08-26T18:28:51Z"
+      activity_at: "2025-08-28T23:37:36Z"
+      roadmap_issue: 13
+    - id: zenulabidin-electrum-silent-payments-sender
+      repo: ZenulAbidin/electrum-silent-payments-sender
+      project: Electrum SP plugin
+      tags: [silent-payments]
+      summary: "BIP352 Silent Payments sender plugin for Electrum (roadmap #10)."
+      discovered_at: "2025-08-26T18:20:48Z"
+      activity_at: "2026-04-20T13:45:21Z"
+      roadmap_issue: 10
+    - id: shakesco-shakesco-silent
+      repo: shakesco/shakesco-silent
+      project: Shakesco Wallet library
+      tags: [silent-payments]
+      summary: "BIP 352 Silent Payments library (roadmap #27)."
+      discovered_at: "2025-08-29T17:59:11Z"
+      activity_at: "2025-08-29T19:44:51Z"
+      roadmap_issue: 27
+  github_pull_requests:
+    - id: bitcoin-pr-35301
+      name: "bitcoin/bitcoin #35301"
+      url: https://github.com/bitcoin/bitcoin/pull/35301
+      project: Bitcoin Core
+      tags: [silent-payments, pull-request]
+      summary: Silent Payments foundation (BIP-352) implementation, take 2.
+      discovered_at: "2025-08-29T19:44:02Z"
+      activity_at: "2026-05-29T18:55:54Z"
+      roadmap_issue: 32
+    - id: bitcoin-pr-35302
+      name: "bitcoin/bitcoin #35302"
+      url: https://github.com/bitcoin/bitcoin/pull/35302
+      project: Bitcoin Core
+      tags: [silent-payments, pull-request]
+      summary: Silent Payments wallet sending, take 2.
+      discovered_at: "2025-08-26T17:54:03Z"
+      activity_at: "2026-05-29T18:55:00Z"
+      roadmap_issue: 6
+    - id: bitcoin-pr-32966
+      name: "bitcoin/bitcoin #32966"
+      url: https://github.com/bitcoin/bitcoin/pull/32966
+      project: Bitcoin Core
+      tags: [silent-payments, pull-request]
+      summary: Silent Payments wallet receiving.
+      discovered_at: "2025-08-26T17:55:29Z"
+      activity_at: "2025-08-30T18:50:11Z"
+      roadmap_issue: 7
+    - id: secp256k1-pr-1765
+      name: "bitcoin-core/secp256k1 #1765"
+      url: https://github.com/bitcoin-core/secp256k1/pull/1765
+      project: secp256k1
+      tags: [silent-payments, pull-request]
+      summary: silentpayments module implementing BIP-352, merged to master.
+      discovered_at: "2025-08-25T21:07:36Z"
+      activity_at: "2026-07-23T13:30:03Z"
+      roadmap_issue: 2
+    - id: coldcard-pr-587
+      name: "Coldcard/firmware #587"
+      url: https://github.com/Coldcard/firmware/pull/587
+      project: Coldcard
+      tags: [silent-payments, pull-request]
+      summary: Add Silent Payments Support.
+      discovered_at: "2025-11-26T14:57:08Z"
+      activity_at: "2026-08-07T17:46:02Z"
+      roadmap_issue: 45
+    - id: coldcard-pr-683
+      name: "Coldcard/firmware #683"
+      url: https://github.com/Coldcard/firmware/pull/683
+      project: Coldcard
+      tags: [silent-payments, pull-request]
+      summary: Add MuSig2 + Silent Payments.
+      discovered_at: "2026-07-01T14:56:21Z"
+      activity_at: "2026-08-05T14:15:42Z"
+    - id: seedsigner-pr-949
+      name: "SeedSigner/seedsigner #949"
+      url: https://github.com/SeedSigner/seedsigner/pull/949
+      project: SeedSigner
+      tags: [silent-payments, pull-request]
+      summary: Silent Payments send support using Sparrow as coordinator.
+      discovered_at: "2026-07-13T19:18:57Z"
+      activity_at: "2026-08-24T13:26:56Z"
+      roadmap_issue: 36
+    - id: seedsigner-pr-769
+      name: "SeedSigner/seedsigner #769"
+      url: https://github.com/SeedSigner/seedsigner/pull/769
+      project: SeedSigner
+      tags: [silent-payments, pull-request]
+      summary: BIP-352 Silent Payments address support.
+      discovered_at: "2025-06-11T16:05:40Z"
+      activity_at: "2026-06-05T11:35:21Z"
+      roadmap_issue: 36
+    - id: embit-pr-145
+      name: "diybitcoinhardware/embit #145"
+      url: https://github.com/diybitcoinhardware/embit/pull/145
+      project: embit
+      tags: [silent-payments, pull-request]
+      summary: Full Silent Payments implementation in embit.
+      discovered_at: "2026-07-09T14:17:06Z"
+      activity_at: "2026-08-28T12:20:46Z"
+      roadmap_issue: 28
+
+
   crates: []
 
 live_collectors:
-  github_repository_searches: []
-  github_pull_request_searches: []
-  delving_topic_searches: []
-  delving_category_listings: []
+  github_repository_searches:
+    - id: github-silent-payments-repo-discovery
+      query: '"silent payments" archived:false'
+      max_results: 10
+      tags: [silent-payments, github, candidate, repository-discovery]
+    - id: github-silentpayments-repo-discovery
+      query: 'silentpayments archived:false'
+      max_results: 10
+      tags: [silent-payments, github, candidate, repository-discovery]
+    - id: github-bip352-repo-discovery
+      query: 'bip352 archived:false'
+      max_results: 10
+      tags: [silent-payments, bip352, github, candidate, repository-discovery]
+    - id: github-bip-352-repo-discovery
+      query: 'bip-352 archived:false'
+      max_results: 10
+      tags: [silent-payments, bip-352, github, candidate, repository-discovery]
+    - id: github-bip375-repo-discovery
+      query: 'bip375 archived:false'
+      max_results: 10
+      tags: [silent-payments, bip375, github, candidate, repository-discovery]
+    - id: github-bip-375-repo-discovery
+      query: 'bip-375 archived:false'
+      max_results: 10
+      tags: [silent-payments, bip-375, github, candidate, repository-discovery]
+    - id: github-bip376-repo-discovery
+      query: 'bip376 archived:false'
+      max_results: 10
+      tags: [silent-payments, bip376, github, candidate, repository-discovery]
+    - id: github-bip-376-repo-discovery
+      query: 'bip-376 archived:false'
+      max_results: 10
+      tags: [silent-payments, bip-376, github, candidate, repository-discovery]
+    - id: github-bip392-repo-discovery
+      query: 'bip392 archived:false'
+      max_results: 10
+      tags: [silent-payments, bip392, github, candidate, repository-discovery]
+    - id: github-bip-392-repo-discovery
+      query: 'bip-392 archived:false'
+      max_results: 10
+      tags: [silent-payments, bip-392, github, candidate, repository-discovery]
+  github_pull_request_searches:
+    - id: github-silent-payments-pr-discovery
+      query: '"silent payments" is:pr'
+      max_results: 10
+      tags: [silent-payments, github, candidate, pull-request-discovery]
+    - id: github-silentpayments-pr-discovery
+      query: 'silentpayments is:pr'
+      max_results: 10
+      tags: [silent-payments, github, candidate, pull-request-discovery]
+    - id: github-bip352-pr-discovery
+      query: 'bip352 is:pr'
+      max_results: 10
+      tags: [silent-payments, bip352, github, candidate, pull-request-discovery]
+    - id: github-bip-352-pr-discovery
+      query: 'bip-352 is:pr'
+      max_results: 10
+      tags: [silent-payments, bip-352, github, candidate, pull-request-discovery]
+    - id: github-bip375-pr-discovery
+      query: 'bip375 is:pr'
+      max_results: 10
+      tags: [silent-payments, bip375, github, candidate, pull-request-discovery]
+    - id: github-bip-375-pr-discovery
+      query: 'bip-375 is:pr'
+      max_results: 10
+      tags: [silent-payments, bip-375, github, candidate, pull-request-discovery]
+    - id: github-bip376-pr-discovery
+      query: 'bip376 is:pr'
+      max_results: 10
+      tags: [silent-payments, bip376, github, candidate, pull-request-discovery]
+    - id: github-bip-376-pr-discovery
+      query: 'bip-376 is:pr'
+      max_results: 10
+      tags: [silent-payments, bip-376, github, candidate, pull-request-discovery]
+    - id: github-bip392-pr-discovery
+      query: 'bip392 is:pr'
+      max_results: 10
+      tags: [silent-payments, bip392, github, candidate, pull-request-discovery]
+    - id: github-bip-392-pr-discovery
+      query: 'bip-392 is:pr'
+      max_results: 10
+      tags: [silent-payments, bip-392, github, candidate, pull-request-discovery]
+  delving_topic_searches:
+    - id: delving-silent-payments-title
+      query: '"silent payments" in:title'
+      max_results: 10
+      tags: [silent-payments, delving, candidate, topic-discovery]
+    - id: delving-bip352-title
+      query: 'bip352 in:title'
+      max_results: 10
+      tags: [silent-payments, bip352, delving, candidate, topic-discovery]
+    - id: delving-silentpayments
+      query: silentpayments
+      max_results: 10
+      tags: [silent-payments, delving, candidate, topic-discovery]
+  delving_category_listings:
+    - id: delving-wg-silent-payments
+      category: 12
+      max_results: 30
+      tags: [silent-payments, delving, candidate, topic-discovery]
