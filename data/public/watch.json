@@ -1,1 +1,16 @@
-{"default_tag":"example","hidden_tags":["github","repository-discovery","pull-request-discovery","candidate","pull-request","package","delving","topic-discovery"],"name":"Example Watch","preferred_chips":["docs","spec"],"topics":[]}
+{
+  "default_tag": "example",
+  "hidden_tags": [
+    "github",
+    "repository-discovery",
+    "candidate",
+    "pull-request",
+    "package"
+  ],
+  "name": "Example Watch",
+  "preferred_chips": [
+    "docs",
+    "spec"
+  ],
+  "topics": []
+}

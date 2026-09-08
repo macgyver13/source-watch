@@ -1,1 +1,7 @@
-{"description":"Public activity on tracked sources.","generated_at":"2026-09-08T01:35:46Z","items":[],"schema_version":"source-watch.feed.v0","title":"Example Watch"}
+{
+  "description": "Public activity on tracked sources.",
+  "generated_at": "2026-09-02T16:23:48Z",
+  "items": [],
+  "schema_version": "source-watch.feed.v0",
+  "title": "Example Watch"
+}

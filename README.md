@@ -19,7 +19,7 @@ Committed `feed.json`, `feed.xml`, `items.jsonl`, `projects.json`, and `sources.
 
 1. Fork or copy this repository.
 2. Fill `config/watch.yaml` (name, base URL, description, tags, relevance, optional topics).
-3. Fill `config/source-seeds.yaml` with the docs pages, repositories, PRs, and crates to track, plus any live GitHub repository/PR searches or Delving topic collectors.
+3. Fill `config/source-seeds.yaml` with the docs pages, repositories, PRs, and crates to track, plus any live GitHub repository searches or Delving topic collectors.
 4. Run the local pipeline below so `site/static/` has fresh artifacts.
 5. Point Cloudflare Pages **or** GitHub Pages at `site/`.
 
@@ -59,13 +59,12 @@ hugo --source site --minify
 
 `python3 scripts/build_seed_feed.py` refreshes seeded GitHub repo/PR
 `activity_at` timestamps and runs live collectors
-(`github_repository_searches`, `github_pull_request_searches`,
-`delving_topic_searches`, `delving_category_listings`). Repository search
-does not see PRs inside an already-seeded repo; PR search does. Each
-collector emits **candidate** `source_discovered` items alongside seeds.
-A candidate is a search or category hit that passed `watch.yaml`
-`relevance`; it is not yet in the accepted `seeded_sources` catalog.
-Discovery dates on seeds stay put; activity moves if GitHub or Delving is newer.
+(`github_repository_searches`, `delving_topic_searches`,
+`delving_category_listings`). Each collector emits **candidate**
+`source_discovered` items alongside seeds. A candidate is a search or
+category hit that passed `watch.yaml` `relevance`; it is not yet in the
+accepted `seeded_sources` catalog. Discovery dates on seeds stay put;
+activity moves if GitHub or Delving is newer.
 
 Seed-only (no GitHub or Delving HTTP):
 
@@ -94,7 +93,7 @@ directory.
 
 ## Config
 
-- `config/watch.yaml` — instance identity: name, base URL, description, default tag, preferred chips, hidden tags, relevance rules, optional topic tiles. Chips, hidden tags, and name ship in `watch.json` for the client. `relevance` filters live collector hits (`always_match` short-circuits accept; `required_any` / `context_any` must appear in the GitHub description/topics, PR title/body, or Delving title/excerpt/tags).
+- `config/watch.yaml` — instance identity: name, base URL, description, default tag, preferred chips, hidden tags, relevance rules, optional topic tiles. Chips, hidden tags, and name ship in `watch.json` for the client. `relevance` filters live collector hits (`always_match` short-circuits accept; `required_any` / `context_any` must appear in the GitHub description/topics or Delving title/excerpt/tags).
 - `config/source-seeds.yaml` — seeded sources and live collectors. Pipeline input only; not read at request time.
 
 ## Tests
