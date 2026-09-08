@@ -3,7 +3,7 @@
 <title>Post-Quantum Watch</title>
 <link>https://example.com/</link>
 <description>Public activity on BIP-360, P2MR, P2QRH, hash-based signatures, and related post-quantum Bitcoin work.</description>
-<lastBuildDate>Fri, 04 Sep 2026 14:04:31 +0000</lastBuildDate>
+<lastBuildDate>Tue, 08 Sep 2026 17:52:11 +0000</lastBuildDate>
 <item>
 <title>A Post Quantum Migration Proposal</title>
 <link>https://groups.google.com/g/bitcoindev/c/uEaf4bj07rE/m/RMkPWnrSBwAJ</link>
@@ -131,11 +131,95 @@
 <pubDate>Fri, 04 Sep 2026 13:41:26 +0000</pubDate>
 </item>
 <item>
+<title>XuJiandong/shrincs-lock</title>
+<link>https://github.com/XuJiandong/shrincs-lock</link>
+<guid isPermaLink="false">gh-search:github-shrincs-repo-discovery:xujiandong-shrincs-lock</guid>
+<description>A new lock script on CKB powered by SHRINCS, a post-quantum signature scheme.</description>
+<pubDate>Mon, 31 Aug 2026 05:30:44 +0000</pubDate>
+</item>
+<item>
+<title>AppliedPQC/shrincs-rs</title>
+<link>https://github.com/AppliedPQC/shrincs-rs</link>
+<guid isPermaLink="false">gh-search:github-shrincs-repo-discovery:appliedpqc-shrincs-rs</guid>
+<description>Rust reference implementation of SHRINCS, the semi-stateful hash-based signature draft BIP for Bitcoin</description>
+<pubDate>Fri, 28 Aug 2026 12:57:39 +0000</pubDate>
+</item>
+<item>
+<title>bussyjd/btq-browser-wallet</title>
+<link>https://github.com/bussyjd/btq-browser-wallet</link>
+<guid isPermaLink="false">gh-search:github-p2mr-repo-discovery:bussyjd-btq-browser-wallet</guid>
+<description>Post-quantum BTQ (Bitcoin Quantum) browser wallet — ML-DSA-44 / P2MR, testnet. MV3 extension.</description>
+<pubDate>Sat, 22 Aug 2026 19:51:42 +0000</pubDate>
+</item>
+<item>
+<title>starius/flockroot</title>
+<link>https://github.com/starius/flockroot</link>
+<guid isPermaLink="false">gh-search:github-shrincs-repo-discovery:starius-flockroot</guid>
+<description>Bitcoin output with hydrid EC and SHRINCS-in-Flock signature</description>
+<pubDate>Thu, 20 Aug 2026 04:59:29 +0000</pubDate>
+</item>
+<item>
+<title>let-the-dreamers-rise/p2mr-assurance-lab</title>
+<link>https://github.com/let-the-dreamers-rise/p2mr-assurance-lab</link>
+<guid isPermaLink="false">gh-search:github-bip-360-repo-discovery:let-the-dreamers-rise-p2mr-assurance-lab</guid>
+<description>Independent conformance testing for BIP 360 (P2MR): pinned official vectors, boundary tests, adversarial mutation corpus with per-case spec citations. Draft-stage; no mainnet claims.</description>
+<pubDate>Sat, 08 Aug 2026 22:55:43 +0000</pubDate>
+</item>
+<item>
+<title>coldtest-berlin/pq-single-address-backup</title>
+<link>https://github.com/coldtest-berlin/pq-single-address-backup</link>
+<guid isPermaLink="false">gh-search:github-bip360-repo-discovery:coldtest-berlin-pq-single-address-backup</guid>
+<description>Offline BIP-360 backup for post-quantum SLH-DSA seeds, BIP-38 style</description>
+<pubDate>Sun, 02 Aug 2026 08:19:24 +0000</pubDate>
+</item>
+<item>
 <title>PRAWNS</title>
 <link>https://lclhost.org/blog/prawns/</link>
 <guid isPermaLink="false">seed:prawns-blog</guid>
 <description>PRF-Assisted Winternitz n-party signatures. Threshold HBSS that verifies as an ordinary Winternitz signature.</description>
 <pubDate>Sun, 02 Aug 2026 00:00:00 +0000</pubDate>
+</item>
+<item>
+<title>jbride/p2mr-ref-impl</title>
+<link>https://github.com/jbride/p2mr-ref-impl</link>
+<guid isPermaLink="false">gh-search:github-p2mr-repo-discovery:jbride-p2mr-ref-impl</guid>
+<description>Bitcoin P2MR Reference Implementation functionality</description>
+<pubDate>Fri, 17 Jul 2026 04:19:41 +0000</pubDate>
+</item>
+<item>
+<title>minksy-ux/Bitcoin-QRAT-Hybrid-PQ-Framework-with-Optimized-Hash-Signatures-Adaptive-P2MR-zk-STARK-Migration-</title>
+<link>https://github.com/minksy-ux/Bitcoin-QRAT-Hybrid-PQ-Framework-with-Optimized-Hash-Signatures-Adaptive-P2MR-zk-STARK-Migration-</link>
+<guid isPermaLink="false">gh-search:github-bip-360-repo-discovery:minksy-ux-bitcoin-qrat-hybrid-pq-framework-with-optimized-hash-signatures-adaptive-p2mr-zk-stark-migration</guid>
+<description>Bitcoin QRAT is a hybrid post-quantum framework combining optimized hash-based signatures (SHRINCS/SHRIMPS), Adaptive P2MR (BIP-360), and zk-STARK recovery</description>
+<pubDate>Wed, 08 Jul 2026 07:14:43 +0000</pubDate>
+</item>
+<item>
+<title>utxo-detective/shorlock</title>
+<link>https://github.com/utxo-detective/shorlock</link>
+<guid isPermaLink="false">gh-search:github-isogeny-bitcoin-repo-discovery:utxo-detective-shorlock</guid>
+<description>ShorLock — quantum-safe Bitcoin locking scripts in sCrypt. Hash-based (Lamport), lattice-based (ML-DSA family), and isogeny-based UTXO locks that survive Q-Day, benchmarked head-to-head. Locks Shor can't pick.</description>
+<pubDate>Mon, 06 Jul 2026 14:25:17 +0000</pubDate>
+</item>
+<item>
+<title>starius/p2mr-slides</title>
+<link>https://github.com/starius/p2mr-slides</link>
+<guid isPermaLink="false">gh-search:github-bip-360-repo-discovery:starius-p2mr-slides</guid>
+<description>Slides explaining EC recovery leaf proposal for P2MR (BIP-360)</description>
+<pubDate>Tue, 30 Jun 2026 06:07:01 +0000</pubDate>
+</item>
+<item>
+<title>Qbit-Org/qbit-libbitcoinpqc</title>
+<link>https://github.com/Qbit-Org/qbit-libbitcoinpqc</link>
+<guid isPermaLink="false">gh-search:github-bip-360-repo-discovery:qbit-org-qbit-libbitcoinpqc</guid>
+<description>Qbit-focused BIP-360 post-quantum signature support for Bitcoin, enabling bounded SLH-DSA key generation, signing, and consensus validation</description>
+<pubDate>Wed, 24 Jun 2026 13:18:35 +0000</pubDate>
+</item>
+<item>
+<title>BlockstreamResearch/shrincs-c</title>
+<link>https://github.com/BlockstreamResearch/shrincs-c</link>
+<guid isPermaLink="false">gh-search:github-shrincs-repo-discovery:blockstreamresearch-shrincs-c</guid>
+<description>An experimental library for SHRINCS signature written on C</description>
+<pubDate>Tue, 19 May 2026 10:27:47 +0000</pubDate>
 </item>
 <item>
 <title>SHRINCS/shrincs-bip</title>
@@ -150,6 +234,13 @@
 <guid isPermaLink="false">seed:localhost-pqc-group</guid>
 <description>Localhost + Boneh + Bünz group on conservative Bitcoin PQ primitives, including SHRINCS/SHRIMPS review.</description>
 <pubDate>Tue, 28 Apr 2026 00:00:00 +0000</pubDate>
+</item>
+<item>
+<title>Rayo2010x/the_sword_of_damocles</title>
+<link>https://github.com/Rayo2010x/the_sword_of_damocles</link>
+<guid isPermaLink="false">gh-search:github-bip-360-repo-discovery:rayo2010x-the-sword-of-damocles</guid>
+<description>A Strategic Assessment of Bitcoin’s Quantum Fragility Facing the Age of Cryptographically Relevant Quantum Computers (CRQC) and the BIP-360/361 Migration Path</description>
+<pubDate>Tue, 21 Apr 2026 18:56:11 +0000</pubDate>
 </item>
 <item>
 <title>Bitcoin post-quantum work tracker</title>
@@ -171,6 +262,13 @@
 <guid isPermaLink="false">seed:roasbeef-bip32-pq-zkp</guid>
 <description>STARK proof that a Taproot key was BIP-32/BIP-86 derived, without revealing the seed.</description>
 <pubDate>Fri, 03 Apr 2026 23:42:31 +0000</pubDate>
+</item>
+<item>
+<title>0x00s3c/Bitcoin-Defensive-Repository-BIP-360-P2MR</title>
+<link>https://github.com/0x00s3c/Bitcoin-Defensive-Repository-BIP-360-P2MR</link>
+<guid isPermaLink="false">gh-search:github-p2mr-repo-discovery:0x00s3c-bitcoin-defensive-repository-bip-360-p2mr</guid>
+<description>This project requires a fork of the Bitcoin Quantum Testnet (v0.3.0+) which includes the Pay-to-Merkle-Root (P2MR) implementation.</description>
+<pubDate>Tue, 31 Mar 2026 16:05:32 +0000</pubDate>
 </item>
 <item>
 <title>avihu28/Quantum-Safe-Bitcoin-Transactions</title>
@@ -215,11 +313,25 @@
 <pubDate>Tue, 20 Jan 2026 11:07:23 +0000</pubDate>
 </item>
 <item>
+<title>rosieRRRRR/zeb</title>
+<link>https://github.com/rosieRRRRR/zeb</link>
+<guid isPermaLink="false">gh-search:github-bip360-repo-discovery:rosierrrrr-zeb</guid>
+<description>Rail-agnostic execution boundary and Bitcoin broadcast discipline.</description>
+<pubDate>Thu, 01 Jan 2026 01:01:49 +0000</pubDate>
+</item>
+<item>
 <title>SHRINCS</title>
 <link>https://delvingbitcoin.org/t/shrincs-324-byte-stateful-post-quantum-signatures-with-static-backups/2158</link>
 <guid isPermaLink="false">seed:delving-shrincs</guid>
 <description>324-byte stateful hash-based signatures with a SPHINCS+ stateless fallback and static seed backups.</description>
 <pubDate>Thu, 11 Dec 2025 00:00:00 +0000</pubDate>
+</item>
+<item>
+<title>rosieRRRRR/bitcoin-quantum-spend</title>
+<link>https://github.com/rosieRRRRR/bitcoin-quantum-spend</link>
+<guid isPermaLink="false">gh-search:github-bip360-repo-discovery:rosierrrrr-bitcoin-quantum-spend</guid>
+<description>Bitcoin execution-layer security research aligned with BIP-360 (P2TSH).</description>
+<pubDate>Sat, 06 Dec 2025 20:25:32 +0000</pubDate>
 </item>
 <item>
 <title>Hash-based Signature Schemes for Bitcoin</title>
