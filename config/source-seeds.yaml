@@ -2,6 +2,8 @@
 # Silent Payments Watch — preview/silent-payments only.
 # discovered_at = silent-payments/roadmap issue created_at
 # activity_at = issue updated_at (latest when one seed maps to several issues)
+# github_pull_request_searches find PRs even when the parent repo is already seeded.
+
 
 seeded_sources:
   docs_pages:
@@ -81,6 +83,7 @@ seeded_sources:
       discovered_at: "2025-08-29T18:11:44Z"
       activity_at: "2026-08-10T16:01:30Z"
       roadmap_issue: 28
+      live_activity: false
     - id: bluewallet-silentpayments
       repo: BlueWallet/SilentPayments
       project: BlueWallet SilentPayments
@@ -93,10 +96,11 @@ seeded_sources:
       repo: SeedSigner/seedsigner
       project: SeedSigner
       tags: [silent-payments]
-      summary: SeedSigner firmware listed for Silent Payments signing with Sparrow as coordinator.
+      summary: SeedSigner firmware for Silent Payments signing with Sparrow as coordinator (PRs 949 and 769).
       discovered_at: "2025-08-29T20:46:19Z"
       activity_at: "2026-08-10T15:59:01Z"
       roadmap_issue: 36
+      live_activity: false
     - id: romanz-electrs
       repo: romanz/electrs
       project: electrs
@@ -273,6 +277,33 @@ seeded_sources:
       summary: Add MuSig2 + Silent Payments.
       discovered_at: "2026-07-01T14:56:21Z"
       activity_at: "2026-08-05T14:15:42Z"
+    - id: seedsigner-pr-949
+      name: "SeedSigner/seedsigner #949"
+      url: https://github.com/SeedSigner/seedsigner/pull/949
+      project: SeedSigner
+      tags: [silent-payments, pull-request]
+      summary: Silent Payments send support using Sparrow as coordinator.
+      discovered_at: "2026-07-13T19:18:57Z"
+      activity_at: "2026-08-24T13:26:56Z"
+      roadmap_issue: 36
+    - id: seedsigner-pr-769
+      name: "SeedSigner/seedsigner #769"
+      url: https://github.com/SeedSigner/seedsigner/pull/769
+      project: SeedSigner
+      tags: [silent-payments, pull-request]
+      summary: BIP-352 Silent Payments address support.
+      discovered_at: "2025-06-11T16:05:40Z"
+      activity_at: "2026-06-05T11:35:21Z"
+      roadmap_issue: 36
+    - id: embit-pr-145
+      name: "diybitcoinhardware/embit #145"
+      url: https://github.com/diybitcoinhardware/embit/pull/145
+      project: embit
+      tags: [silent-payments, pull-request]
+      summary: Full Silent Payments implementation in embit.
+      discovered_at: "2026-07-09T14:17:06Z"
+      activity_at: "2026-08-28T12:20:46Z"
+      roadmap_issue: 28
 
 
   crates: []
@@ -319,6 +350,47 @@ live_collectors:
       query: 'bip-392 archived:false'
       max_results: 10
       tags: [silent-payments, bip-392, github, candidate, repository-discovery]
+  github_pull_request_searches:
+    - id: github-silent-payments-pr-discovery
+      query: '"silent payments" is:pr'
+      max_results: 10
+      tags: [silent-payments, github, candidate, pull-request-discovery]
+    - id: github-silentpayments-pr-discovery
+      query: 'silentpayments is:pr'
+      max_results: 10
+      tags: [silent-payments, github, candidate, pull-request-discovery]
+    - id: github-bip352-pr-discovery
+      query: 'bip352 is:pr'
+      max_results: 10
+      tags: [silent-payments, bip352, github, candidate, pull-request-discovery]
+    - id: github-bip-352-pr-discovery
+      query: 'bip-352 is:pr'
+      max_results: 10
+      tags: [silent-payments, bip-352, github, candidate, pull-request-discovery]
+    - id: github-bip375-pr-discovery
+      query: 'bip375 is:pr'
+      max_results: 10
+      tags: [silent-payments, bip375, github, candidate, pull-request-discovery]
+    - id: github-bip-375-pr-discovery
+      query: 'bip-375 is:pr'
+      max_results: 10
+      tags: [silent-payments, bip-375, github, candidate, pull-request-discovery]
+    - id: github-bip376-pr-discovery
+      query: 'bip376 is:pr'
+      max_results: 10
+      tags: [silent-payments, bip376, github, candidate, pull-request-discovery]
+    - id: github-bip-376-pr-discovery
+      query: 'bip-376 is:pr'
+      max_results: 10
+      tags: [silent-payments, bip-376, github, candidate, pull-request-discovery]
+    - id: github-bip392-pr-discovery
+      query: 'bip392 is:pr'
+      max_results: 10
+      tags: [silent-payments, bip392, github, candidate, pull-request-discovery]
+    - id: github-bip-392-pr-discovery
+      query: 'bip-392 is:pr'
+      max_results: 10
+      tags: [silent-payments, bip-392, github, candidate, pull-request-discovery]
   delving_topic_searches:
     - id: delving-silent-payments-title
       query: '"silent payments" in:title'

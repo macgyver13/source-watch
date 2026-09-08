@@ -3,13 +3,167 @@
 <title>Silent Payments Watch</title>
 <link>https://example.com/</link>
 <description>Public activity on Silent Payments and related work.</description>
-<lastBuildDate>Fri, 04 Sep 2026 20:36:05 +0000</lastBuildDate>
+<lastBuildDate>Mon, 07 Sep 2026 17:49:01 +0000</lastBuildDate>
+<item>
+<title>Conxian/conxius-wallet #533</title>
+<link>https://github.com/Conxian/conxius-wallet/pull/533</link>
+<guid isPermaLink="false">gh-pr-search:github-silent-payments-pr-discovery:conxian-conxius-wallet-533</guid>
+<description>chore(deps): migrate secp256k1 0.31.1 -&gt; 0.33.1 (silent-payments)</description>
+<pubDate>Mon, 07 Sep 2026 17:10:55 +0000</pubDate>
+</item>
+<item>
+<title>btclib-org/btclib-secp256k1 #817</title>
+<link>https://github.com/btclib-org/btclib-secp256k1/pull/817</link>
+<guid isPermaLink="false">gh-pr-search:github-silentpayments-pr-discovery:btclib-org-btclib-secp256k1-817</guid>
+<description>`module_flags_test.py` guards a flag's value, not only its name (closes #807)</description>
+<pubDate>Mon, 07 Sep 2026 16:50:45 +0000</pubDate>
+</item>
+<item>
+<title>btclib-org/btclib-secp256k1 #816</title>
+<link>https://github.com/btclib-org/btclib-secp256k1/pull/816</link>
+<guid isPermaLink="false">gh-pr-search:github-silentpayments-pr-discovery:btclib-org-btclib-secp256k1-816</guid>
+<description>`signer_test.py`'s and `keys.py`'s docstrings drop a stale count (closes #809) (closes #813)</description>
+<pubDate>Mon, 07 Sep 2026 16:17:53 +0000</pubDate>
+</item>
+<item>
+<title>bitcoin-core/secp256k1 #1932</title>
+<link>https://github.com/bitcoin-core/secp256k1/pull/1932</link>
+<guid isPermaLink="false">gh-pr-search:github-silentpayments-pr-discovery:bitcoin-core-secp256k1-1932</guid>
+<description>silentpayments: drop &quot;empty key arrays must be NULL&quot; requirement</description>
+<pubDate>Mon, 07 Sep 2026 16:02:55 +0000</pubDate>
+</item>
+<item>
+<title>btclib-org/btclib-secp256k1 #814</title>
+<link>https://github.com/btclib-org/btclib-secp256k1/pull/814</link>
+<guid isPermaLink="false">gh-pr-search:github-silentpayments-pr-discovery:btclib-org-btclib-secp256k1-814</guid>
+<description>`src/`'s comments and docstrings name their enumerations (closes #804)</description>
+<pubDate>Mon, 07 Sep 2026 16:00:53 +0000</pubDate>
+</item>
+<item>
+<title>btclib-org/btclib-secp256k1 #812</title>
+<link>https://github.com/btclib-org/btclib-secp256k1/pull/812</link>
+<guid isPermaLink="false">gh-pr-search:github-silent-payments-pr-discovery:btclib-org-btclib-secp256k1-812</guid>
+<description>The module flag lists name every module, the ones off included (closes #792)</description>
+<pubDate>Mon, 07 Sep 2026 15:28:27 +0000</pubDate>
+</item>
+<item>
+<title>btclib-org/btclib-secp256k1 #806</title>
+<link>https://github.com/btclib-org/btclib-secp256k1/pull/806</link>
+<guid isPermaLink="false">gh-pr-search:github-silentpayments-pr-discovery:btclib-org-btclib-secp256k1-806</guid>
+<description>`README.md` and `SECURITY.md` name their enumerations (closes #791)</description>
+<pubDate>Mon, 07 Sep 2026 14:41:39 +0000</pubDate>
+</item>
+<item>
+<title>bitcoin-core/secp256k1 #1931</title>
+<link>https://github.com/bitcoin-core/secp256k1/pull/1931</link>
+<guid isPermaLink="false">gh-pr-search:github-silentpayments-pr-discovery:bitcoin-core-secp256k1-1931</guid>
+<description>tests: cover rejection of invalid plain seckey alongside a valid one</description>
+<pubDate>Mon, 07 Sep 2026 13:54:18 +0000</pubDate>
+</item>
+<item>
+<title>lifofifoX/saffron #7</title>
+<link>https://github.com/lifofifoX/saffron/pull/7</link>
+<guid isPermaLink="false">gh-pr-search:github-bip375-pr-discovery:lifofifox-saffron-7</guid>
+<description>Bump the npm-minor-and-patch group across 1 directory with 14 updates</description>
+<pubDate>Mon, 07 Sep 2026 11:12:38 +0000</pubDate>
+</item>
+<item>
+<title>btclib-org/btclib-secp256k1 #797</title>
+<link>https://github.com/btclib-org/btclib-secp256k1/pull/797</link>
+<guid isPermaLink="false">gh-pr-search:github-silentpayments-pr-discovery:btclib-org-btclib-secp256k1-797</guid>
+<description>The `secp256k1-zkp` pin moves past the 0.8.0 sync (closes #777)</description>
+<pubDate>Mon, 07 Sep 2026 11:09:19 +0000</pubDate>
+</item>
+<item>
+<title>anondevdrop/anoncommerce #13</title>
+<link>https://github.com/anondevdrop/anoncommerce/pull/13</link>
+<guid isPermaLink="false">gh-pr-search:github-bip375-pr-discovery:anondevdrop-anoncommerce-13</guid>
+<description>Bump the npm-minor-and-patch group across 1 directory with 8 updates</description>
+<pubDate>Mon, 07 Sep 2026 03:11:36 +0000</pubDate>
+</item>
+<item>
+<title>Conxian/conxius-wallet #528</title>
+<link>https://github.com/Conxian/conxius-wallet/pull/528</link>
+<guid isPermaLink="false">gh-pr-search:github-silent-payments-pr-discovery:conxian-conxius-wallet-528</guid>
+<description>build(deps): bump secp256k1 from 0.31.1 to 0.33.1 in /native/silent-payments-jni</description>
+<pubDate>Sun, 06 Sep 2026 15:42:34 +0000</pubDate>
+</item>
+<item>
+<title>Conxian/conxius-wallet #527</title>
+<link>https://github.com/Conxian/conxius-wallet/pull/527</link>
+<guid isPermaLink="false">gh-pr-search:github-silent-payments-pr-discovery:conxian-conxius-wallet-527</guid>
+<description>build(deps): bump secp256k1 from 0.31.1 to 0.33.1 in /native/silent-payments</description>
+<pubDate>Sun, 06 Sep 2026 15:42:31 +0000</pubDate>
+</item>
+<item>
+<title>Conxian/conxian-gateway #372</title>
+<link>https://github.com/Conxian/conxian-gateway/pull/372</link>
+<guid isPermaLink="false">gh-pr-search:github-bip-352-pr-discovery:conxian-conxian-gateway-372</guid>
+<description>chore(deps): bump the rust-dependencies group with 2 updates</description>
+<pubDate>Sun, 06 Sep 2026 07:24:58 +0000</pubDate>
+</item>
+<item>
+<title>OogaBoogaX/entropylab #386</title>
+<link>https://github.com/OogaBoogaX/entropylab/pull/386</link>
+<guid isPermaLink="false">gh-pr-search:github-bip352-pr-discovery:oogaboogax-entropylab-386</guid>
+<description>[abandoned] incomplete SECURITY-only stub</description>
+<pubDate>Sun, 06 Sep 2026 02:01:49 +0000</pubDate>
+</item>
+<item>
+<title>barrydeen/wisp-ios #459</title>
+<link>https://github.com/barrydeen/wisp-ios/pull/459</link>
+<guid isPermaLink="false">gh-pr-search:github-bip-352-pr-discovery:barrydeen-wisp-ios-459</guid>
+<description>feat(profile): NIP-A3 payment targets</description>
+<pubDate>Sat, 05 Sep 2026 19:52:38 +0000</pubDate>
+</item>
+<item>
+<title>OogaBoogaX/entropylab #378</title>
+<link>https://github.com/OogaBoogaX/entropylab/pull/378</link>
+<guid isPermaLink="false">gh-pr-search:github-bip352-pr-discovery:oogaboogax-entropylab-378</guid>
+<description>Hand SP sender keys around as zeroable bytes, and wipe them after use</description>
+<pubDate>Sat, 05 Sep 2026 16:25:19 +0000</pubDate>
+</item>
+<item>
+<title>OogaBoogaX/entropylab #377</title>
+<link>https://github.com/OogaBoogaX/entropylab/pull/377</link>
+<guid isPermaLink="false">gh-pr-search:github-bip352-pr-discovery:oogaboogax-entropylab-377</guid>
+<description>SP send: validate BIP-352 input keys and spend taproot inputs with the output key</description>
+<pubDate>Sat, 05 Sep 2026 16:19:55 +0000</pubDate>
+</item>
+<item>
+<title>OogaBoogaX/entropylab #319</title>
+<link>https://github.com/OogaBoogaX/entropylab/pull/319</link>
+<guid isPermaLink="false">gh-pr-search:github-bip352-pr-discovery:oogaboogax-entropylab-319</guid>
+<description>Validate BIP352 input private keys</description>
+<pubDate>Sat, 05 Sep 2026 00:02:35 +0000</pubDate>
+</item>
+<item>
+<title>bitcoin/bips #2276</title>
+<link>https://github.com/bitcoin/bips/pull/2276</link>
+<guid isPermaLink="false">gh-pr-search:github-bip376-pr-discovery:bitcoin-bips-2276</guid>
+<description>BIP376: keep PSBT_IN_WITNESS_UTXO after finalization</description>
+<pubDate>Fri, 04 Sep 2026 09:07:42 +0000</pubDate>
+</item>
 <item>
 <title>benjamin-jarvie/butlers-playground</title>
 <link>https://github.com/benjamin-jarvie/butlers-playground</link>
 <guid isPermaLink="false">gh-search:github-silent-payments-repo-discovery:benjamin-jarvie-butlers-playground</guid>
 <description>Corky plus everything else: codex32 backups, BIP39, SeedQR, silent payments later. The signer itself lives at benjamin-jarvie/corky with zero code that touches your key.</description>
 <pubDate>Fri, 04 Sep 2026 06:57:21 +0000</pubDate>
+</item>
+<item>
+<title>bitcoin-core/secp256k1 #1929</title>
+<link>https://github.com/bitcoin-core/secp256k1/pull/1929</link>
+<guid isPermaLink="false">gh-pr-search:github-silentpayments-pr-discovery:bitcoin-core-secp256k1-1929</guid>
+<description>silentpayments: perform tweak addition with actual scalars</description>
+<pubDate>Fri, 04 Sep 2026 03:07:13 +0000</pubDate>
+</item>
+<item>
+<title>BitmapAsset/block-genomics-nexus #175</title>
+<link>https://github.com/BitmapAsset/block-genomics-nexus/pull/175</link>
+<guid isPermaLink="false">gh-pr-search:github-bip375-pr-discovery:bitmapasset-block-genomics-nexus-175</guid>
+<description>chore(deps): bump @scure/btc-signer from 1.8.1 to 2.4.1 in /examples/reference-agent</description>
+<pubDate>Thu, 03 Sep 2026 10:47:35 +0000</pubDate>
 </item>
 <item>
 <title>bitsagarob/blindbit-v1-shim</title>
@@ -19,11 +173,39 @@
 <pubDate>Wed, 02 Sep 2026 19:47:06 +0000</pubDate>
 </item>
 <item>
+<title>diybitcoinhardware/embit #152</title>
+<link>https://github.com/diybitcoinhardware/embit/pull/152</link>
+<guid isPermaLink="false">gh-pr-search:github-bip-376-pr-discovery:diybitcoinhardware-embit-152</guid>
+<description>PSBTv2 (BIP-370) support and PSBT hardening</description>
+<pubDate>Wed, 02 Sep 2026 16:54:25 +0000</pubDate>
+</item>
+<item>
+<title>macgyver13/bip375-examples #2</title>
+<link>https://github.com/macgyver13/bip375-examples/pull/2</link>
+<guid isPermaLink="false">gh-pr-search:github-bip375-pr-discovery:macgyver13-bip375-examples-2</guid>
+<description>refactor: move Rust examples to repo root and rebase example crates</description>
+<pubDate>Wed, 02 Sep 2026 13:39:26 +0000</pubDate>
+</item>
+<item>
+<title>chippr-robotics/prediction-dao-research #1414</title>
+<link>https://github.com/chippr-robotics/prediction-dao-research/pull/1414</link>
+<guid isPermaLink="false">gh-pr-search:github-bip375-pr-discovery:chippr-robotics-prediction-dao-research-1414</guid>
+<description>chore(deps): bump @scure/btc-signer from 2.3.0 to 2.4.1</description>
+<pubDate>Wed, 02 Sep 2026 11:38:43 +0000</pubDate>
+</item>
+<item>
 <title>bitsagarob/spcommit-checkpoint-startos</title>
 <link>https://github.com/bitsagarob/spcommit-checkpoint-startos</link>
 <guid isPermaLink="false">gh-search:github-silentpayments-repo-discovery:bitsagarob-spcommit-checkpoint-startos</guid>
 <description>A second, independently-computed nostr checkpoint witness for the silentpayments.net BIP-352 tweak-index commitment chain (StartOS package)</description>
 <pubDate>Wed, 02 Sep 2026 10:47:27 +0000</pubDate>
+</item>
+<item>
+<title>bitcoindevkit/bdk-sp #76</title>
+<link>https://github.com/bitcoindevkit/bdk-sp/pull/76</link>
+<guid isPermaLink="false">gh-pr-search:github-silentpayments-pr-discovery:bitcoindevkit-bdk-sp-76</guid>
+<description>docs: fix the stale silent payment example in the README</description>
+<pubDate>Tue, 01 Sep 2026 20:43:07 +0000</pubDate>
 </item>
 <item>
 <title>azeemshaik025/silent-payments</title>
@@ -40,6 +222,20 @@
 <pubDate>Fri, 28 Aug 2026 00:58:07 +0000</pubDate>
 </item>
 <item>
+<title>sparrowwallet/drongo #50</title>
+<link>https://github.com/sparrowwallet/drongo/pull/50</link>
+<guid isPermaLink="false">gh-pr-search:github-bip375-pr-discovery:sparrowwallet-drongo-50</guid>
+<description>Sort silent payment codes sharing a scan key before assigning k</description>
+<pubDate>Thu, 27 Aug 2026 20:03:16 +0000</pubDate>
+</item>
+<item>
+<title>btclib-org/btclib #1336</title>
+<link>https://github.com/btclib-org/btclib/pull/1336</link>
+<guid isPermaLink="false">gh-pr-search:github-bip375-pr-discovery:btclib-org-btclib-1336</guid>
+<description>The vendored vectors that need no code catch up to upstream</description>
+<pubDate>Tue, 25 Aug 2026 10:55:10 +0000</pubDate>
+</item>
+<item>
 <title>bitsagarob/payment-name-startos</title>
 <link>https://github.com/bitsagarob/payment-name-startos</link>
 <guid isPermaLink="false">gh-search:github-silent-payments-repo-discovery:bitsagarob-payment-name-startos</guid>
@@ -54,11 +250,53 @@
 <pubDate>Mon, 24 Aug 2026 19:42:41 +0000</pubDate>
 </item>
 <item>
+<title>shrec/UltrafastSecp256k1 #384</title>
+<link>https://github.com/shrec/UltrafastSecp256k1/pull/384</link>
+<guid isPermaLink="false">gh-pr-search:github-bip352-pr-discovery:shrec-ultrafastsecp256k1-384</guid>
+<description>fix: separate BIP-352 GPU audit coverage</description>
+<pubDate>Thu, 20 Aug 2026 07:49:02 +0000</pubDate>
+</item>
+<item>
+<title>bitcoin/bips #2257</title>
+<link>https://github.com/bitcoin/bips/pull/2257</link>
+<guid isPermaLink="false">gh-pr-search:github-bip375-pr-discovery:bitcoin-bips-2257</guid>
+<description>bip-0375: say the version byte belongs to the identifier, not to the field</description>
+<pubDate>Fri, 14 Aug 2026 17:24:04 +0000</pubDate>
+</item>
+<item>
+<title>bitcoin/bips #2256</title>
+<link>https://github.com/bitcoin/bips/pull/2256</link>
+<guid isPermaLink="false">gh-pr-search:github-bip352-pr-discovery:bitcoin-bips-2256</guid>
+<description>bip-0375: assign k in output index order</description>
+<pubDate>Fri, 14 Aug 2026 17:21:33 +0000</pubDate>
+</item>
+<item>
 <title>Blockstream/Jade</title>
 <link>https://github.com/Blockstream/Jade</link>
 <guid isPermaLink="false">seed:blockstream-jade</guid>
 <description>Blockstream Jade repository listed for Silent Payment PSBT support in Jade and libwally-core.</description>
 <pubDate>Fri, 14 Aug 2026 14:56:39 +0000</pubDate>
+</item>
+<item>
+<title>GautamBytes/psbt-interop-lab #36</title>
+<link>https://github.com/GautamBytes/psbt-interop-lab/pull/36</link>
+<guid isPermaLink="false">gh-pr-search:github-bip376-pr-discovery:gautambytes-psbt-interop-lab-36</guid>
+<description>fix: align v0.10 public content and reports</description>
+<pubDate>Sun, 09 Aug 2026 16:50:05 +0000</pubDate>
+</item>
+<item>
+<title>GautamBytes/psbt-interop-lab #31</title>
+<link>https://github.com/GautamBytes/psbt-interop-lab/pull/31</link>
+<guid isPermaLink="false">gh-pr-search:github-bip376-pr-discovery:gautambytes-psbt-interop-lab-31</guid>
+<description>feat: add BIP376 receiver spend workflow</description>
+<pubDate>Sun, 09 Aug 2026 05:56:13 +0000</pubDate>
+</item>
+<item>
+<title>GautamBytes/psbt-interop-lab #27</title>
+<link>https://github.com/GautamBytes/psbt-interop-lab/pull/27</link>
+<guid isPermaLink="false">gh-pr-search:github-bip376-pr-discovery:gautambytes-psbt-interop-lab-27</guid>
+<description>feat: add Silent Payment PSBT parser foundation</description>
+<pubDate>Sat, 08 Aug 2026 17:28:37 +0000</pubDate>
 </item>
 <item>
 <title>Coinfidential/dkgkit</title>
@@ -117,6 +355,41 @@
 <pubDate>Mon, 20 Jul 2026 19:40:28 +0000</pubDate>
 </item>
 <item>
+<title>SeedSigner/seedsigner #949</title>
+<link>https://github.com/SeedSigner/seedsigner/pull/949</link>
+<guid isPermaLink="false">seed:seedsigner-pr-949</guid>
+<description>Silent Payments send support using Sparrow as coordinator.</description>
+<pubDate>Mon, 13 Jul 2026 19:18:57 +0000</pubDate>
+</item>
+<item>
+<title>bitcoinaustria/kassiber #435</title>
+<link>https://github.com/bitcoinaustria/kassiber/pull/435</link>
+<guid isPermaLink="false">gh-pr-search:github-bip392-pr-discovery:bitcoinaustria-kassiber-435</guid>
+<description>Replace manual chain observers with BDK and LWK</description>
+<pubDate>Mon, 13 Jul 2026 14:19:16 +0000</pubDate>
+</item>
+<item>
+<title>diybitcoinhardware/embit #145</title>
+<link>https://github.com/diybitcoinhardware/embit/pull/145</link>
+<guid isPermaLink="false">seed:embit-pr-145</guid>
+<description>Full Silent Payments implementation in embit.</description>
+<pubDate>Thu, 09 Jul 2026 14:17:06 +0000</pubDate>
+</item>
+<item>
+<title>bitcoin/bips #2207</title>
+<link>https://github.com/bitcoin/bips/pull/2207</link>
+<guid isPermaLink="false">gh-pr-search:github-bip-375-pr-discovery:bitcoin-bips-2207</guid>
+<description>BIP-375: correct labeled test vectors to include labeled-spend key in PSBT_OUT_SP_V0_INFO</description>
+<pubDate>Tue, 07 Jul 2026 15:46:53 +0000</pubDate>
+</item>
+<item>
+<title>bitcoinaustria/kassiber #315</title>
+<link>https://github.com/bitcoinaustria/kassiber/pull/315</link>
+<guid isPermaLink="false">gh-pr-search:github-bip392-pr-discovery:bitcoinaustria-kassiber-315</guid>
+<description>[codex] Add watch-only Silent Payments wallet source</description>
+<pubDate>Wed, 01 Jul 2026 15:48:47 +0000</pubDate>
+</item>
+<item>
 <title>Coldcard/firmware #683</title>
 <link>https://github.com/Coldcard/firmware/pull/683</link>
 <guid isPermaLink="false">seed:coldcard-pr-683</guid>
@@ -138,6 +411,13 @@
 <pubDate>Fri, 29 May 2026 19:06:24 +0000</pubDate>
 </item>
 <item>
+<title>sethforprivacy/silentpaymentsxyz #42</title>
+<link>https://github.com/sethforprivacy/silentpaymentsxyz/pull/42</link>
+<guid isPermaLink="false">gh-pr-search:github-bip376-pr-discovery:sethforprivacy-silentpaymentsxyz-42</guid>
+<description>Update Wallets and Developers - track BIP375 / BIP376</description>
+<pubDate>Tue, 05 May 2026 02:08:51 +0000</pubDate>
+</item>
+<item>
 <title>caravan-bitcoin/caravan</title>
 <link>https://github.com/caravan-bitcoin/caravan</link>
 <guid isPermaLink="false">seed:caravan-bitcoin-caravan</guid>
@@ -150,6 +430,20 @@
 <guid isPermaLink="false">seed:kernel-node-kernel-node</guid>
 <description>kernel-node listed for BIP-352 receiver-side scanning and wallet support.</description>
 <pubDate>Wed, 29 Apr 2026 14:21:04 +0000</pubDate>
+</item>
+<item>
+<title>bitcoin/bips #2149</title>
+<link>https://github.com/bitcoin/bips/pull/2149</link>
+<guid isPermaLink="false">gh-pr-search:github-bip392-pr-discovery:bitcoin-bips-2149</guid>
+<description>BIP-0329: Add spscan label type for labelling silent payments wallets</description>
+<pubDate>Fri, 24 Apr 2026 07:12:05 +0000</pubDate>
+</item>
+<item>
+<title>bitcoin/bips #2135</title>
+<link>https://github.com/bitcoin/bips/pull/2135</link>
+<guid isPermaLink="false">gh-pr-search:github-bip376-pr-discovery:bitcoin-bips-2135</guid>
+<description>BIP174: Deduplicate type definitions by introducing registry file</description>
+<pubDate>Wed, 08 Apr 2026 22:33:04 +0000</pubDate>
 </item>
 <item>
 <title>shuv-amp/sp-differ</title>
@@ -194,6 +488,20 @@
 <pubDate>Thu, 12 Mar 2026 18:27:28 +0000</pubDate>
 </item>
 <item>
+<title>cygnet3/dana #331</title>
+<link>https://github.com/cygnet3/dana/pull/331</link>
+<guid isPermaLink="false">gh-pr-search:github-bip392-pr-discovery:cygnet3-dana-331</guid>
+<description>Implement BIP392</description>
+<pubDate>Mon, 09 Mar 2026 13:17:10 +0000</pubDate>
+</item>
+<item>
+<title>bitcoin/bips #2099</title>
+<link>https://github.com/bitcoin/bips/pull/2099</link>
+<guid isPermaLink="false">gh-pr-search:github-bip392-pr-discovery:bitcoin-bips-2099</guid>
+<description>BIP393: Output Script Descriptor Annotations</description>
+<pubDate>Wed, 11 Feb 2026 11:15:37 +0000</pubDate>
+</item>
+<item>
 <title>Silent Payments Bindings rust-secp256k1</title>
 <link>https://gitea.bitcoin.ninja/rust-bitcoin/rust-secp256k1/pulls/909</link>
 <guid isPermaLink="false">seed:rust-secp256k1-sp-bindings</guid>
@@ -208,11 +516,25 @@
 <pubDate>Mon, 02 Feb 2026 13:29:44 +0000</pubDate>
 </item>
 <item>
+<title>bitcoin/bips #2089</title>
+<link>https://github.com/bitcoin/bips/pull/2089</link>
+<guid isPermaLink="false">gh-pr-search:github-bip376-pr-discovery:bitcoin-bips-2089</guid>
+<description>BIP376: Spending Silent Payment outputs with PSBTs</description>
+<pubDate>Mon, 19 Jan 2026 22:07:51 +0000</pubDate>
+</item>
+<item>
 <title>Silent Payments notifications via Nostr</title>
 <link>https://delvingbitcoin.org/t/silent-payments-notifications-via-nostr/2203</link>
 <guid isPermaLink="false">delving-search:delving-silent-payments-title:2203</guid>
 <description>This write-up has the goal to discuss the approach of sending notifications for incoming Silent Payments transactions via Nostr. The design is an extension of the discussions around &quot;Stealth addresses using nostr&quot; which had a Nostr-only approach. The des...</description>
 <pubDate>Thu, 15 Jan 2026 23:00:09 +0000</pubDate>
+</item>
+<item>
+<title>bitcoin-core/secp256k1 #1802</title>
+<link>https://github.com/bitcoin-core/secp256k1/pull/1802</link>
+<guid isPermaLink="false">gh-pr-search:github-bip375-pr-discovery:bitcoin-core-secp256k1-1802</guid>
+<description>Add DLEQ proof implementing BIP 374</description>
+<pubDate>Thu, 15 Jan 2026 01:39:55 +0000</pubDate>
 </item>
 <item>
 <title>FreeOnlineUser/bip375-test-tools</title>
@@ -227,6 +549,13 @@
 <guid isPermaLink="false">seed:cygnet3-spdk</guid>
 <description>Rust library for building Silent Payment wallets, including scanning and transaction signing.</description>
 <pubDate>Mon, 05 Jan 2026 23:12:48 +0000</pubDate>
+</item>
+<item>
+<title>bitcoin/bips #2047</title>
+<link>https://github.com/bitcoin/bips/pull/2047</link>
+<guid isPermaLink="false">gh-pr-search:github-bip392-pr-discovery:bitcoin-bips-2047</guid>
+<description>BIP392: Silent Payment Output Script Descriptors</description>
+<pubDate>Wed, 03 Dec 2025 11:13:10 +0000</pubDate>
 </item>
 <item>
 <title>Coldcard/firmware</title>
@@ -274,7 +603,7 @@
 <title>SeedSigner/seedsigner</title>
 <link>https://github.com/SeedSigner/seedsigner</link>
 <guid isPermaLink="false">seed:seedsigner-seedsigner</guid>
-<description>SeedSigner firmware listed for Silent Payments signing with Sparrow as coordinator.</description>
+<description>SeedSigner firmware for Silent Payments signing with Sparrow as coordinator (PRs 949 and 769).</description>
 <pubDate>Fri, 29 Aug 2025 20:46:19 +0000</pubDate>
 </item>
 <item>
@@ -395,6 +724,13 @@
 <guid isPermaLink="false">delving-search:delving-silent-payments-title:1854</guid>
 <description>...Dilithium sig. Taken together, these papers indicate there is nothing inherently blocking lattice‑based post‑quantum replacements for BIP‑32, BIP‑352 silent payments, MuSig, or FROST.</description>
 <pubDate>Sun, 20 Jul 2025 18:30:46 +0000</pubDate>
+</item>
+<item>
+<title>SeedSigner/seedsigner #769</title>
+<link>https://github.com/SeedSigner/seedsigner/pull/769</link>
+<guid isPermaLink="false">seed:seedsigner-pr-769</guid>
+<description>BIP-352 Silent Payments address support.</description>
+<pubDate>Wed, 11 Jun 2025 16:05:40 +0000</pubDate>
 </item>
 <item>
 <title>BitPolito/silent-payments</title>

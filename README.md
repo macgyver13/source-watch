@@ -21,7 +21,7 @@ Committed `feed.json`, `feed.xml`, `items.jsonl`, `projects.json`, and `sources.
 
 1. Fork or copy this repository.
 2. Fill `config/watch.yaml` (name, base URL, description, tags, relevance, optional topics).
-3. Fill `config/source-seeds.yaml` with the docs pages, repositories, PRs, and crates to track, plus any live GitHub repository searches.
+3. Fill `config/source-seeds.yaml` with the docs pages, repositories, PRs, and crates to track, plus any live GitHub repository and pull-request searches.
 4. Run the local pipeline below so `site/static/` has fresh artifacts.
 5. Point Cloudflare Pages **or** GitHub Pages at `site/`.
 
@@ -41,8 +41,10 @@ hugo --source site --minify
 ```
 
 `python3 scripts/build_seed_feed.py` refreshes seeded GitHub repo/PR
-`activity_at` timestamps and runs `live_collectors.github_repository_searches`.
-Each collector emits candidate `source_discovered` items alongside seeds.
+`activity_at` timestamps and runs `live_collectors.github_repository_searches`
+and `live_collectors.github_pull_request_searches`. Repository search does not
+see PRs inside an already-seeded repo; PR search does. Each collector emits
+candidate `source_discovered` items alongside seeds.
 Discovery dates on seeds stay put; activity moves if GitHub is newer.
 
 Set `GITHUB_TOKEN` or `GH_TOKEN` for authenticated GitHub calls (higher rate
