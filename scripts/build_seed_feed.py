@@ -399,28 +399,39 @@ def later_iso(*values: str | None) -> str | None:
     return max(stamps) if stamps else None
 
 
-def live_seed_activity(entry: dict, kind: str, github_json_fetcher) -> str | None:
-    """Latest GitHub timestamp for a seeded repo or pull request."""
-    if github_json_fetcher is None or entry.get("live_activity") is False:
-        return None
+def live_seed_github(entry: dict, kind: str, github_json_fetcher) -> tuple[str | None, str | None]:
+    """Return (created_at, activity_at) from GitHub for a seeded repo or PR.
+
+    created_at becomes discovered_at when present. activity_at is omitted
+    when live_activity is false (noisy monorepos); created_at is still used.
+    """
+    if github_json_fetcher is None:
+        return None, None
+    skip_activity = entry.get("live_activity") is False
     if kind == "github_repositories":
         repo = str(entry.get("repo") or "").strip()
         if not repo:
-            return None
+            return None, None
         payload = github_json_fetcher(f"/repos/{repo}") or {}
-        return optional_iso(payload.get("pushed_at") or payload.get("updated_at"))
+        created = optional_iso(payload.get("created_at"))
+        activity = None if skip_activity else optional_iso(
+            payload.get("pushed_at") or payload.get("updated_at")
+        )
+        return created, activity
     if kind == "github_pull_requests":
         match = PR_URL_RE.match(str(entry.get("url") or ""))
         if not match:
-            return None
+            return None, None
         owner, name, number = match.group(1), match.group(2), match.group(3)
         payload = github_json_fetcher(f"/repos/{owner}/{name}/pulls/{number}") or {}
-        return later_iso(
+        created = optional_iso(payload.get("created_at"))
+        activity = None if skip_activity else later_iso(
             optional_iso(payload.get("merged_at")),
             optional_iso(payload.get("updated_at")),
             optional_iso(payload.get("closed_at")),
         )
-    return None
+        return created, activity
+    return None, None
 
 
 
@@ -545,8 +556,8 @@ def build_seeded_item(
     old_item = existing_items.get(item_id, {})
     seed_discovered = optional_iso(entry.get("discovered_at"))
     seed_activity = optional_iso(entry.get("activity_at"))
-    live_activity = live_seed_activity(entry, kind, github_json_fetcher)
-    discovered_at = seed_discovered or discovery_time(old_item, observed_at)
+    live_created, live_activity = live_seed_github(entry, kind, github_json_fetcher)
+    discovered_at = live_created or seed_discovered or discovery_time(old_item, observed_at)
     activity_at = later_iso(seed_activity, live_activity) or item_activity_at({
         **old_item,
         "event_time": discovered_at,
@@ -572,7 +583,7 @@ def build_seeded_item(
     }
 
     old_source = existing_sources.get(source_id, {})
-    source_discovered_at = seed_discovered or discovery_time(old_source, observed_at)
+    source_discovered_at = live_created or seed_discovered or discovery_time(old_source, observed_at)
     source = {
         "id": source_id,
         "name": title_for(entry, kind),
@@ -588,10 +599,10 @@ def build_seeded_item(
 
     pslug = slugify(project)
     old_project = existing_projects.get(pslug, {})
-    project_discovered_at = seed_discovered or discovery_time(old_project, observed_at)
+    project_discovered_at = live_created or seed_discovered or discovery_time(old_project, observed_at)
     project_activity = activity_at
     old_latest = old_project.get("latest_discovered_at") or old_project.get("discovered_at") or ""
-    latest_discovered_at = discovered_at if seed_discovered else (
+    latest_discovered_at = discovered_at if (live_created or seed_discovered) else (
         max(old_latest, discovered_at) if old_latest else discovered_at
     )
     project_record = {

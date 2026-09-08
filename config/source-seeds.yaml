@@ -6,10 +6,13 @@
 # Catalog largely from https://gist.github.com/Roasbeef/563f173fe44e2005e003a082716e586f
 #
 # Optional per seed:
-#   discovered_at:  ISO timestamp; weeks and "new" sort use this (stable).
+#   discovered_at:  ISO timestamp; weeks use this. Live GitHub created_at
+#                   overwrites this for seeded repos/PRs.
 #   activity_at:    ISO timestamp; latest-activity views use this.
 #   live_activity:  false to skip GitHub pushed_at on noisy monorepos
 #                   (pair with github_pull_requests for the real PRs).
+#                   created_at is still used for discovery.
+# Seeded GitHub repos/PRs take live created_at as discovered_at.
 # Live GitHub searches use repo created_at as discovered_at.
 # Live GitHub PR searches use pull created_at / updated_at. A seeded
 # parent repo does not hide matching PRs.
