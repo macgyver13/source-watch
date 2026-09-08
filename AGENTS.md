@@ -22,12 +22,12 @@ This template is the starting point for any instance. Domain names, tags, and se
 ## Stand up an instance
 
 1. Fork this repo, or branch from `main`.
-2. Fill `config/watch.yaml`: name, `base_url` (the `*.pages.dev` host once known), description, `default_tag`, preferred chips, hidden tags, `relevance` (`always_match` / `required_any` / `context_any`), optional topics.
+2. Fill `config/watch.yaml`: name, `base_url` (the `*.pages.dev` host once known), description, `default_tag`, preferred chips, hidden tags, `relevance` (`always_match` / `required_any` / `context_any`), optional `discovered_after`, optional topics.
 3. Fill `config/source-seeds.yaml` with this instance's docs, repos, PRs, crates, and optional live collectors (`github_repository_searches`, `github_pull_request_searches`, `delving_topic_searches`, `delving_category_listings`).
 4. Optional per seed:
-   - `discovered_at` — fallback when live GitHub `created_at` is unavailable (docs, crates, `--seed-only`). Live GitHub overwrites this for seeded repos/PRs. Weeks use this.
+   - `discovered_at` — fallback when live GitHub `created_at` is unavailable (docs, crates, `--seed-only`) or older than `watch.yaml` `discovered_after`. Live GitHub overwrites this for seeded repos/PRs on or after that floor. Weeks use this.
    - `activity_at` — last known movement. Live refresh overwrites if GitHub is newer.
-   - `live_activity: false` — skip `pushed_at` on noisy monorepos. Does not skip `created_at` for discovery. Add `github_pull_requests` for the PRs that actually matter.
+   - `live_activity: false` — skip `pushed_at` on noisy monorepos. Does not skip `created_at` for discovery; set `discovered_after` so pre-topic repo birth dates do not open weeks. Add `github_pull_requests` for the PRs that actually matter.
 5. Generate artifacts (never commit another project's feed):
 
 ```bash
@@ -84,11 +84,11 @@ Stop with Ctrl-C. `hugo server` does not run the Python pipeline.
 | `activity_at` | Last real movement | Home feed, project cards |
 | `observed_at` | Last crawl | Not shown as the event time |
 
-Live GitHub search hits **and** seeded GitHub repos/PRs: `discovered_at` = repo/PR `created_at`, `activity_at` = repo `pushed_at` or PR `merged_at`/`updated_at`. Seed yaml dates are fallback when live fetch is off. Live Delving hits: `discovered_at` = topic `created_at`, `activity_at` = `last_posted_at`. Do not use crawl time as discovery.
+Live GitHub search hits **and** seeded GitHub repos/PRs: `discovered_at` = repo/PR `created_at` when that stamp is on or after `watch.yaml` `discovered_after` (unset = no floor). Earlier `created_at` is ignored: live hits are dropped, seeded sources keep yaml/`first-seen`. `activity_at` = repo `pushed_at` or PR `merged_at`/`updated_at`. Live Delving hits: `discovered_at` = topic `created_at`, `activity_at` = `last_posted_at`, with the same floor. Do not use crawl time as discovery.
 
 ## Candidate discovery
 
-`live_collectors.github_repository_searches`, `github_pull_request_searches`, `delving_topic_searches`, and `delving_category_listings` run at build time. Hits that pass `watch.yaml` `relevance` become feed items with `status: candidate` and `event_type: source_discovered`. They are public matches, not the accepted seeded catalog. To promote one, add it under `seeded_sources` and rebuild. A seeded GitHub repository does **not** hide matching PRs from `github_pull_request_searches`. Delving search-only topics that age out of `max_results` may freeze `activity_at`; that is accepted.
+`live_collectors.github_repository_searches`, `github_pull_request_searches`, `delving_topic_searches`, and `delving_category_listings` run at build time. Hits that pass `watch.yaml` `relevance` and `discovered_after` become feed items with `status: candidate` and `event_type: source_discovered`. They are public matches, not the accepted `seeded_sources` catalog. To promote one, add it under `seeded_sources` and rebuild. A seeded GitHub repository does **not** hide matching PRs from `github_pull_request_searches`. Delving search-only topics that age out of `max_results` may freeze `activity_at`; that is accepted.
 
 ## UI this engine adds
 

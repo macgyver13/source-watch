@@ -18,4 +18,5 @@ relevance:
   always_match: []   # accept if any of these appear in description/topics/title/excerpt
   required_any: []   # if non-empty, one of these must appear; empty = no required term
   context_any: []    # if required_any is set AND this is non-empty, also need one of these
+discovered_after: ""  # ISO date; drop live hits and ignore GitHub created_at before this
 topics: []           # optional extra Start-here tiles: [{title, slug, blurb, note}]
