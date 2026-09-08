@@ -142,6 +142,10 @@
     return item.activity_at || item.source_updated_at || item.source_published_at || item.discovered_at || item.event_time || item.observed_at;
   }
 
+  function weekItemDate(item) {
+    return item.discovered_at || item.event_time;
+  }
+
   function displayTitle(item) {
     var t = item.title || item.name || "";
     t = t.replace(/ PR #(\d+)/, " #$1");
@@ -193,6 +197,14 @@
     return items.slice().sort(function (a, b) {
       var da = itemDate(a) || "";
       var db = itemDate(b) || "";
+      return db < da ? -1 : db > da ? 1 : 0;
+    });
+  }
+
+  function sortDiscovery(items) {
+    return items.slice().sort(function (a, b) {
+      var da = weekItemDate(a) || "";
+      var db = weekItemDate(b) || "";
       return db < da ? -1 : db > da ? 1 : 0;
     });
   }
@@ -344,12 +356,12 @@
       });
     }
     var items = itemsForWeek(allItems, weekSlug);
-    var cands = sortActivity(items.filter(isCandidate));
-    var prs = sortActivity(items.filter(function (i) { return i.source_type === "github_pull_request" && !isCandidate(i); }));
-    var repos = sortActivity(items.filter(function (i) {
+    var cands = sortDiscovery(items.filter(isCandidate));
+    var prs = sortDiscovery(items.filter(function (i) { return i.source_type === "github_pull_request" && !isCandidate(i); }));
+    var repos = sortDiscovery(items.filter(function (i) {
       return !isCandidate(i) && (i.source_type === "github_repository" || i.source_type === "package_crate");
     }));
-    var docs = sortActivity(items.filter(function (i) { return i.source_type === "docs_page"; }));
+    var docs = sortDiscovery(items.filter(function (i) { return i.source_type === "docs_page"; }));
     var n = items.length;
     var lede =
       n === 0
@@ -366,7 +378,7 @@
               '<a class="title" href="' + esc(item.source_url) + '">' + esc(displayTitle(item)) + "</a>" +
               '<div class="sum">' + esc(displaySummary(item)) + "</div>" +
             "</div>" +
-            '<span class="time">' + esc(humanDate(itemDate(item))) + "</span>" +
+            '<span class="time">' + esc(humanDate(weekItemDate(item))) + "</span>" +
           "</div>"
         );
       }).join("");
