@@ -25,9 +25,9 @@ This template is the starting point for any instance. Domain names, tags, and se
 2. Fill `config/watch.yaml`: name, `base_url` (the `*.pages.dev` host once known), description, `default_tag`, preferred chips, hidden tags, `relevance` (`always_match` / `required_any` / `context_any`), optional topics.
 3. Fill `config/source-seeds.yaml` with this instance's docs, repos, PRs, crates, and optional live collectors (`github_repository_searches`, `github_pull_request_searches`, `delving_topic_searches`, `delving_category_listings`).
 4. Optional per seed:
-   - `discovered_at` — ISO time the source appeared (tracker issue `created_at`, or leave unset so live GitHub uses repo `created_at`). Weeks use this.
+   - `discovered_at` — fallback when live GitHub `created_at` is unavailable (docs, crates, `--seed-only`). Live GitHub overwrites this for seeded repos/PRs. Weeks use this.
    - `activity_at` — last known movement. Live refresh overwrites if GitHub is newer.
-   - `live_activity: false` — skip `pushed_at` on noisy monorepos. Add `github_pull_requests` for the PRs that actually matter.
+   - `live_activity: false` — skip `pushed_at` on noisy monorepos. Does not skip `created_at` for discovery. Add `github_pull_requests` for the PRs that actually matter.
 5. Generate artifacts (never commit another project's feed):
 
 ```bash
@@ -80,11 +80,11 @@ Stop with Ctrl-C. `hugo server` does not run the Python pipeline.
 
 | Field | Meaning | UI |
 |---|---|---|
-| `discovered_at` | When the source appeared | Weeks, "new this week" |
-| `activity_at` | Last real movement | Home feed, project cards, week row timestamps |
+| `discovered_at` | When the source appeared | Weeks, "new this week", week row timestamps |
+| `activity_at` | Last real movement | Home feed, project cards |
 | `observed_at` | Last crawl | Not shown as the event time |
 
-Live GitHub search hits: `discovered_at` = repo `created_at` or PR `created_at`, `activity_at` = repo `pushed_at` or PR `updated_at`. Live Delving hits: `discovered_at` = topic `created_at`, `activity_at` = `last_posted_at`. Do not use crawl time as discovery.
+Live GitHub search hits **and** seeded GitHub repos/PRs: `discovered_at` = repo/PR `created_at`, `activity_at` = repo `pushed_at` or PR `merged_at`/`updated_at`. Seed yaml dates are fallback when live fetch is off. Live Delving hits: `discovered_at` = topic `created_at`, `activity_at` = `last_posted_at`. Do not use crawl time as discovery.
 
 ## Candidate discovery
 
@@ -94,7 +94,7 @@ Live GitHub search hits: `discovered_at` = repo `created_at` or PR `created_at`,
 
 - Project cards list linked sources (PRs as `#123` → that PR).
 - Sources page: search + repo/PR/docs/crate chips.
-- Weeks rail: per-week item counts. Rows sort by activity.
+- Weeks rail: per-week item counts. Rows sort by discovery; timestamps are `discovered_at` (always inside that ISO week).
 - Header `nav` styles do not leak onto the week rail.
 
 ## Checks before you stop
