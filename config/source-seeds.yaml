@@ -1,8 +1,22 @@
+# Seeded sources and live collectors for this watch instance.
+# Identity (name, base_url, description, default_tag, chips, topics, relevance)
+# lives in config/watch.yaml. This file is only seeds + collectors.
 # This file is for preview/post-quantum only; do not merge to main.
 # Post-Quantum Watch — BIP-360 / P2MR / hash-based / isogeny local instance.
 # Catalog largely from https://gist.github.com/Roasbeef/563f173fe44e2005e003a082716e586f
-# discovered_at = when the source appeared (repo created_at, PR created_at, or first public post).
-# activity_at = last known movement; live GitHub overwrites if newer.
+#
+# Optional per seed:
+#   discovered_at:  ISO timestamp; weeks use this. Live GitHub created_at
+#                   overwrites this for seeded repos/PRs.
+#   activity_at:    ISO timestamp; latest-activity views use this.
+#   live_activity:  false to skip GitHub pushed_at on noisy monorepos
+#                   (pair with github_pull_requests for the real PRs).
+#                   created_at is still used for discovery.
+# Seeded GitHub repos/PRs take live created_at as discovered_at.
+# Live GitHub searches use repo created_at as discovered_at.
+# Live GitHub PR searches use pull created_at / updated_at. A seeded
+# parent repo does not hide matching PRs.
+# Live Delving collectors use topic created_at / last_posted_at.
 
 seeded_sources:
   docs_pages:
@@ -381,3 +395,38 @@ live_collectors:
       query: 'isogeny bitcoin archived:false'
       max_results: 10
       tags: [isogeny, github, candidate, repository-discovery]
+  github_pull_request_searches:
+    - id: github-bip360-pr-discovery
+      query: 'bip360 is:pr'
+      max_results: 10
+      tags: [bip360, github, candidate, pull-request-discovery]
+    - id: github-bip-360-pr-discovery
+      query: 'bip-360 is:pr'
+      max_results: 10
+      tags: [bip360, github, candidate, pull-request-discovery]
+    - id: github-p2qrh-pr-discovery
+      query: 'p2qrh is:pr'
+      max_results: 10
+      tags: [p2qrh, github, candidate, pull-request-discovery]
+    - id: github-p2mr-pr-discovery
+      query: 'p2mr bitcoin is:pr'
+      max_results: 10
+      tags: [p2mr, github, candidate, pull-request-discovery]
+    - id: github-p2tsh-pr-discovery
+      query: 'p2tsh bitcoin is:pr'
+      max_results: 10
+      tags: [p2tsh, github, candidate, pull-request-discovery]
+    - id: github-bitcoinpqc-pr-discovery
+      query: 'bitcoinpqc is:pr'
+      max_results: 10
+      tags: [post-quantum, github, candidate, pull-request-discovery]
+    - id: github-shrincs-pr-discovery
+      query: 'shrincs is:pr'
+      max_results: 10
+      tags: [shrincs, github, candidate, pull-request-discovery]
+    - id: github-isogeny-bitcoin-pr-discovery
+      query: 'isogeny bitcoin is:pr'
+      max_results: 10
+      tags: [isogeny, github, candidate, pull-request-discovery]
+  delving_topic_searches: []
+  delving_category_listings: []
