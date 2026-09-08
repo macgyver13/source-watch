@@ -474,6 +474,85 @@ class DiscoveryDateTests(unittest.TestCase):
             finally:
                 build_seed_feed.OUT = old_out
 
+    def test_seeded_repo_before_discovered_after_keeps_seed_date(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            out = Path(tmp)
+            old_out = build_seed_feed.OUT
+            build_seed_feed.OUT = out
+            try:
+                (out / "feed.json").write_text(json.dumps({"items": []}))
+                (out / "projects.json").write_text(json.dumps({"projects": []}))
+                (out / "sources.json").write_text(json.dumps({"sources": []}))
+
+                def fake_github(path: str):
+                    return {
+                        "created_at": "2010-12-19T15:16:43Z",
+                        "pushed_at": "2026-09-03T13:50:46Z",
+                    }
+
+                cfg = {
+                    "discovered_after": "2022-03-13",
+                    "seeded_sources": {"github_repositories": [{
+                        "id": "bitcoin-bitcoin",
+                        "repo": "bitcoin/bitcoin",
+                        "project": "Bitcoin Core",
+                        "tags": ["silent-payments"],
+                        "discovered_at": "2025-08-26T17:54:03Z",
+                        "activity_at": "2026-05-29T18:55:54Z",
+                        "live_activity": False,
+                    }]},
+                }
+                items, _projects, _sources = build_seed_feed.build_items(
+                    cfg, github_json_fetcher=fake_github, skip_searches=True,
+                )
+                self.assertEqual(items[0]["discovered_at"], "2025-08-26T17:54:03Z")
+                self.assertEqual(items[0]["activity_at"], "2026-05-29T18:55:54Z")
+            finally:
+                build_seed_feed.OUT = old_out
+
+    def test_seeded_repo_after_discovered_after_uses_github(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            out = Path(tmp)
+            old_out = build_seed_feed.OUT
+            build_seed_feed.OUT = out
+            try:
+                (out / "feed.json").write_text(json.dumps({"items": []}))
+                (out / "projects.json").write_text(json.dumps({"projects": []}))
+                (out / "sources.json").write_text(json.dumps({"sources": []}))
+
+                def fake_github(path: str):
+                    return {
+                        "created_at": "2023-06-14T17:45:52Z",
+                        "pushed_at": "2025-08-29T20:14:04Z",
+                    }
+
+                cfg = {
+                    "discovered_after": "2022-03-13T00:00:00Z",
+                    "seeded_sources": {"github_repositories": [{
+                        "id": "bluewallet-silentpayments",
+                        "repo": "BlueWallet/SilentPayments",
+                        "project": "BlueWallet SilentPayments",
+                        "tags": ["silent-payments"],
+                        "discovered_at": "2025-08-29T20:10:24Z",
+                    }]},
+                }
+                items, _projects, _sources = build_seed_feed.build_items(
+                    cfg, github_json_fetcher=fake_github, skip_searches=True,
+                )
+                self.assertEqual(items[0]["discovered_at"], "2023-06-14T17:45:52Z")
+                self.assertEqual(items[0]["activity_at"], "2025-08-29T20:14:04Z")
+            finally:
+                build_seed_feed.OUT = old_out
+
+    def test_discovery_too_old_date_only_floor(self) -> None:
+        watch = {"discovered_after": "2022-03-13"}
+        self.assertTrue(build_seed_feed.discovery_too_old("2010-12-19T15:16:43Z", watch))
+        self.assertTrue(build_seed_feed.discovery_too_old("2022-03-12T23:59:59Z", watch))
+        self.assertFalse(build_seed_feed.discovery_too_old("2022-03-13T00:00:00Z", watch))
+        self.assertFalse(build_seed_feed.discovery_too_old("2023-06-14T17:45:52Z", watch))
+        self.assertFalse(build_seed_feed.discovery_too_old("2010-12-19T15:16:43Z", {}))
+
+
 
 
 if __name__ == "__main__":

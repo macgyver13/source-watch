@@ -64,9 +64,11 @@ timestamps and runs live collectors
 does not see PRs inside an already-seeded repo; PR search does. Each
 collector emits **candidate** `source_discovered` items alongside seeds.
 A candidate is a search or category hit that passed `watch.yaml`
-`relevance`; it is not yet in the accepted `seeded_sources` catalog.
-Seeded GitHub repos/PRs take live `created_at` as `discovered_at`;
-activity moves if GitHub or Delving is newer. Docs, crates, and
+`relevance` and, if set, `discovered_after`; it is not yet in the accepted
+`seeded_sources` catalog.
+Seeded GitHub repos/PRs take live `created_at` as `discovered_at` when that
+stamp is on or after `discovered_after`; older `created_at` keeps the seed
+date. Activity moves if GitHub or Delving is newer. Docs, crates, and
 `--seed-only` keep seed or first-seen discovery.
 
 Seed-only (no GitHub or Delving HTTP):
@@ -96,7 +98,7 @@ directory.
 
 ## Config
 
-- `config/watch.yaml` — instance identity: name, base URL, description, default tag, preferred chips, hidden tags, relevance rules, optional topic tiles. Chips, hidden tags, and name ship in `watch.json` for the client. `relevance` filters live collector hits (`always_match` short-circuits accept; `required_any` / `context_any` must appear in the GitHub description/topics, PR title/body, or Delving title/excerpt/tags).
+- `config/watch.yaml` — instance identity: name, base URL, description, default tag, preferred chips, hidden tags, relevance rules, optional `discovered_after` (ISO date; drop live hits and ignore GitHub `created_at` before this), optional topic tiles. Chips, hidden tags, and name ship in `watch.json` for the client. `relevance` filters live collector hits (`always_match` short-circuits accept; `required_any` / `context_any` must appear in the GitHub description/topics, PR title/body, or Delving title/excerpt/tags).
 - `config/source-seeds.yaml` — seeded sources and live collectors. Pipeline input only; not read at request time.
 
 ## Tests
