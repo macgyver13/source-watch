@@ -31,9 +31,9 @@ title: "Tags"
 - [bip360.org](https://bip360.org/)
 - [cryptoquick/bip360.org](https://github.com/cryptoquick/bip360.org)
 - [BIP-360 Pay-to-Merkle-Root](https://github.com/bitcoin/bips/blob/master/bip-0360.mediawiki)
-- [bitcoin/bips](https://github.com/bitcoin/bips)
 - [bitcoin/bips #1670](https://github.com/bitcoin/bips/pull/1670)
 - [Proposing a P2QRH BIP](https://delvingbitcoin.org/t/proposing-a-p2qrh-bip-towards-a-quantum-resistant-soft-fork/956)
+- [bitcoin/bips](https://github.com/bitcoin/bips)
 
 ## bitcoin
 
@@ -438,13 +438,13 @@ title: "Tags"
 - [cryptoquick/bip360.org](https://github.com/cryptoquick/bip360.org)
 - [Hash-Based Signature Schemes for Post-Quantum Bitcoin](https://conduition.io/cryptography/quantum-hbs/)
 - [BIP-360 Pay-to-Merkle-Root](https://github.com/bitcoin/bips/blob/master/bip-0360.mediawiki)
-- [bitcoin/bips](https://github.com/bitcoin/bips)
 - [bitcoin/bips #1670](https://github.com/bitcoin/bips/pull/1670)
 - [Proposing a P2QRH BIP](https://delvingbitcoin.org/t/proposing-a-p2qrh-bip-towards-a-quantum-resistant-soft-fork/956)
 - [Protecting Quantum Procrastinators with Signature Lifting](https://eprint.iacr.org/2023/362)
 - [Making Classical Signatures Post-Quantum for Single Use](https://eprint.iacr.org/2023/420)
 - [The Exact Security of BIP32 Wallets](https://eprint.iacr.org/2021/1287)
 - [Committing to Quantum Resistance](https://eprint.iacr.org/2018/213)
+- [bitcoin/bips](https://github.com/bitcoin/bips)
 
 ## post-quantum-cryptography
 
@@ -580,11 +580,11 @@ title: "Tags"
 - [Hash-based Signature Schemes for Bitcoin](https://eprint.iacr.org/2025/2203)
 - [Post-Quantum Security of Bitcoin's Taproot](https://eprint.iacr.org/2025/1307)
 - [BIP-360 Pay-to-Merkle-Root](https://github.com/bitcoin/bips/blob/master/bip-0360.mediawiki)
-- [bitcoin/bips](https://github.com/bitcoin/bips)
 - [Protecting Quantum Procrastinators with Signature Lifting](https://eprint.iacr.org/2023/362)
 - [Making Classical Signatures Post-Quantum for Single Use](https://eprint.iacr.org/2023/420)
 - [The Exact Security of BIP32 Wallets](https://eprint.iacr.org/2021/1287)
 - [Committing to Quantum Resistance](https://eprint.iacr.org/2018/213)
+- [bitcoin/bips](https://github.com/bitcoin/bips)
 
 ## utxo
 

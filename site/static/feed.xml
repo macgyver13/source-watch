@@ -3,7 +3,7 @@
 <title>Post-Quantum Watch</title>
 <link>https://example.com/</link>
 <description>Public activity on BIP-360, P2MR, P2QRH, hash-based signatures, and related post-quantum Bitcoin work.</description>
-<lastBuildDate>Tue, 08 Sep 2026 13:11:23 +0000</lastBuildDate>
+<lastBuildDate>Tue, 08 Sep 2026 17:47:33 +0000</lastBuildDate>
 <item>
 <title>posix4e/btc-pq #4</title>
 <link>https://github.com/posix4e/btc-pq/pull/4</link>
@@ -733,13 +733,6 @@
 <pubDate>Fri, 27 Sep 2024 16:08:30 +0000</pubDate>
 </item>
 <item>
-<title>bitcoin/bips</title>
-<link>https://github.com/bitcoin/bips</link>
-<guid isPermaLink="false">seed:bitcoin-bips</guid>
-<description>Official BIP repository. BIP-360 (P2MR) lives here after PR 1670 merged.</description>
-<pubDate>Fri, 27 Sep 2024 16:08:30 +0000</pubDate>
-</item>
-<item>
 <title>bitcoin/bips #1670</title>
 <link>https://github.com/bitcoin/bips/pull/1670</link>
 <guid isPermaLink="false">seed:bips-pr-1670</guid>
@@ -780,5 +773,12 @@
 <guid isPermaLink="false">seed:eprint-committing-qr</guid>
 <description>Stewart et al. early Bitcoin commit-reveal defense against quantum theft.</description>
 <pubDate>Thu, 01 Feb 2018 00:00:00 +0000</pubDate>
+</item>
+<item>
+<title>bitcoin/bips</title>
+<link>https://github.com/bitcoin/bips</link>
+<guid isPermaLink="false">seed:bitcoin-bips</guid>
+<description>Official BIP repository. BIP-360 (P2MR) lives here after PR 1670 merged.</description>
+<pubDate>Tue, 19 Nov 2013 17:18:41 +0000</pubDate>
 </item>
 </channel></rss>
