@@ -30,6 +30,7 @@ OUT = ROOT / "data" / "public"
 STATIC = ROOT / "site" / "static"
 GITHUB_API = "https://api.github.com"
 GITHUB_SEARCH_API = f"{GITHUB_API}/search/repositories"
+GITHUB_PR_SEARCH_API = f"{GITHUB_API}/search/issues"
 PR_URL_RE = re.compile(r"https://github\.com/([^/]+)/([^/]+)/pull/(\d+)/?$", re.I)
 DELVING_ORIGIN = "https://delvingbitcoin.org"
 DELVING_TOPIC_URL_RE = re.compile(
@@ -229,6 +230,57 @@ def search_github_repositories(query: str, max_results: int = 10) -> list[dict]:
         print(f"warning: GitHub repository search failed for query {query!r}: {exc}", file=sys.stderr)
         return []
     return payload.get("items", [])
+
+
+def ensure_pr_search_query(query: str) -> str:
+    text = str(query or "").strip()
+    if not text:
+        return "is:pr"
+    if re.search(r"(?<!\S)is:pr(?!\S)", text, re.I):
+        return text
+    return f"{text} is:pr"
+
+
+def github_pr_url(hit: dict) -> str | None:
+    pr = hit.get("pull_request") if isinstance(hit.get("pull_request"), dict) else {}
+    for candidate in (pr.get("html_url"), hit.get("html_url")):
+        text = str(candidate or "").strip()
+        if text and PR_URL_RE.match(text):
+            return text.rstrip("/")
+    return None
+
+
+def github_pr_key(url: str) -> str | None:
+    match = PR_URL_RE.match(str(url or ""))
+    if not match:
+        return None
+    return f"{match.group(1)}/{match.group(2)}#{match.group(3)}".lower()
+
+
+def github_repo_key(url: str) -> str | None:
+    match = re.match(r"https://github\.com/([^/]+)/([^/]+)(?:/|$)", str(url or ""), re.I)
+    if not match:
+        return None
+    return f"{match.group(1)}/{match.group(2)}".lower()
+
+
+def search_github_pull_requests(query: str, max_results: int = 10) -> list[dict]:
+    params = urlencode({
+        "q": ensure_pr_search_query(query),
+        "per_page": max(1, min(int(max_results), 25)),
+        "sort": "updated",
+        "order": "desc",
+    })
+    request = Request(f"{GITHUB_PR_SEARCH_API}?{params}", headers=github_headers())
+    try:
+        with urlopen(request, timeout=30) as response:
+            payload = json.loads(response.read().decode("utf-8"))
+    except Exception as exc:
+        print(f"warning: GitHub pull request search failed for query {query!r}: {exc}", file=sys.stderr)
+        return []
+    items = payload.get("items", []) if isinstance(payload, dict) else []
+    return [hit for hit in items if isinstance(hit, dict) and github_pr_url(hit)]
+
 
 
 
@@ -438,6 +490,25 @@ def repo_matches_relevance_rules(repo: dict, watch: dict | None = None) -> bool:
     return haystack_matches_relevance_rules(" ".join(content_parts), watch)
 
 
+def pr_haystack(hit: dict) -> str:
+    url = github_pr_url(hit) or str(hit.get("html_url") or "")
+    return " ".join([
+        str(hit.get("title") or ""),
+        str(hit.get("body") or ""),
+        url,
+    ])
+
+
+def pr_excluded_by_query_terms(hit: dict, query: str) -> bool:
+    return excluded_by_query_terms(pr_haystack(hit), query)
+
+
+def pr_matches_relevance_rules(hit: dict, watch: dict | None = None) -> bool:
+    """Filter GitHub pull-request search hits using watch.relevance against title/body."""
+    return haystack_matches_relevance_rules(pr_haystack(hit), watch)
+
+
+
 
 def append_or_replace_project(projects: dict[str, dict], project: dict) -> None:
     current = projects.setdefault(project["id"], project)
@@ -624,6 +695,102 @@ def build_github_repo_item(
     }
     return item, source, project_record
 
+
+def build_github_pr_item(
+    collector: dict,
+    hit: dict,
+    observed_at: str,
+    existing_items: dict[str, dict],
+    existing_projects: dict[str, dict],
+    existing_sources: dict[str, dict],
+    watch: dict,
+    project: str,
+) -> tuple[dict, dict, dict]:
+    url = github_pr_url(hit) or ""
+    match = PR_URL_RE.match(url)
+    if not match:
+        raise ValueError(f"cannot derive pull request URL for {hit}")
+    owner, repo, number = match.group(1), match.group(2), match.group(3)
+    full_name = f"{owner}/{repo}"
+    title = f"{full_name} #{number}"
+    source_id = f"gh-pr-search:{collector['id']}:{slugify(full_name)}-{number}"
+    old_item = existing_items.get(source_id, {})
+    created_at = optional_iso(hit.get("created_at"))
+    discovered_at = created_at or discovery_time(old_item, observed_at)
+    pr_meta = hit.get("pull_request") if isinstance(hit.get("pull_request"), dict) else {}
+    tags = merge_tags(watch, collector.get("tags", []))
+    if optional_iso(pr_meta.get("merged_at")) and "merged" not in tags:
+        tags.append("merged")
+    pr_title = str(hit.get("title") or "").strip()
+    old_summary = str(old_item.get("summary") or "").strip()
+    if pr_title:
+        summary = pr_title
+    elif old_summary and not is_generated_summary(old_summary):
+        summary = old_summary
+    else:
+        summary = f"Tracked pull request: {title}."
+    activity_at = later_iso(
+        optional_iso(pr_meta.get("merged_at")),
+        optional_iso(hit.get("updated_at")),
+        optional_iso(hit.get("closed_at")),
+        created_at,
+        discovered_at,
+    ) or discovered_at
+    item = {
+        "id": source_id,
+        "title": title,
+        "summary": summary,
+        "source_url": url,
+        "source_type": "github_pull_request",
+        "event_type": "source_discovered",
+        "project": project,
+        "tags": tags,
+        "status": "candidate",
+        "discovered_at": discovered_at,
+        "event_time": discovered_at,
+        "activity_at": activity_at,
+        "observed_at": observed_at,
+        "last_seen_at": observed_at,
+        "confidence": "github_pr_search",
+        "evidence": [{
+            "url": url,
+            "retrieved_at": observed_at,
+            "query": collector["query"],
+        }],
+    }
+
+    old_source = existing_sources.get(source_id, {})
+    source_discovered_at = created_at or discovery_time(old_source, observed_at)
+    source = {
+        "id": source_id,
+        "name": title,
+        "url": url,
+        "source_type": "github_pull_request",
+        "project": project,
+        "tags": tags,
+        "confidence": "github_pr_search",
+        "discovered_at": source_discovered_at,
+        "first_seen": source_discovered_at,
+        "last_checked": observed_at,
+    }
+
+    pslug = slugify(project)
+    old_project = existing_projects.get(pslug, {})
+    project_discovered_at = created_at or discovery_time(old_project, observed_at)
+    project_record = {
+        "id": pslug,
+        "name": project,
+        "tags": sorted(set(tags)),
+        "sources": [source_id],
+        "discovered_at": project_discovered_at,
+        "first_seen": project_discovered_at,
+        "activity_at": activity_at,
+        "last_observed_activity": observed_at,
+        "latest_discovered_at": discovered_at,
+    }
+    return item, source, project_record
+
+
 def build_delving_topic_item(
     collector: dict,
     topic: dict,
@@ -777,6 +944,7 @@ def build_items(
     skip_searches: bool | None = None,
     delving_search_fetcher=None,
     delving_category_fetcher=None,
+    github_pr_fetcher=None,
 ) -> tuple[list[dict], dict, dict]:
     if watch is None:
         resolved = watch_from_cfg(cfg)
@@ -808,11 +976,6 @@ def build_items(
     if skip_searches:
         return items, projects, sources
 
-    def github_repo_key(url: str) -> str | None:
-        match = re.match(r"https://github\.com/([^/]+)/([^/]+)(?:/|$)", str(url or ""), re.I)
-        if not match:
-            return None
-        return f"{match.group(1)}/{match.group(2)}".lower()
 
     seen_repos = {key for key in (github_repo_key(item.get("source_url", "")) for item in items) if key}
 
@@ -849,6 +1012,55 @@ def build_items(
             items.append(item)
             sources[source["id"]] = source
             append_or_replace_project(projects, project)
+
+    seen_prs = {key for key in (github_pr_key(item.get("source_url", "")) for item in items) if key}
+    repo_projects: dict[str, str] = {}
+    for item in items:
+        repo_key = github_repo_key(item.get("source_url", ""))
+        if repo_key and repo_key not in repo_projects:
+            repo_projects[repo_key] = item.get("project") or repo_key
+
+    for collector in cfg.get("live_collectors", {}).get("github_pull_request_searches", []) or []:
+        query = collector.get("query", "").strip()
+        collector_id = collector.get("id", "").strip()
+        if not query or not collector_id:
+            continue
+        search_query = ensure_pr_search_query(query)
+        if github_pr_fetcher is None:
+            results = search_github_pull_requests(search_query, collector.get("max_results", 10))
+        else:
+            results = github_pr_fetcher(search_query)
+        for hit in results:
+            url = github_pr_url(hit)
+            if not url:
+                continue
+            pr_key = github_pr_key(url)
+            if not pr_key or pr_key in seen_prs:
+                continue
+            if pr_excluded_by_query_terms(hit, query):
+                continue
+            if not pr_matches_relevance_rules(hit, resolved):
+                continue
+            match = PR_URL_RE.match(url)
+            repo_full = f"{match.group(1)}/{match.group(2)}" if match else ""
+            project_name = collector.get("project") or repo_projects.get(repo_full.lower()) or repo_full
+            seen_prs.add(pr_key)
+            item, source, project = build_github_pr_item(
+                collector,
+                hit,
+                observed_at,
+                existing_items,
+                existing_projects,
+                existing_sources,
+                resolved,
+                project_name,
+            )
+            items.append(item)
+            sources[source["id"]] = source
+            append_or_replace_project(projects, project)
+            if repo_full.lower() and repo_full.lower() not in repo_projects:
+                repo_projects[repo_full.lower()] = project_name
+
 
     seen_topics = {key for key in (delving_topic_key(item.get("source_url", "")) for item in items) if key}
 
@@ -992,7 +1204,7 @@ def main() -> int:
     parser.add_argument(
         "--seed-only",
         action="store_true",
-        help="Skip live HTTP (GitHub searches/timestamps and Delving collectors).",
+        help="Skip live HTTP (GitHub repo/PR searches, timestamps, and Delving collectors).",
     )
     args = parser.parse_args()
     seed_only = args.seed_only or skip_live_collectors()

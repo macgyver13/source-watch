@@ -8,6 +8,7 @@ preferred_chips:
 hidden_tags:
   - github
   - repository-discovery
+  - pull-request-discovery
   - candidate
   - pull-request
   - package
