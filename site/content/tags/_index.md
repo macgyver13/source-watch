@@ -2,8 +2,30 @@
 title: "Tags"
 ---
 
+## backup
+
+- [coldtest-berlin/pq-single-address-backup](https://github.com/coldtest-berlin/pq-single-address-backup)
+
 ## bip360
 
+- [bitcoin/bips #2273](https://github.com/bitcoin/bips/pull/2273)
+- [btq-ag/btq-core #181](https://github.com/btq-ag/btq-core/pull/181)
+- [bussyjd/drongo #1](https://github.com/bussyjd/drongo/pull/1)
+- [btq-ag/btq-core #167](https://github.com/btq-ag/btq-core/pull/167)
+- [ADDAddition/ADDITION #35](https://github.com/ADDAddition/ADDITION/pull/35)
+- [ADDAddition/ADDITION #12](https://github.com/ADDAddition/ADDITION/pull/12)
+- [let-the-dreamers-rise/p2mr-assurance-lab](https://github.com/let-the-dreamers-rise/p2mr-assurance-lab)
+- [btq-ag/btq-core #159](https://github.com/btq-ag/btq-core/pull/159)
+- [coldtest-berlin/pq-single-address-backup](https://github.com/coldtest-berlin/pq-single-address-backup)
+- [bitcoin/bips #2232](https://github.com/bitcoin/bips/pull/2232)
+- [bitcoin/bips #2212](https://github.com/bitcoin/bips/pull/2212)
+- [minksy-ux/Bitcoin-QRAT-Hybrid-PQ-Framework-with-Optimized-Hash-Signatures-Adaptive-P2MR-zk-STARK-Migration-](https://github.com/minksy-ux/Bitcoin-QRAT-Hybrid-PQ-Framework-with-Optimized-Hash-Signatures-Adaptive-P2MR-zk-STARK-Migration-)
+- [starius/p2mr-slides](https://github.com/starius/p2mr-slides)
+- [Qbit-Org/qbit-libbitcoinpqc](https://github.com/Qbit-Org/qbit-libbitcoinpqc)
+- [Rayo2010x/the_sword_of_damocles](https://github.com/Rayo2010x/the_sword_of_damocles)
+- [rosieRRRRR/zeb](https://github.com/rosieRRRRR/zeb)
+- [rosieRRRRR/bitcoin-quantum-spend](https://github.com/rosieRRRRR/bitcoin-quantum-spend)
+- [bitcoin/bitcoin #33163](https://github.com/bitcoin/bitcoin/pull/33163)
 - [Changes to BIP-360](https://delvingbitcoin.org/t/changes-to-bip-360-pay-to-quantum-resistant-hash-p2qrh/1811)
 - [cryptoquick/libbitcoinpqc](https://github.com/cryptoquick/libbitcoinpqc)
 - [bip360.org](https://bip360.org/)
@@ -12,6 +34,89 @@ title: "Tags"
 - [bitcoin/bips](https://github.com/bitcoin/bips)
 - [bitcoin/bips #1670](https://github.com/bitcoin/bips/pull/1670)
 - [Proposing a P2QRH BIP](https://delvingbitcoin.org/t/proposing-a-p2qrh-bip-towards-a-quantum-resistant-soft-fork/956)
+
+## bitcoin
+
+- [coldtest-berlin/pq-single-address-backup](https://github.com/coldtest-berlin/pq-single-address-backup)
+- [rosieRRRRR/zeb](https://github.com/rosieRRRRR/zeb)
+
+## bitcoin-script
+
+- [utxo-detective/shorlock](https://github.com/utxo-detective/shorlock)
+
+## bitcoin-transaction
+
+- [rosieRRRRR/zeb](https://github.com/rosieRRRRR/zeb)
+
+## candidate
+
+- [posix4e/btc-pq #4](https://github.com/posix4e/btc-pq/pull/4)
+- [AlxCheh/Bitcoin-Intel #1212](https://github.com/AlxCheh/Bitcoin-Intel/pull/1212)
+- [bitcointranscripts/bitcointranscripts #707](https://github.com/bitcointranscripts/bitcointranscripts/pull/707)
+- [bitcoin/bips #2273](https://github.com/bitcoin/bips/pull/2273)
+- [SHRINCS/shrincs-bip #63](https://github.com/SHRINCS/shrincs-bip/pull/63)
+- [XuJiandong/shrincs-lock](https://github.com/XuJiandong/shrincs-lock)
+- [AppliedPQC/AppliedPQC.github.io #20](https://github.com/AppliedPQC/AppliedPQC.github.io/pull/20)
+- [AppliedPQC/shrincs-rs](https://github.com/AppliedPQC/shrincs-rs)
+- [AppliedPQC/pqc-research #27](https://github.com/AppliedPQC/pqc-research/pull/27)
+- [soqucoin/soqucoin #52](https://github.com/soqucoin/soqucoin/pull/52)
+- [bitcoinops/bitcoinops.github.io #2861](https://github.com/bitcoinops/bitcoinops.github.io/pull/2861)
+- [btq-ag/btq-core #181](https://github.com/btq-ag/btq-core/pull/181)
+- [bussyjd/btq-browser-wallet #3](https://github.com/bussyjd/btq-browser-wallet/pull/3)
+- [bussyjd/btq-browser-wallet #2](https://github.com/bussyjd/btq-browser-wallet/pull/2)
+- [bussyjd/btq-browser-wallet #1](https://github.com/bussyjd/btq-browser-wallet/pull/1)
+- [bussyjd/btq-browser-wallet](https://github.com/bussyjd/btq-browser-wallet)
+- [bussyjd/Qparrow #1](https://github.com/bussyjd/Qparrow/pull/1)
+- [bussyjd/drongo #3](https://github.com/bussyjd/drongo/pull/3)
+- [bussyjd/drongo #1](https://github.com/bussyjd/drongo/pull/1)
+- [Friotaioch/Friotaioch #1](https://github.com/Friotaioch/Friotaioch/pull/1)
+- [starius/flockroot](https://github.com/starius/flockroot)
+- [SHRINCS/shrincs-bip #51](https://github.com/SHRINCS/shrincs-bip/pull/51)
+- [btq-ag/btq-core #172](https://github.com/btq-ag/btq-core/pull/172)
+- [btq-ag/btq-core #167](https://github.com/btq-ag/btq-core/pull/167)
+- [ADDAddition/ADDITION #35](https://github.com/ADDAddition/ADDITION/pull/35)
+- [ADDAddition/ADDITION #12](https://github.com/ADDAddition/ADDITION/pull/12)
+- [let-the-dreamers-rise/p2mr-assurance-lab](https://github.com/let-the-dreamers-rise/p2mr-assurance-lab)
+- [btq-ag/btq-core #159](https://github.com/btq-ag/btq-core/pull/159)
+- [coldtest-berlin/pq-single-address-backup](https://github.com/coldtest-berlin/pq-single-address-backup)
+- [bitcoin/bips #2232](https://github.com/bitcoin/bips/pull/2232)
+- [SHRINCS/shrincs-bip #28](https://github.com/SHRINCS/shrincs-bip/pull/28)
+- [bitcoin/bips #2212](https://github.com/bitcoin/bips/pull/2212)
+- [jbride/p2mr-ref-impl](https://github.com/jbride/p2mr-ref-impl)
+- [LayerTwo-Labs/bip300301_enforcer #459](https://github.com/LayerTwo-Labs/bip300301_enforcer/pull/459)
+- [Qbit-Org/qbit-libbitcoinpqc #4](https://github.com/Qbit-Org/qbit-libbitcoinpqc/pull/4)
+- [Qbit-Org/qbit #107](https://github.com/Qbit-Org/qbit/pull/107)
+- [minksy-ux/Bitcoin-QRAT-Hybrid-PQ-Framework-with-Optimized-Hash-Signatures-Adaptive-P2MR-zk-STARK-Migration-](https://github.com/minksy-ux/Bitcoin-QRAT-Hybrid-PQ-Framework-with-Optimized-Hash-Signatures-Adaptive-P2MR-zk-STARK-Migration-)
+- [utxo-detective/shorlock](https://github.com/utxo-detective/shorlock)
+- [jbride/bitcoin #1](https://github.com/jbride/bitcoin/pull/1)
+- [starius/p2mr-slides](https://github.com/starius/p2mr-slides)
+- [Qbit-Org/qbit-libbitcoinpqc](https://github.com/Qbit-Org/qbit-libbitcoinpqc)
+- [BlockstreamResearch/shrincs-c](https://github.com/BlockstreamResearch/shrincs-c)
+- [btxchain/btx #18](https://github.com/btxchain/btx/pull/18)
+- [btxchain/btx #17](https://github.com/btxchain/btx/pull/17)
+- [sonic-mast/aibtc-workspace #31](https://github.com/sonic-mast/aibtc-workspace/pull/31)
+- [btxchain/btx #15](https://github.com/btxchain/btx/pull/15)
+- [Iskander-Agent/quantum-visualizer #26](https://github.com/Iskander-Agent/quantum-visualizer/pull/26)
+- [Rayo2010x/the_sword_of_damocles](https://github.com/Rayo2010x/the_sword_of_damocles)
+- [0x00s3c/Bitcoin-Defensive-Repository-BIP-360-P2MR](https://github.com/0x00s3c/Bitcoin-Defensive-Repository-BIP-360-P2MR)
+- [bitcoinops/bitcoinops.github.io #2693](https://github.com/bitcoinops/bitcoinops.github.io/pull/2693)
+- [rosieRRRRR/zeb](https://github.com/rosieRRRRR/zeb)
+- [cryptoquick/bips #38](https://github.com/cryptoquick/bips/pull/38)
+- [rosieRRRRR/bitcoin-quantum-spend](https://github.com/rosieRRRRR/bitcoin-quantum-spend)
+- [bitcoinops/bitcoinops.github.io #2574](https://github.com/bitcoinops/bitcoinops.github.io/pull/2574)
+- [DHB94/nonce-recurrence-attack #19](https://github.com/DHB94/nonce-recurrence-attack/pull/19)
+- [DHB94/nonce-recurrence-attack #18](https://github.com/DHB94/nonce-recurrence-attack/pull/18)
+- [DHB94/nonce-recurrence-attack #16](https://github.com/DHB94/nonce-recurrence-attack/pull/16)
+- [DHB94/nonce-recurrence-attack #15](https://github.com/DHB94/nonce-recurrence-attack/pull/15)
+- [cryptoquick/bips #31](https://github.com/cryptoquick/bips/pull/31)
+- [cryptoquick/bitcoin #4](https://github.com/cryptoquick/bitcoin/pull/4)
+- [bitcoin/bitcoin #33163](https://github.com/bitcoin/bitcoin/pull/33163)
+- [bitcoin/bips #1895](https://github.com/bitcoin/bips/pull/1895)
+- [bitcoin/bips #1830](https://github.com/bitcoin/bips/pull/1830)
+
+## cold-storage
+
+- [coldtest-berlin/pq-single-address-backup](https://github.com/coldtest-berlin/pq-single-address-backup)
 
 ## docs
 
@@ -45,6 +150,76 @@ title: "Tags"
 - [Hash-Based Signature Schemes for Post-Quantum Bitcoin](https://conduition.io/cryptography/quantum-hbs/)
 - [Proposing a P2QRH BIP](https://delvingbitcoin.org/t/proposing-a-p2qrh-bip-towards-a-quantum-resistant-soft-fork/956)
 
+## execution-gated
+
+- [rosieRRRRR/zeb](https://github.com/rosieRRRRR/zeb)
+
+## github
+
+- [posix4e/btc-pq #4](https://github.com/posix4e/btc-pq/pull/4)
+- [AlxCheh/Bitcoin-Intel #1212](https://github.com/AlxCheh/Bitcoin-Intel/pull/1212)
+- [bitcointranscripts/bitcointranscripts #707](https://github.com/bitcointranscripts/bitcointranscripts/pull/707)
+- [bitcoin/bips #2273](https://github.com/bitcoin/bips/pull/2273)
+- [SHRINCS/shrincs-bip #63](https://github.com/SHRINCS/shrincs-bip/pull/63)
+- [XuJiandong/shrincs-lock](https://github.com/XuJiandong/shrincs-lock)
+- [AppliedPQC/AppliedPQC.github.io #20](https://github.com/AppliedPQC/AppliedPQC.github.io/pull/20)
+- [AppliedPQC/shrincs-rs](https://github.com/AppliedPQC/shrincs-rs)
+- [AppliedPQC/pqc-research #27](https://github.com/AppliedPQC/pqc-research/pull/27)
+- [soqucoin/soqucoin #52](https://github.com/soqucoin/soqucoin/pull/52)
+- [bitcoinops/bitcoinops.github.io #2861](https://github.com/bitcoinops/bitcoinops.github.io/pull/2861)
+- [btq-ag/btq-core #181](https://github.com/btq-ag/btq-core/pull/181)
+- [bussyjd/btq-browser-wallet #3](https://github.com/bussyjd/btq-browser-wallet/pull/3)
+- [bussyjd/btq-browser-wallet #2](https://github.com/bussyjd/btq-browser-wallet/pull/2)
+- [bussyjd/btq-browser-wallet #1](https://github.com/bussyjd/btq-browser-wallet/pull/1)
+- [bussyjd/btq-browser-wallet](https://github.com/bussyjd/btq-browser-wallet)
+- [bussyjd/Qparrow #1](https://github.com/bussyjd/Qparrow/pull/1)
+- [bussyjd/drongo #3](https://github.com/bussyjd/drongo/pull/3)
+- [bussyjd/drongo #1](https://github.com/bussyjd/drongo/pull/1)
+- [Friotaioch/Friotaioch #1](https://github.com/Friotaioch/Friotaioch/pull/1)
+- [starius/flockroot](https://github.com/starius/flockroot)
+- [SHRINCS/shrincs-bip #51](https://github.com/SHRINCS/shrincs-bip/pull/51)
+- [btq-ag/btq-core #172](https://github.com/btq-ag/btq-core/pull/172)
+- [btq-ag/btq-core #167](https://github.com/btq-ag/btq-core/pull/167)
+- [ADDAddition/ADDITION #35](https://github.com/ADDAddition/ADDITION/pull/35)
+- [ADDAddition/ADDITION #12](https://github.com/ADDAddition/ADDITION/pull/12)
+- [let-the-dreamers-rise/p2mr-assurance-lab](https://github.com/let-the-dreamers-rise/p2mr-assurance-lab)
+- [btq-ag/btq-core #159](https://github.com/btq-ag/btq-core/pull/159)
+- [coldtest-berlin/pq-single-address-backup](https://github.com/coldtest-berlin/pq-single-address-backup)
+- [bitcoin/bips #2232](https://github.com/bitcoin/bips/pull/2232)
+- [SHRINCS/shrincs-bip #28](https://github.com/SHRINCS/shrincs-bip/pull/28)
+- [bitcoin/bips #2212](https://github.com/bitcoin/bips/pull/2212)
+- [jbride/p2mr-ref-impl](https://github.com/jbride/p2mr-ref-impl)
+- [LayerTwo-Labs/bip300301_enforcer #459](https://github.com/LayerTwo-Labs/bip300301_enforcer/pull/459)
+- [Qbit-Org/qbit-libbitcoinpqc #4](https://github.com/Qbit-Org/qbit-libbitcoinpqc/pull/4)
+- [Qbit-Org/qbit #107](https://github.com/Qbit-Org/qbit/pull/107)
+- [minksy-ux/Bitcoin-QRAT-Hybrid-PQ-Framework-with-Optimized-Hash-Signatures-Adaptive-P2MR-zk-STARK-Migration-](https://github.com/minksy-ux/Bitcoin-QRAT-Hybrid-PQ-Framework-with-Optimized-Hash-Signatures-Adaptive-P2MR-zk-STARK-Migration-)
+- [utxo-detective/shorlock](https://github.com/utxo-detective/shorlock)
+- [jbride/bitcoin #1](https://github.com/jbride/bitcoin/pull/1)
+- [starius/p2mr-slides](https://github.com/starius/p2mr-slides)
+- [Qbit-Org/qbit-libbitcoinpqc](https://github.com/Qbit-Org/qbit-libbitcoinpqc)
+- [BlockstreamResearch/shrincs-c](https://github.com/BlockstreamResearch/shrincs-c)
+- [btxchain/btx #18](https://github.com/btxchain/btx/pull/18)
+- [btxchain/btx #17](https://github.com/btxchain/btx/pull/17)
+- [sonic-mast/aibtc-workspace #31](https://github.com/sonic-mast/aibtc-workspace/pull/31)
+- [btxchain/btx #15](https://github.com/btxchain/btx/pull/15)
+- [Iskander-Agent/quantum-visualizer #26](https://github.com/Iskander-Agent/quantum-visualizer/pull/26)
+- [Rayo2010x/the_sword_of_damocles](https://github.com/Rayo2010x/the_sword_of_damocles)
+- [0x00s3c/Bitcoin-Defensive-Repository-BIP-360-P2MR](https://github.com/0x00s3c/Bitcoin-Defensive-Repository-BIP-360-P2MR)
+- [bitcoinops/bitcoinops.github.io #2693](https://github.com/bitcoinops/bitcoinops.github.io/pull/2693)
+- [rosieRRRRR/zeb](https://github.com/rosieRRRRR/zeb)
+- [cryptoquick/bips #38](https://github.com/cryptoquick/bips/pull/38)
+- [rosieRRRRR/bitcoin-quantum-spend](https://github.com/rosieRRRRR/bitcoin-quantum-spend)
+- [bitcoinops/bitcoinops.github.io #2574](https://github.com/bitcoinops/bitcoinops.github.io/pull/2574)
+- [DHB94/nonce-recurrence-attack #19](https://github.com/DHB94/nonce-recurrence-attack/pull/19)
+- [DHB94/nonce-recurrence-attack #18](https://github.com/DHB94/nonce-recurrence-attack/pull/18)
+- [DHB94/nonce-recurrence-attack #16](https://github.com/DHB94/nonce-recurrence-attack/pull/16)
+- [DHB94/nonce-recurrence-attack #15](https://github.com/DHB94/nonce-recurrence-attack/pull/15)
+- [cryptoquick/bips #31](https://github.com/cryptoquick/bips/pull/31)
+- [cryptoquick/bitcoin #4](https://github.com/cryptoquick/bitcoin/pull/4)
+- [bitcoin/bitcoin #33163](https://github.com/bitcoin/bitcoin/pull/33163)
+- [bitcoin/bips #1895](https://github.com/bitcoin/bips/pull/1895)
+- [bitcoin/bips #1830](https://github.com/bitcoin/bips/pull/1830)
+
 ## hash-based
 
 - [Trivial QC Signatures with Clean Upgrade Path](https://groups.google.com/g/bitcoindev/c/8O857bRSVV8/m/j4ngMjlHCAAJ)
@@ -64,25 +239,104 @@ title: "Tags"
 - [Hash-based Signature Schemes for Bitcoin](https://eprint.iacr.org/2025/2203)
 - [Hash-Based Signature Schemes for Post-Quantum Bitcoin](https://conduition.io/cryptography/quantum-hbs/)
 
+## hodl
+
+- [coldtest-berlin/pq-single-address-backup](https://github.com/coldtest-berlin/pq-single-address-backup)
+
+## inheritance
+
+- [coldtest-berlin/pq-single-address-backup](https://github.com/coldtest-berlin/pq-single-address-backup)
+
 ## isogeny
 
 - [Post-quantum HD wallets, silent payments, thresholds](https://delvingbitcoin.org/t/post-quantum-hd-wallets-silent-payments-key-aggregation-and-threshold-signatures/1854)
+- [utxo-detective/shorlock](https://github.com/utxo-detective/shorlock)
+- [bitcoinops/bitcoinops.github.io #2693](https://github.com/bitcoinops/bitcoinops.github.io/pull/2693)
 - [Bitcoin Devs Should Be Learning Isogeny Cryptography](https://conduition.io/cryptography/isogenies-intro/)
 - [Compact isogeny PQC for HD wallets](https://delvingbitcoin.org/t/compact-isogeny-pqc-can-replace-hd-wallets-key-tweaking-silent-payments/2324)
+- [DHB94/nonce-recurrence-attack #19](https://github.com/DHB94/nonce-recurrence-attack/pull/19)
+- [DHB94/nonce-recurrence-attack #18](https://github.com/DHB94/nonce-recurrence-attack/pull/18)
+- [DHB94/nonce-recurrence-attack #16](https://github.com/DHB94/nonce-recurrence-attack/pull/16)
+- [DHB94/nonce-recurrence-attack #15](https://github.com/DHB94/nonce-recurrence-attack/pull/15)
+- [bitcoin/bips #1830](https://github.com/bitcoin/bips/pull/1830)
+
+## lamport-signature
+
+- [utxo-detective/shorlock](https://github.com/utxo-detective/shorlock)
+
+## lattice-cryptography
+
+- [utxo-detective/shorlock](https://github.com/utxo-detective/shorlock)
+
+## mempool
+
+- [rosieRRRRR/zeb](https://github.com/rosieRRRRR/zeb)
+- [rosieRRRRR/bitcoin-quantum-spend](https://github.com/rosieRRRRR/bitcoin-quantum-spend)
+
+## merged
+
+- [AlxCheh/Bitcoin-Intel #1212](https://github.com/AlxCheh/Bitcoin-Intel/pull/1212)
+- [AppliedPQC/AppliedPQC.github.io #20](https://github.com/AppliedPQC/AppliedPQC.github.io/pull/20)
+- [AppliedPQC/pqc-research #27](https://github.com/AppliedPQC/pqc-research/pull/27)
+- [soqucoin/soqucoin #52](https://github.com/soqucoin/soqucoin/pull/52)
+- [bitcoinops/bitcoinops.github.io #2861](https://github.com/bitcoinops/bitcoinops.github.io/pull/2861)
+- [bussyjd/Qparrow #1](https://github.com/bussyjd/Qparrow/pull/1)
+- [bussyjd/drongo #3](https://github.com/bussyjd/drongo/pull/3)
+- [bussyjd/drongo #1](https://github.com/bussyjd/drongo/pull/1)
+- [btq-ag/btq-core #167](https://github.com/btq-ag/btq-core/pull/167)
+- [ADDAddition/ADDITION #35](https://github.com/ADDAddition/ADDITION/pull/35)
+- [btq-ag/btq-core #159](https://github.com/btq-ag/btq-core/pull/159)
+- [SHRINCS/shrincs-bip #28](https://github.com/SHRINCS/shrincs-bip/pull/28)
+- [Qbit-Org/qbit #107](https://github.com/Qbit-Org/qbit/pull/107)
+- [btxchain/btx #18](https://github.com/btxchain/btx/pull/18)
+- [btxchain/btx #17](https://github.com/btxchain/btx/pull/17)
+- [btxchain/btx #15](https://github.com/btxchain/btx/pull/15)
+- [bitcoinops/bitcoinops.github.io #2693](https://github.com/bitcoinops/bitcoinops.github.io/pull/2693)
+- [cryptoquick/bips #38](https://github.com/cryptoquick/bips/pull/38)
+- [bitcoinops/bitcoinops.github.io #2574](https://github.com/bitcoinops/bitcoinops.github.io/pull/2574)
+- [DHB94/nonce-recurrence-attack #19](https://github.com/DHB94/nonce-recurrence-attack/pull/19)
+- [DHB94/nonce-recurrence-attack #18](https://github.com/DHB94/nonce-recurrence-attack/pull/18)
+- [DHB94/nonce-recurrence-attack #16](https://github.com/DHB94/nonce-recurrence-attack/pull/16)
+- [DHB94/nonce-recurrence-attack #15](https://github.com/DHB94/nonce-recurrence-attack/pull/15)
+- [bitcoin/bips #1895](https://github.com/bitcoin/bips/pull/1895)
 
 ## p2mr
 
+- [bussyjd/btq-browser-wallet #3](https://github.com/bussyjd/btq-browser-wallet/pull/3)
+- [bussyjd/btq-browser-wallet #2](https://github.com/bussyjd/btq-browser-wallet/pull/2)
+- [bussyjd/btq-browser-wallet #1](https://github.com/bussyjd/btq-browser-wallet/pull/1)
+- [bussyjd/btq-browser-wallet](https://github.com/bussyjd/btq-browser-wallet)
+- [bussyjd/Qparrow #1](https://github.com/bussyjd/Qparrow/pull/1)
+- [bussyjd/drongo #3](https://github.com/bussyjd/drongo/pull/3)
+- [btq-ag/btq-core #172](https://github.com/btq-ag/btq-core/pull/172)
+- [jbride/p2mr-ref-impl](https://github.com/jbride/p2mr-ref-impl)
+- [0x00s3c/Bitcoin-Defensive-Repository-BIP-360-P2MR](https://github.com/0x00s3c/Bitcoin-Defensive-Repository-BIP-360-P2MR)
 - [bip360.org](https://bip360.org/)
 - [BIP-360 Pay-to-Merkle-Root](https://github.com/bitcoin/bips/blob/master/bip-0360.mediawiki)
 - [bitcoin/bips #1670](https://github.com/bitcoin/bips/pull/1670)
 
 ## p2qrh
 
+- [Friotaioch/Friotaioch #1](https://github.com/Friotaioch/Friotaioch/pull/1)
+- [jbride/bitcoin #1](https://github.com/jbride/bitcoin/pull/1)
+- [sonic-mast/aibtc-workspace #31](https://github.com/sonic-mast/aibtc-workspace/pull/31)
+- [Iskander-Agent/quantum-visualizer #26](https://github.com/Iskander-Agent/quantum-visualizer/pull/26)
+- [bitcoin/bips #1895](https://github.com/bitcoin/bips/pull/1895)
 - [Changes to BIP-360](https://delvingbitcoin.org/t/changes-to-bip-360-pay-to-quantum-resistant-hash-p2qrh/1811)
 - [Proposing a P2QRH BIP](https://delvingbitcoin.org/t/proposing-a-p2qrh-bip-towards-a-quantum-resistant-soft-fork/956)
 
+## p2tsh
+
+- [cryptoquick/bips #38](https://github.com/cryptoquick/bips/pull/38)
+- [bitcoinops/bitcoinops.github.io #2574](https://github.com/bitcoinops/bitcoinops.github.io/pull/2574)
+- [cryptoquick/bips #31](https://github.com/cryptoquick/bips/pull/31)
+- [cryptoquick/bitcoin #4](https://github.com/cryptoquick/bitcoin/pull/4)
+
 ## post-quantum
 
+- [posix4e/btc-pq #4](https://github.com/posix4e/btc-pq/pull/4)
+- [AlxCheh/Bitcoin-Intel #1212](https://github.com/AlxCheh/Bitcoin-Intel/pull/1212)
+- [bitcointranscripts/bitcointranscripts #707](https://github.com/bitcointranscripts/bitcointranscripts/pull/707)
 - [A Post Quantum Migration Proposal](https://groups.google.com/g/bitcoindev/c/uEaf4bj07rE/m/RMkPWnrSBwAJ)
 - [Trivial QC Signatures with Clean Upgrade Path](https://groups.google.com/g/bitcoindev/c/8O857bRSVV8/m/j4ngMjlHCAAJ)
 - [Algorithm agility against quantum and classical attacks](https://delvingbitcoin.org/t/algorithm-agility-to-defeat-quantum-and-classical-attacks-on-bitcoins-signature-algorithms/2241)
@@ -101,24 +355,84 @@ title: "Tags"
 - [Bitcoin and Quantum Computing](https://delvingbitcoin.org/t/bitcoin-and-quantum-computing/1730)
 - [Taproot is post-quantum secure on script-path spends](https://groups.google.com/g/bitcoindev/c/ydE5u5C0xVc/m/Xpxx_94IAgAJ)
 - [Quantum Safe Bitcoin paper](https://github.com/avihu28/Quantum-Safe-Bitcoin-Transactions/blob/main/paper/QSB.pdf)
+- [bitcoin/bips #2273](https://github.com/bitcoin/bips/pull/2273)
+- [SHRINCS/shrincs-bip #63](https://github.com/SHRINCS/shrincs-bip/pull/63)
+- [XuJiandong/shrincs-lock](https://github.com/XuJiandong/shrincs-lock)
+- [AppliedPQC/AppliedPQC.github.io #20](https://github.com/AppliedPQC/AppliedPQC.github.io/pull/20)
+- [AppliedPQC/shrincs-rs](https://github.com/AppliedPQC/shrincs-rs)
+- [AppliedPQC/pqc-research #27](https://github.com/AppliedPQC/pqc-research/pull/27)
+- [soqucoin/soqucoin #52](https://github.com/soqucoin/soqucoin/pull/52)
+- [bitcoinops/bitcoinops.github.io #2861](https://github.com/bitcoinops/bitcoinops.github.io/pull/2861)
+- [btq-ag/btq-core #181](https://github.com/btq-ag/btq-core/pull/181)
+- [bussyjd/btq-browser-wallet #3](https://github.com/bussyjd/btq-browser-wallet/pull/3)
+- [bussyjd/btq-browser-wallet #2](https://github.com/bussyjd/btq-browser-wallet/pull/2)
+- [bussyjd/btq-browser-wallet #1](https://github.com/bussyjd/btq-browser-wallet/pull/1)
+- [bussyjd/btq-browser-wallet](https://github.com/bussyjd/btq-browser-wallet)
+- [bussyjd/Qparrow #1](https://github.com/bussyjd/Qparrow/pull/1)
+- [bussyjd/drongo #3](https://github.com/bussyjd/drongo/pull/3)
+- [bussyjd/drongo #1](https://github.com/bussyjd/drongo/pull/1)
+- [Friotaioch/Friotaioch #1](https://github.com/Friotaioch/Friotaioch/pull/1)
+- [starius/flockroot](https://github.com/starius/flockroot)
+- [SHRINCS/shrincs-bip #51](https://github.com/SHRINCS/shrincs-bip/pull/51)
+- [btq-ag/btq-core #172](https://github.com/btq-ag/btq-core/pull/172)
+- [btq-ag/btq-core #167](https://github.com/btq-ag/btq-core/pull/167)
+- [ADDAddition/ADDITION #35](https://github.com/ADDAddition/ADDITION/pull/35)
+- [ADDAddition/ADDITION #12](https://github.com/ADDAddition/ADDITION/pull/12)
+- [let-the-dreamers-rise/p2mr-assurance-lab](https://github.com/let-the-dreamers-rise/p2mr-assurance-lab)
+- [btq-ag/btq-core #159](https://github.com/btq-ag/btq-core/pull/159)
+- [coldtest-berlin/pq-single-address-backup](https://github.com/coldtest-berlin/pq-single-address-backup)
 - [PRAWNS](https://lclhost.org/blog/prawns/)
+- [bitcoin/bips #2232](https://github.com/bitcoin/bips/pull/2232)
+- [SHRINCS/shrincs-bip #28](https://github.com/SHRINCS/shrincs-bip/pull/28)
+- [bitcoin/bips #2212](https://github.com/bitcoin/bips/pull/2212)
+- [jbride/p2mr-ref-impl](https://github.com/jbride/p2mr-ref-impl)
+- [LayerTwo-Labs/bip300301_enforcer #459](https://github.com/LayerTwo-Labs/bip300301_enforcer/pull/459)
+- [Qbit-Org/qbit-libbitcoinpqc #4](https://github.com/Qbit-Org/qbit-libbitcoinpqc/pull/4)
+- [Qbit-Org/qbit #107](https://github.com/Qbit-Org/qbit/pull/107)
+- [minksy-ux/Bitcoin-QRAT-Hybrid-PQ-Framework-with-Optimized-Hash-Signatures-Adaptive-P2MR-zk-STARK-Migration-](https://github.com/minksy-ux/Bitcoin-QRAT-Hybrid-PQ-Framework-with-Optimized-Hash-Signatures-Adaptive-P2MR-zk-STARK-Migration-)
+- [utxo-detective/shorlock](https://github.com/utxo-detective/shorlock)
+- [jbride/bitcoin #1](https://github.com/jbride/bitcoin/pull/1)
+- [starius/p2mr-slides](https://github.com/starius/p2mr-slides)
+- [Qbit-Org/qbit-libbitcoinpqc](https://github.com/Qbit-Org/qbit-libbitcoinpqc)
+- [BlockstreamResearch/shrincs-c](https://github.com/BlockstreamResearch/shrincs-c)
 - [SHRINCS/shrincs-bip](https://github.com/SHRINCS/shrincs-bip)
+- [btxchain/btx #18](https://github.com/btxchain/btx/pull/18)
+- [btxchain/btx #17](https://github.com/btxchain/btx/pull/17)
+- [sonic-mast/aibtc-workspace #31](https://github.com/sonic-mast/aibtc-workspace/pull/31)
+- [btxchain/btx #15](https://github.com/btxchain/btx/pull/15)
 - [Post Quantum Cryptography Group](https://lclhost.org/blog/post-quantum-cryptography-group/)
+- [Iskander-Agent/quantum-visualizer #26](https://github.com/Iskander-Agent/quantum-visualizer/pull/26)
+- [Rayo2010x/the_sword_of_damocles](https://github.com/Rayo2010x/the_sword_of_damocles)
 - [Bitcoin post-quantum work tracker](https://gist.github.com/Roasbeef/563f173fe44e2005e003a082716e586f)
 - [Roasbeef/go-zkvm](https://github.com/Roasbeef/go-zkvm)
 - [Roasbeef/bip32-pq-zkp](https://github.com/Roasbeef/bip32-pq-zkp)
+- [0x00s3c/Bitcoin-Defensive-Repository-BIP-360-P2MR](https://github.com/0x00s3c/Bitcoin-Defensive-Repository-BIP-360-P2MR)
+- [bitcoinops/bitcoinops.github.io #2693](https://github.com/bitcoinops/bitcoinops.github.io/pull/2693)
 - [avihu28/Quantum-Safe-Bitcoin-Transactions](https://github.com/avihu28/Quantum-Safe-Bitcoin-Transactions)
 - [SHRIMPS](https://delvingbitcoin.org/t/shrimps-2-5-kb-post-quantum-signatures-across-multiple-stateful-devices/2355)
 - [Bitcoin Devs Should Be Learning Isogeny Cryptography](https://conduition.io/cryptography/isogenies-intro/)
 - [Compact isogeny PQC for HD wallets](https://delvingbitcoin.org/t/compact-isogeny-pqc-can-replace-hd-wallets-key-tweaking-silent-payments/2324)
 - [BlockstreamResearch/shrincs-cpp](https://github.com/BlockstreamResearch/shrincs-cpp)
 - [BlockstreamResearch/shrincs-simplicity-verifier](https://github.com/BlockstreamResearch/shrincs-simplicity-verifier)
+- [rosieRRRRR/zeb](https://github.com/rosieRRRRR/zeb)
+- [cryptoquick/bips #38](https://github.com/cryptoquick/bips/pull/38)
 - [SHRINCS](https://delvingbitcoin.org/t/shrincs-324-byte-stateful-post-quantum-signatures-with-static-backups/2158)
+- [rosieRRRRR/bitcoin-quantum-spend](https://github.com/rosieRRRRR/bitcoin-quantum-spend)
+- [bitcoinops/bitcoinops.github.io #2574](https://github.com/bitcoinops/bitcoinops.github.io/pull/2574)
 - [Hash-based Signature Schemes for Bitcoin](https://eprint.iacr.org/2025/2203)
+- [DHB94/nonce-recurrence-attack #19](https://github.com/DHB94/nonce-recurrence-attack/pull/19)
+- [DHB94/nonce-recurrence-attack #18](https://github.com/DHB94/nonce-recurrence-attack/pull/18)
+- [DHB94/nonce-recurrence-attack #16](https://github.com/DHB94/nonce-recurrence-attack/pull/16)
+- [DHB94/nonce-recurrence-attack #15](https://github.com/DHB94/nonce-recurrence-attack/pull/15)
+- [cryptoquick/bips #31](https://github.com/cryptoquick/bips/pull/31)
+- [cryptoquick/bitcoin #4](https://github.com/cryptoquick/bitcoin/pull/4)
+- [bitcoin/bitcoin #33163](https://github.com/bitcoin/bitcoin/pull/33163)
+- [bitcoin/bips #1895](https://github.com/bitcoin/bips/pull/1895)
 - [Changes to BIP-360](https://delvingbitcoin.org/t/changes-to-bip-360-pay-to-quantum-resistant-hash-p2qrh/1811)
 - [Post-Quantum Security of Bitcoin's Taproot](https://eprint.iacr.org/2025/1307)
 - [Post-quantum proposals for Bitcoin](https://blog.projecteleven.com/posts/a-look-at-post-quantum-proposals-for-bitcoin)
 - [starkware-bitcoin/s2morrow](https://github.com/starkware-bitcoin/s2morrow)
+- [bitcoin/bips #1830](https://github.com/bitcoin/bips/pull/1830)
 - [cryptoquick/libbitcoinpqc](https://github.com/cryptoquick/libbitcoinpqc)
 - [bip360.org](https://bip360.org/)
 - [cryptoquick/bip360.org](https://github.com/cryptoquick/bip360.org)
@@ -132,6 +446,10 @@ title: "Tags"
 - [The Exact Security of BIP32 Wallets](https://eprint.iacr.org/2021/1287)
 - [Committing to Quantum Resistance](https://eprint.iacr.org/2018/213)
 
+## post-quantum-cryptography
+
+- [utxo-detective/shorlock](https://github.com/utxo-detective/shorlock)
+
 ## prawns
 
 - [PRAWNS](https://lclhost.org/blog/prawns/)
@@ -140,8 +458,108 @@ title: "Tags"
 
 - [bitcoin/bips #1670](https://github.com/bitcoin/bips/pull/1670)
 
+## pull-request-discovery
+
+- [posix4e/btc-pq #4](https://github.com/posix4e/btc-pq/pull/4)
+- [AlxCheh/Bitcoin-Intel #1212](https://github.com/AlxCheh/Bitcoin-Intel/pull/1212)
+- [bitcointranscripts/bitcointranscripts #707](https://github.com/bitcointranscripts/bitcointranscripts/pull/707)
+- [bitcoin/bips #2273](https://github.com/bitcoin/bips/pull/2273)
+- [SHRINCS/shrincs-bip #63](https://github.com/SHRINCS/shrincs-bip/pull/63)
+- [AppliedPQC/AppliedPQC.github.io #20](https://github.com/AppliedPQC/AppliedPQC.github.io/pull/20)
+- [AppliedPQC/pqc-research #27](https://github.com/AppliedPQC/pqc-research/pull/27)
+- [soqucoin/soqucoin #52](https://github.com/soqucoin/soqucoin/pull/52)
+- [bitcoinops/bitcoinops.github.io #2861](https://github.com/bitcoinops/bitcoinops.github.io/pull/2861)
+- [btq-ag/btq-core #181](https://github.com/btq-ag/btq-core/pull/181)
+- [bussyjd/btq-browser-wallet #3](https://github.com/bussyjd/btq-browser-wallet/pull/3)
+- [bussyjd/btq-browser-wallet #2](https://github.com/bussyjd/btq-browser-wallet/pull/2)
+- [bussyjd/btq-browser-wallet #1](https://github.com/bussyjd/btq-browser-wallet/pull/1)
+- [bussyjd/Qparrow #1](https://github.com/bussyjd/Qparrow/pull/1)
+- [bussyjd/drongo #3](https://github.com/bussyjd/drongo/pull/3)
+- [bussyjd/drongo #1](https://github.com/bussyjd/drongo/pull/1)
+- [Friotaioch/Friotaioch #1](https://github.com/Friotaioch/Friotaioch/pull/1)
+- [SHRINCS/shrincs-bip #51](https://github.com/SHRINCS/shrincs-bip/pull/51)
+- [btq-ag/btq-core #172](https://github.com/btq-ag/btq-core/pull/172)
+- [btq-ag/btq-core #167](https://github.com/btq-ag/btq-core/pull/167)
+- [ADDAddition/ADDITION #35](https://github.com/ADDAddition/ADDITION/pull/35)
+- [ADDAddition/ADDITION #12](https://github.com/ADDAddition/ADDITION/pull/12)
+- [btq-ag/btq-core #159](https://github.com/btq-ag/btq-core/pull/159)
+- [bitcoin/bips #2232](https://github.com/bitcoin/bips/pull/2232)
+- [SHRINCS/shrincs-bip #28](https://github.com/SHRINCS/shrincs-bip/pull/28)
+- [bitcoin/bips #2212](https://github.com/bitcoin/bips/pull/2212)
+- [LayerTwo-Labs/bip300301_enforcer #459](https://github.com/LayerTwo-Labs/bip300301_enforcer/pull/459)
+- [Qbit-Org/qbit-libbitcoinpqc #4](https://github.com/Qbit-Org/qbit-libbitcoinpqc/pull/4)
+- [Qbit-Org/qbit #107](https://github.com/Qbit-Org/qbit/pull/107)
+- [jbride/bitcoin #1](https://github.com/jbride/bitcoin/pull/1)
+- [btxchain/btx #18](https://github.com/btxchain/btx/pull/18)
+- [btxchain/btx #17](https://github.com/btxchain/btx/pull/17)
+- [sonic-mast/aibtc-workspace #31](https://github.com/sonic-mast/aibtc-workspace/pull/31)
+- [btxchain/btx #15](https://github.com/btxchain/btx/pull/15)
+- [Iskander-Agent/quantum-visualizer #26](https://github.com/Iskander-Agent/quantum-visualizer/pull/26)
+- [bitcoinops/bitcoinops.github.io #2693](https://github.com/bitcoinops/bitcoinops.github.io/pull/2693)
+- [cryptoquick/bips #38](https://github.com/cryptoquick/bips/pull/38)
+- [bitcoinops/bitcoinops.github.io #2574](https://github.com/bitcoinops/bitcoinops.github.io/pull/2574)
+- [DHB94/nonce-recurrence-attack #19](https://github.com/DHB94/nonce-recurrence-attack/pull/19)
+- [DHB94/nonce-recurrence-attack #18](https://github.com/DHB94/nonce-recurrence-attack/pull/18)
+- [DHB94/nonce-recurrence-attack #16](https://github.com/DHB94/nonce-recurrence-attack/pull/16)
+- [DHB94/nonce-recurrence-attack #15](https://github.com/DHB94/nonce-recurrence-attack/pull/15)
+- [cryptoquick/bips #31](https://github.com/cryptoquick/bips/pull/31)
+- [cryptoquick/bitcoin #4](https://github.com/cryptoquick/bitcoin/pull/4)
+- [bitcoin/bitcoin #33163](https://github.com/bitcoin/bitcoin/pull/33163)
+- [bitcoin/bips #1895](https://github.com/bitcoin/bips/pull/1895)
+- [bitcoin/bips #1830](https://github.com/bitcoin/bips/pull/1830)
+
+## quantum-computing
+
+- [utxo-detective/shorlock](https://github.com/utxo-detective/shorlock)
+- [rosieRRRRR/zeb](https://github.com/rosieRRRRR/zeb)
+
+## quantum-resistant
+
+- [utxo-detective/shorlock](https://github.com/utxo-detective/shorlock)
+
+## repository-discovery
+
+- [XuJiandong/shrincs-lock](https://github.com/XuJiandong/shrincs-lock)
+- [AppliedPQC/shrincs-rs](https://github.com/AppliedPQC/shrincs-rs)
+- [bussyjd/btq-browser-wallet](https://github.com/bussyjd/btq-browser-wallet)
+- [starius/flockroot](https://github.com/starius/flockroot)
+- [let-the-dreamers-rise/p2mr-assurance-lab](https://github.com/let-the-dreamers-rise/p2mr-assurance-lab)
+- [coldtest-berlin/pq-single-address-backup](https://github.com/coldtest-berlin/pq-single-address-backup)
+- [jbride/p2mr-ref-impl](https://github.com/jbride/p2mr-ref-impl)
+- [minksy-ux/Bitcoin-QRAT-Hybrid-PQ-Framework-with-Optimized-Hash-Signatures-Adaptive-P2MR-zk-STARK-Migration-](https://github.com/minksy-ux/Bitcoin-QRAT-Hybrid-PQ-Framework-with-Optimized-Hash-Signatures-Adaptive-P2MR-zk-STARK-Migration-)
+- [utxo-detective/shorlock](https://github.com/utxo-detective/shorlock)
+- [starius/p2mr-slides](https://github.com/starius/p2mr-slides)
+- [Qbit-Org/qbit-libbitcoinpqc](https://github.com/Qbit-Org/qbit-libbitcoinpqc)
+- [BlockstreamResearch/shrincs-c](https://github.com/BlockstreamResearch/shrincs-c)
+- [Rayo2010x/the_sword_of_damocles](https://github.com/Rayo2010x/the_sword_of_damocles)
+- [0x00s3c/Bitcoin-Defensive-Repository-BIP-360-P2MR](https://github.com/0x00s3c/Bitcoin-Defensive-Repository-BIP-360-P2MR)
+- [rosieRRRRR/zeb](https://github.com/rosieRRRRR/zeb)
+- [rosieRRRRR/bitcoin-quantum-spend](https://github.com/rosieRRRRR/bitcoin-quantum-spend)
+
+## scrypt
+
+- [utxo-detective/shorlock](https://github.com/utxo-detective/shorlock)
+
+## sha256
+
+- [utxo-detective/shorlock](https://github.com/utxo-detective/shorlock)
+
 ## shrincs
 
+- [posix4e/btc-pq #4](https://github.com/posix4e/btc-pq/pull/4)
+- [AlxCheh/Bitcoin-Intel #1212](https://github.com/AlxCheh/Bitcoin-Intel/pull/1212)
+- [bitcointranscripts/bitcointranscripts #707](https://github.com/bitcointranscripts/bitcointranscripts/pull/707)
+- [SHRINCS/shrincs-bip #63](https://github.com/SHRINCS/shrincs-bip/pull/63)
+- [XuJiandong/shrincs-lock](https://github.com/XuJiandong/shrincs-lock)
+- [AppliedPQC/AppliedPQC.github.io #20](https://github.com/AppliedPQC/AppliedPQC.github.io/pull/20)
+- [AppliedPQC/shrincs-rs](https://github.com/AppliedPQC/shrincs-rs)
+- [AppliedPQC/pqc-research #27](https://github.com/AppliedPQC/pqc-research/pull/27)
+- [soqucoin/soqucoin #52](https://github.com/soqucoin/soqucoin/pull/52)
+- [bitcoinops/bitcoinops.github.io #2861](https://github.com/bitcoinops/bitcoinops.github.io/pull/2861)
+- [starius/flockroot](https://github.com/starius/flockroot)
+- [SHRINCS/shrincs-bip #51](https://github.com/SHRINCS/shrincs-bip/pull/51)
+- [SHRINCS/shrincs-bip #28](https://github.com/SHRINCS/shrincs-bip/pull/28)
+- [BlockstreamResearch/shrincs-c](https://github.com/BlockstreamResearch/shrincs-c)
 - [SHRINCS/shrincs-bip](https://github.com/SHRINCS/shrincs-bip)
 - [Post Quantum Cryptography Group](https://lclhost.org/blog/post-quantum-cryptography-group/)
 - [SHRIMPS](https://delvingbitcoin.org/t/shrimps-2-5-kb-post-quantum-signatures-across-multiple-stateful-devices/2355)
@@ -149,6 +567,10 @@ title: "Tags"
 - [BlockstreamResearch/shrincs-simplicity-verifier](https://github.com/BlockstreamResearch/shrincs-simplicity-verifier)
 - [SHRINCS](https://delvingbitcoin.org/t/shrincs-324-byte-stateful-post-quantum-signatures-with-static-backups/2158)
 - [Hash-based Signature Schemes for Bitcoin](https://eprint.iacr.org/2025/2203)
+
+## slh-dsa
+
+- [coldtest-berlin/pq-single-address-backup](https://github.com/coldtest-berlin/pq-single-address-backup)
 
 ## spec
 
@@ -163,4 +585,16 @@ title: "Tags"
 - [Making Classical Signatures Post-Quantum for Single Use](https://eprint.iacr.org/2023/420)
 - [The Exact Security of BIP32 Wallets](https://eprint.iacr.org/2021/1287)
 - [Committing to Quantum Resistance](https://eprint.iacr.org/2018/213)
+
+## utxo
+
+- [utxo-detective/shorlock](https://github.com/utxo-detective/shorlock)
+
+## zeb
+
+- [rosieRRRRR/zeb](https://github.com/rosieRRRRR/zeb)
+
+## zero-exposure-broadcast
+
+- [rosieRRRRR/zeb](https://github.com/rosieRRRRR/zeb)
 

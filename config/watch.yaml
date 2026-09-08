@@ -14,9 +14,12 @@ preferred_chips:
 hidden_tags:
   - github
   - repository-discovery
+  - pull-request-discovery
   - candidate
   - pull-request
   - package
+  - delving
+  - topic-discovery
 relevance:
   always_match:
     - bip360
