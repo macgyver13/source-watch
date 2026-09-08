@@ -359,6 +359,122 @@ class DiscoveryDateTests(unittest.TestCase):
             finally:
                 build_seed_feed.OUT = old_out
 
+    def test_live_github_pr_created_at_overwrites_seed_discovery(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            out = Path(tmp)
+            old_out = build_seed_feed.OUT
+            build_seed_feed.OUT = out
+            try:
+                (out / "feed.json").write_text(json.dumps({
+                    "items": [{
+                        "id": "seed:example-pr-42",
+                        "discovered_at": "2026-08-28T19:59:47Z",
+                        "event_time": "2026-08-28T19:59:47Z",
+                    }]
+                }))
+                (out / "projects.json").write_text(json.dumps({"projects": []}))
+                (out / "sources.json").write_text(json.dumps({"sources": []}))
+
+                def fake_github(path: str):
+                    if path == "/repos/example/monorepo/pulls/42":
+                        return {
+                            "created_at": "2024-11-01T12:00:00Z",
+                            "updated_at": "2024-11-26T13:15:57Z",
+                            "merged_at": "2024-11-26T13:15:57Z",
+                        }
+                    return {}
+
+                cfg = {"seeded_sources": {"github_pull_requests": [{
+                    "id": "example-pr-42",
+                    "name": "example/monorepo #42",
+                    "url": "https://github.com/example/monorepo/pull/42",
+                    "project": "Example Core",
+                    "tags": ["docs"],
+                    "discovered_at": "2026-08-28T19:59:47Z",
+                }]}}
+                items, projects, sources = build_seed_feed.build_items(
+                    cfg, github_json_fetcher=fake_github, skip_searches=True,
+                )
+                self.assertEqual(items[0]["discovered_at"], "2024-11-01T12:00:00Z")
+                self.assertEqual(items[0]["event_time"], "2024-11-01T12:00:00Z")
+                self.assertEqual(items[0]["activity_at"], "2024-11-26T13:15:57Z")
+                self.assertEqual(sources["example-pr-42"]["discovered_at"], "2024-11-01T12:00:00Z")
+                self.assertEqual(projects["example-core"]["discovered_at"], "2024-11-01T12:00:00Z")
+            finally:
+                build_seed_feed.OUT = old_out
+
+    def test_live_github_repo_created_at_overwrites_catalog_time(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            out = Path(tmp)
+            old_out = build_seed_feed.OUT
+            build_seed_feed.OUT = out
+            try:
+                (out / "feed.json").write_text(json.dumps({
+                    "items": [{
+                        "id": "seed:example-lib",
+                        "discovered_at": "2026-08-28T19:59:47Z",
+                        "event_time": "2026-08-28T19:59:47Z",
+                    }]
+                }))
+                (out / "projects.json").write_text(json.dumps({"projects": []}))
+                (out / "sources.json").write_text(json.dumps({"sources": []}))
+
+                def fake_github(path: str):
+                    if path == "/repos/example/lib":
+                        return {
+                            "created_at": "2023-01-15T00:00:00Z",
+                            "pushed_at": "2026-09-01T06:26:50Z",
+                        }
+                    return {}
+
+                cfg = {"seeded_sources": {"github_repositories": [{
+                    "id": "example-lib",
+                    "repo": "example/lib",
+                    "project": "Example Lib",
+                    "tags": ["docs"],
+                }]}}
+                items, _projects, _sources = build_seed_feed.build_items(
+                    cfg, github_json_fetcher=fake_github, skip_searches=True,
+                )
+                self.assertEqual(items[0]["discovered_at"], "2023-01-15T00:00:00Z")
+                self.assertEqual(items[0]["activity_at"], "2026-09-01T06:26:50Z")
+            finally:
+                build_seed_feed.OUT = old_out
+
+    def test_live_activity_false_still_takes_created_at(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            out = Path(tmp)
+            old_out = build_seed_feed.OUT
+            build_seed_feed.OUT = out
+            try:
+                (out / "feed.json").write_text(json.dumps({"items": []}))
+                (out / "projects.json").write_text(json.dumps({"projects": []}))
+                (out / "sources.json").write_text(json.dumps({"sources": []}))
+
+                def fake_github(path: str):
+                    return {
+                        "created_at": "2020-01-01T00:00:00Z",
+                        "pushed_at": "2026-09-03T13:50:46Z",
+                    }
+
+                cfg = {"seeded_sources": {"github_repositories": [{
+                    "id": "example-monorepo",
+                    "repo": "example/monorepo",
+                    "project": "Example Core",
+                    "tags": ["docs"],
+                    "discovered_at": "2025-08-26T17:54:03Z",
+                    "activity_at": "2026-05-29T18:55:54Z",
+                    "live_activity": False,
+                }]}}
+                items, _projects, _sources = build_seed_feed.build_items(
+                    cfg, github_json_fetcher=fake_github, skip_searches=True,
+                )
+                self.assertEqual(items[0]["discovered_at"], "2020-01-01T00:00:00Z")
+                self.assertEqual(items[0]["activity_at"], "2026-05-29T18:55:54Z")
+            finally:
+                build_seed_feed.OUT = old_out
+
+
 
 if __name__ == "__main__":
     unittest.main()
