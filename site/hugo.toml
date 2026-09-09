@@ -6,6 +6,7 @@ disablePathToLower = true
 
 [params]
   description = "Public activity on tracked sources."
+  serving_mode = "static"
 
 [markup]
   [markup.goldmark]

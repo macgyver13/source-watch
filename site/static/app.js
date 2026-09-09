@@ -341,20 +341,61 @@
   }
 
   function renderWeek(allItems, weekSlug) {
+    if (document.querySelectorAll(".rail a[data-week]").length === 0 || !document.querySelector(".rail a[data-week*='-W']")) {
+
+      var slugs = [];
+      var seen = {};
+      (allItems || []).forEach(function (item) {
+        var parts = itemWeek(item);
+        if (!parts) return;
+        var slug = parts.year + "-W" + String(parts.week).padStart(2, "0");
+        if (seen[slug]) return;
+        seen[slug] = true;
+        slugs.push(slug);
+      });
+      slugs.sort().reverse();
+      slugs = slugs.slice(0, 26);
+      var rail = document.querySelector("nav.rail");
+      if (rail) {
+        rail.innerHTML = slugs.map(function (slug) {
+          var p = parseWeekSlug(slug);
+          var num = p ? String(p.week) : slug;
+          var on = slug === weekSlug ? ' class="on"' : "";
+          return '<a href="/weeks/' + slug + '/" data-week="' + slug + '"' + on + '><span class="wk">W' + num + ' <span class="n"></span></span><span class="sub"></span></a>';
+        }).join("");
+      }
+    }
     var parsed = parseWeekSlug(weekSlug);
     if (parsed) {
+      var titleEl = document.getElementById("week-title");
+      if (titleEl) {
+        var titleText = (titleEl.textContent || "").trim();
+        if (!titleText || titleText === "Week") {
+          titleEl.textContent = "Week " + parsed.week + ", " + parsed.year;
+        }
+      }
+      var crumbEl = document.getElementById("week-crumb");
+      if (crumbEl) {
+        var crumbText = (crumbEl.textContent || "").trim();
+        var slug = parsed.slug || weekSlug;
+        if (!crumbText || crumbText === "Week" || crumbText.indexOf(slug) === -1) {
+          var siteTitle = (document.querySelector(".wordmark") || {}).textContent || "";
+          crumbEl.textContent = siteTitle.trim() + " / Weeks / " + slug;
+        }
+      }
       setText("week-range", formatWeekRange(parsed.year, parsed.week));
       document.querySelectorAll(".rail a[data-week]").forEach(function (a) {
-        var slug = a.getAttribute("data-week");
-        var p = parseWeekSlug(slug);
+        var railSlug = a.getAttribute("data-week");
+        var p = parseWeekSlug(railSlug);
         if (!p) return;
-        var n = itemsForWeek(allItems, slug).length;
+        var n = itemsForWeek(allItems, railSlug).length;
         var sub = a.querySelector(".sub");
         if (sub) sub.textContent = formatWeekRange(p.year, p.week);
         var countEl = a.querySelector(".n");
         if (countEl) countEl.textContent = String(n);
       });
     }
+
     var items = itemsForWeek(allItems, weekSlug);
     var cands = sortDiscovery(items.filter(isCandidate));
     var prs = sortDiscovery(items.filter(function (i) { return i.source_type === "github_pull_request" && !isCandidate(i); }));
@@ -612,7 +653,8 @@
     var page = currentPage();
     if (page === "home") renderTeaser(items);
     if (page === "activity") renderFeed(items);
-    if (page === "week") renderWeek(items, document.body.getAttribute("data-week") || "");
+    if (page === "week") renderWeek(items, document.body.getAttribute("data-week") || (location.pathname.match(/\/weeks\/(\d{4}-W\d{1,2})\/?$/) || [])[1] || "");
+
     if (page === "projects") renderAtlas(projects.projects || [], items, sources);
     if (page === "sources") renderSources(sources);
   }

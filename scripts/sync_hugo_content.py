@@ -83,6 +83,7 @@ def write_hugo_toml(watch: dict) -> None:
     if not base_url.endswith("/"):
         base_url += "/"
     description = str(watch.get("description") or "").strip()
+    mode = str((watch.get("serving") or {}).get("mode") or "static")
     lines = [
         f"baseURL = {toml_str(base_url)}",
         'locale = "en-us"',
@@ -92,6 +93,7 @@ def write_hugo_toml(watch: dict) -> None:
         "",
         "[params]",
         f"  description = {toml_str(description)}",
+        f"  serving_mode = {toml_str(mode)}",
         "",
         "[markup]",
         "  [markup.goldmark]",
@@ -155,13 +157,38 @@ def main() -> int:
     write_hugo_toml(watch)
     copy_watch_data(watch)
 
-    feed = json.loads((STATIC / "feed.json").read_text())
-    items = feed.get("items", [])
+    serving_mode = str((watch.get("serving") or {}).get("mode") or "static").strip().lower()
 
     write(CONTENT / "_index.md", fm(str(watch.get("name") or "Source Watch")))
     write(CONTENT / "activity" / "_index.md", fm("Activity"))
     write(CONTENT / "projects" / "_index.md", fm("Projects"))
     write(CONTENT / "sources" / "_index.md", fm("Sources"))
+    sync_topics(watch)
+
+    if serving_mode == "service":
+        week_root = CONTENT / "weeks"
+        write(week_root / "_index.md", fm("Weeks"))
+        write(week_root / "live" / "_index.md", fm("Week"))
+        if week_root.exists():
+            for path in list(week_root.iterdir()):
+                if path.is_dir() and path.name != "live":
+                    shutil.rmtree(path)
+        for name in (
+            "latest",
+            "tags",
+            "source-types",
+            "recently-changed",
+            "newly-discovered",
+            "needs-human-source-seeding",
+        ):
+            path = CONTENT / name
+            if path.exists():
+                shutil.rmtree(path)
+        print("rendered service-mode Hugo shell (weeks=live)")
+        return 0
+
+    feed = json.loads((STATIC / "feed.json").read_text())
+    items = feed.get("items", [])
 
     week_root = CONTENT / "weeks"
     week_root.mkdir(parents=True, exist_ok=True)
@@ -174,8 +201,6 @@ def main() -> int:
     week_dirs = sorted(wanted, reverse=True)
     weeks_note = "" if week_dirs else "No activity yet.\n"
     write(week_root / "_index.md", fm("Weeks") + weeks_note)
-
-    sync_topics(watch)
 
     by_tag: dict[str, list] = defaultdict(list)
     by_type: dict[str, list] = defaultdict(list)
@@ -211,6 +236,7 @@ def main() -> int:
 
     print(f"rendered slim Hugo content from {len(items)} items, weeks={week_dirs}")
     return 0
+
 
 
 if __name__ == "__main__":
