@@ -54,6 +54,7 @@ relevance:
     - slh-dsa
     - sphincs
   context_any: []
+discovered_after: ""  # ISO date; drop live hits and ignore GitHub created_at before this
 topics:
   - title: BIP-360
     slug: bip360
