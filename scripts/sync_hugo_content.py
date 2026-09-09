@@ -89,6 +89,7 @@ def write_hugo_toml(watch: dict) -> None:
         f"title = {toml_str(title)}",
         "enableRobotsTXT = true",
         "disablePathToLower = true",
+        "cleanDestinationDir = true",
         "",
         "[params]",
         f"  description = {toml_str(description)}",

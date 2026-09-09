@@ -3,6 +3,7 @@ locale = "en-us"
 title = "Silent Payments Watch"
 enableRobotsTXT = true
 disablePathToLower = true
+cleanDestinationDir = true
 
 [params]
   description = "Public activity on Silent Payments and related work."

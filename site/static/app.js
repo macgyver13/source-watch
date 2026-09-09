@@ -223,6 +223,43 @@
     });
   }
 
+  function weekSlugFromParts(p) {
+    return p.year + "-W" + String(p.week).padStart(2, "0");
+  }
+
+  function weekSlugsFromItems(items) {
+    var seen = {};
+    var slugs = [];
+    items.forEach(function (item) {
+      var p = itemWeek(item);
+      if (!p) return;
+      var slug = weekSlugFromParts(p);
+      if (seen[slug]) return;
+      seen[slug] = true;
+      slugs.push(slug);
+    });
+    slugs.sort();
+    slugs.reverse();
+    return slugs;
+  }
+
+  function renderWeekRail(allItems, currentSlug) {
+    var nav = document.querySelector("nav.rail");
+    if (!nav) return;
+    nav.innerHTML = weekSlugsFromItems(allItems).map(function (slug) {
+      var p = parseWeekSlug(slug);
+      var n = itemsForWeek(allItems, slug).length;
+      var num = String(p.week);
+      var on = slug === currentSlug ? ' class="on"' : "";
+      return (
+        '<a href="/weeks/' + esc(slug) + '/" data-week="' + esc(slug) + '"' + on + ">" +
+          '<span class="wk">W' + esc(num) + ' <span class="n">' + n + "</span></span>" +
+          '<span class="sub">' + esc(formatWeekRange(p.year, p.week)) + "</span>" +
+        "</a>"
+      );
+    }).join("");
+  }
+
   function setText(id, text) {
     var el = document.getElementById(id);
     if (el) el.textContent = text;
@@ -344,16 +381,7 @@
     var parsed = parseWeekSlug(weekSlug);
     if (parsed) {
       setText("week-range", formatWeekRange(parsed.year, parsed.week));
-      document.querySelectorAll(".rail a[data-week]").forEach(function (a) {
-        var slug = a.getAttribute("data-week");
-        var p = parseWeekSlug(slug);
-        if (!p) return;
-        var n = itemsForWeek(allItems, slug).length;
-        var sub = a.querySelector(".sub");
-        if (sub) sub.textContent = formatWeekRange(p.year, p.week);
-        var countEl = a.querySelector(".n");
-        if (countEl) countEl.textContent = String(n);
-      });
+      renderWeekRail(allItems, parsed.slug);
     }
     var items = itemsForWeek(allItems, weekSlug);
     var cands = sortDiscovery(items.filter(isCandidate));
