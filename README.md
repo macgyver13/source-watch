@@ -65,7 +65,8 @@ does not see PRs inside an already-seeded repo; PR search does. Each
 collector emits **candidate** `source_discovered` items alongside seeds.
 A candidate is a search or category hit that passed `watch.yaml`
 `relevance` and, if set, `discovered_after`; it is not yet in the accepted
-`seeded_sources` catalog.
+`seeded_sources` catalog. Hits whose name, URL, or text contains
+`source-watch` (this engine and forks) are dropped.
 Seeded GitHub repos/PRs take live `created_at` as `discovered_at` when that
 stamp is on or after `discovered_after`; older `created_at` keeps the seed
 date. Activity moves if GitHub or Delving is newer. Docs, crates, and

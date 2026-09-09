@@ -217,6 +217,32 @@ class DelvingLiveCollectorTests(unittest.TestCase):
             finally:
                 build_seed_feed.OUT = old_out
 
+    def test_search_drops_source_watch_topic(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            out = Path(tmp)
+            old_out = build_seed_feed.OUT
+            build_seed_feed.OUT = out
+            try:
+                _empty_artifacts(out)
+                mentioned = {
+                    **FROST,
+                    "id": 102,
+                    "title": "Using source-watch for FROST",
+                    "slug": "using-source-watch-for-frost",
+                    "excerpt": "Stand up a source-watch instance.",
+                }
+                items, _projects, sources = build_seed_feed.build_items(
+                    _search_cfg(),
+                    delving_search_fetcher=lambda _q: [FROST, mentioned],
+                    watch={},
+                )
+                self.assertEqual(len(items), 1)
+                self.assertEqual(items[0]["id"], "delving-search:delving-frost:99")
+                self.assertNotIn("delving-search:delving-frost:102", sources)
+            finally:
+                build_seed_feed.OUT = old_out
+
+
     def test_seeded_delving_url_is_not_rediscovered(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             out = Path(tmp)
