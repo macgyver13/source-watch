@@ -473,6 +473,40 @@ def repo_excluded_by_query_terms(repo: dict, query: str) -> bool:
     return excluded_by_query_terms(" ".join(haystack_parts), query)
 
 
+SOURCE_WATCH_TOKEN = "source-watch"
+
+
+def mentions_source_watch(*parts: object) -> bool:
+    """True when any part contains the engine repo name (origin or a fork)."""
+    token = SOURCE_WATCH_TOKEN
+    return any(token in str(part or "").lower() for part in parts)
+
+
+def repo_is_source_watch(repo: dict) -> bool:
+    topics = " ".join(str(topic) for topic in repo.get("topics") or [])
+    return mentions_source_watch(
+        repo.get("full_name"),
+        repo.get("name"),
+        repo.get("html_url"),
+        repo.get("description"),
+        topics,
+    )
+
+
+def pr_is_source_watch(hit: dict) -> bool:
+    return mentions_source_watch(pr_haystack(hit))
+
+
+def topic_is_source_watch(topic: dict) -> bool:
+    return mentions_source_watch(
+        topic.get("title"),
+        topic.get("slug"),
+        topic.get("excerpt") or topic.get("blurb"),
+        " ".join(discourse_tag_names(topic.get("tags"))),
+    )
+
+
+
 
 def relevance_from_watch(watch: dict | None) -> dict:
     watch = watch or {}
@@ -1029,6 +1063,8 @@ def build_items(
                 continue
             if repo_excluded_by_query_terms(repo, query):
                 continue
+            if repo_is_source_watch(repo):
+                continue
             if not repo_matches_relevance_rules(repo, resolved):
                 continue
             if discovery_too_old(repo.get("created_at"), resolved):
@@ -1074,6 +1110,8 @@ def build_items(
                 continue
             if pr_excluded_by_query_terms(hit, query):
                 continue
+            if pr_is_source_watch(hit):
+                continue
             if not pr_matches_relevance_rules(hit, resolved):
                 continue
             if discovery_too_old(hit.get("created_at"), resolved):
@@ -1117,6 +1155,8 @@ def build_items(
         ])
         query = str(collector.get("query") or "")
         if query and excluded_by_query_terms(haystack, query):
+            return
+        if topic_is_source_watch(topic):
             return
         if not topic_matches_relevance_rules(topic, resolved):
             return

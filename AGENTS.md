@@ -88,7 +88,7 @@ Live GitHub search hits **and** seeded GitHub repos/PRs: `discovered_at` = repo/
 
 ## Candidate discovery
 
-`live_collectors.github_repository_searches`, `github_pull_request_searches`, `delving_topic_searches`, and `delving_category_listings` run at build time. Hits that pass `watch.yaml` `relevance` and `discovered_after` become feed items with `status: candidate` and `event_type: source_discovered`. They are public matches, not the accepted `seeded_sources` catalog. To promote one, add it under `seeded_sources` and rebuild. A seeded GitHub repository does **not** hide matching PRs from `github_pull_request_searches`. Delving search-only topics that age out of `max_results` may freeze `activity_at`; that is accepted.
+`live_collectors.github_repository_searches`, `github_pull_request_searches`, `delving_topic_searches`, and `delving_category_listings` run at build time. Hits that pass `watch.yaml` `relevance` and `discovered_after` become feed items with `status: candidate` and `event_type: source_discovered`. Live hits whose name, URL, or text contains `source-watch` (this engine repo and forks) are dropped. They are public matches, not the accepted `seeded_sources` catalog. To promote one, add it under `seeded_sources` and rebuild. A seeded GitHub repository does **not** hide matching PRs from `github_pull_request_searches`. Delving search-only topics that age out of `max_results` may freeze `activity_at`; that is accepted.
 
 ## UI this engine adds
 
