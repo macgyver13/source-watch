@@ -340,10 +340,14 @@ function applyVisibility(rows, visibility) {
 
 function applyQuery(rows, q, fields) {
   if (!q) return rows;
-  return rows.filter((row) =>
-    fields.some((field) => String(row[field] || "").toLowerCase().includes(q)),
-  );
+  return rows.filter((row) => {
+    if (fields.some((field) => String(row[field] || "").toLowerCase().includes(q))) return true;
+    const patch = row.patch;
+    if (!patch || typeof patch !== "object") return false;
+    return fields.some((field) => String(patch[field] || "").toLowerCase().includes(q));
+  });
 }
+
 
 async function adminItems(env, url) {
   const q = (url.searchParams.get("q") || "").toLowerCase();

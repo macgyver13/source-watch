@@ -290,8 +290,10 @@ export const ADMIN_HTML = `<!doctype html>
         var rows = (data.items || []).map(function (item) {
           var url = item.source_url || "";
           var dim = item.suppressed ? "hidden-row" : "";
+          var displayTitle = (item.patch && item.patch.title) || item.title;
           return "<tr class='" + dim + "'>" +
-            "<td>" + linkCell(item.title, url, esc(item.why || "") + (item.id ? " · " + esc(item.id) : "")) +
+            "<td>" + linkCell(displayTitle, url, esc(item.why || "") + (item.id ? " · " + esc(item.id) : "")) +
+
             "<div class='edit' data-edit='" + esc(item.id) + "'>" +
               "<input data-f='title' value='" + esc(item.patch && item.patch.title || item.title || "") + "' placeholder='title'>" +
               "<input data-f='summary' value='" + esc(item.patch && item.patch.summary || item.summary || "") + "' placeholder='summary'>" +

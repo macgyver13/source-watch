@@ -88,6 +88,34 @@ function stagedName(name, tag) {
   return tag ? `${name}#${tag}` : name;
 }
 
+const RENDER_STALE_MS = 10 * 60 * 1000;
+
+async function purgeStaleRendered(env, liveTag) {
+  const cutoff = Date.now() - RENDER_STALE_MS;
+  const { results } = await env.DB.prepare(
+    "SELECT DISTINCT name FROM rendered WHERE name LIKE '%#g%'",
+  ).all();
+  const stale = [];
+  for (const row of results || []) {
+    const name = String(row.name || "");
+    const match = name.match(/#g(\d+)$/);
+    if (!match) continue;
+    if (`g${match[1]}` === liveTag) continue;
+    if (Number(match[1]) >= cutoff) continue;
+    stale.push(name);
+  }
+  if (!stale.length) return;
+  const stmts = [];
+  for (const name of stale) {
+    stmts.push(env.DB.prepare("DELETE FROM rendered WHERE name = ?").bind(name));
+    stmts.push(env.DB.prepare("DELETE FROM rendered_meta WHERE name = ?").bind(name));
+  }
+  for (let i = 0; i < stmts.length; i += 40) {
+    await env.DB.batch(stmts.slice(i, i + 40));
+  }
+}
+
+
 async function liveRenderedName(env, name) {
   const tag = await getSetting(env, "live_render_tag");
   return stagedName(name, tag);
@@ -276,10 +304,8 @@ export async function renderAll(env) {
   );
   await writeRendered(env, n("weeks-index"), JSON.stringify(weekIndex(overlaid.items)), jsonType);
   await setSetting(env, "live_render_tag", tag);
-  await env.DB.batch([
-    env.DB.prepare("DELETE FROM rendered WHERE name LIKE '%#g%' AND name NOT LIKE ?").bind("%#" + tag),
-    env.DB.prepare("DELETE FROM rendered_meta WHERE name LIKE '%#g%' AND name NOT LIKE ?").bind("%#" + tag),
-  ]);
+  await purgeStaleRendered(env, tag);
+
 
   return {
     items: overlaid.items.length,
