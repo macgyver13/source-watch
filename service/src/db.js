@@ -275,14 +275,12 @@ export async function renderAll(env) {
     "application/rss+xml; charset=utf-8",
   );
   await writeRendered(env, n("weeks-index"), JSON.stringify(weekIndex(overlaid.items)), jsonType);
-  const prev = await getSetting(env, "live_render_tag");
   await setSetting(env, "live_render_tag", tag);
-  if (prev && prev !== tag) {
-    await env.DB.batch([
-      env.DB.prepare("DELETE FROM rendered WHERE name LIKE ?").bind(`%#${prev}`),
-      env.DB.prepare("DELETE FROM rendered_meta WHERE name LIKE ?").bind(`%#${prev}`),
-    ]);
-  }
+  await env.DB.batch([
+    env.DB.prepare("DELETE FROM rendered WHERE name LIKE '%#g%' AND name NOT LIKE ?").bind("%#" + tag),
+    env.DB.prepare("DELETE FROM rendered_meta WHERE name LIKE '%#g%' AND name NOT LIKE ?").bind("%#" + tag),
+  ]);
+
   return {
     items: overlaid.items.length,
     projects: overlaid.projects.length,

@@ -354,7 +354,7 @@
         slugs.push(slug);
       });
       slugs.sort().reverse();
-      slugs = slugs.slice(0, 26);
+
       var rail = document.querySelector("nav.rail");
       if (rail) {
         rail.innerHTML = slugs.map(function (slug) {
