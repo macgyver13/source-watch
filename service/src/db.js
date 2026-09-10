@@ -78,15 +78,39 @@ export async function writeRendered(env, name, body, contentType) {
   await env.DB.batch(stmts);
 }
 
-export async function readRendered(env, name) {
+export async function readRenderedExact(env, name) {
   const { results } = await env.DB.prepare("SELECT body FROM rendered WHERE name = ? ORDER BY seq").bind(name).all();
   if (!results || !results.length) return null;
   return results.map((row) => row.body ?? "").join("");
 }
 
-export async function readRenderedMeta(env, name) {
-  return env.DB.prepare("SELECT etag, content_type, bytes, updated_at FROM rendered_meta WHERE name = ?").bind(name).first();
+function stagedName(name, tag) {
+  return tag ? `${name}#${tag}` : name;
 }
+
+async function liveRenderedName(env, name) {
+  const tag = await getSetting(env, "live_render_tag");
+  return stagedName(name, tag);
+}
+
+export async function readRendered(env, name) {
+  const live = await liveRenderedName(env, name);
+  const body = await readRenderedExact(env, live);
+  if (body != null || live === name) return body;
+  return readRenderedExact(env, name);
+}
+
+export async function readRenderedMeta(env, name) {
+  const live = await liveRenderedName(env, name);
+  const meta = await env.DB.prepare(
+    "SELECT etag, content_type, bytes, updated_at FROM rendered_meta WHERE name = ?",
+  ).bind(live).first();
+  if (meta || live === name) return meta;
+  return env.DB.prepare(
+    "SELECT etag, content_type, bytes, updated_at FROM rendered_meta WHERE name = ?",
+  ).bind(name).first();
+}
+
 
 export async function getSetting(env, key) {
   const row = await env.DB.prepare("SELECT value FROM settings WHERE key = ?").bind(key).first();
@@ -231,16 +255,18 @@ export async function renderAll(env) {
   const projects = { schema_version: "source-watch.projects.v0", projects: overlaid.projects };
   const sources = { schema_version: "source-watch.sources.v0", sources: overlaid.sources };
   const jsonType = "application/json; charset=utf-8";
-  await writeRendered(env, "feed.json", JSON.stringify(feed), jsonType);
-  await writeRendered(env, "projects.json", JSON.stringify(projects), jsonType);
-  await writeRendered(env, "sources.json", JSON.stringify(sources), jsonType);
+  const tag = `g${Date.now()}`;
+  const n = (name) => stagedName(name, tag);
+  await writeRendered(env, n("feed.json"), JSON.stringify(feed), jsonType);
+  await writeRendered(env, n("projects.json"), JSON.stringify(projects), jsonType);
+  await writeRendered(env, n("sources.json"), JSON.stringify(sources), jsonType);
   const publicWatch = { ...watch };
   delete publicWatch.base_url;
-  await writeRendered(env, "watch.json", JSON.stringify(publicWatch), jsonType);
-  await writeRendered(env, "items.jsonl", renderJsonl(overlaid.items), "application/jsonl; charset=utf-8");
+  await writeRendered(env, n("watch.json"), JSON.stringify(publicWatch), jsonType);
+  await writeRendered(env, n("items.jsonl"), renderJsonl(overlaid.items), "application/jsonl; charset=utf-8");
   await writeRendered(
     env,
-    "feed.xml",
+    n("feed.xml"),
     renderRss(overlaid.items, {
       name: feed.title,
       base_url: watch.base_url || "",
@@ -248,7 +274,15 @@ export async function renderAll(env) {
     }),
     "application/rss+xml; charset=utf-8",
   );
-  await writeRendered(env, "weeks-index", JSON.stringify(weekIndex(overlaid.items)), jsonType);
+  await writeRendered(env, n("weeks-index"), JSON.stringify(weekIndex(overlaid.items)), jsonType);
+  const prev = await getSetting(env, "live_render_tag");
+  await setSetting(env, "live_render_tag", tag);
+  if (prev && prev !== tag) {
+    await env.DB.batch([
+      env.DB.prepare("DELETE FROM rendered WHERE name LIKE ?").bind(`%#${prev}`),
+      env.DB.prepare("DELETE FROM rendered_meta WHERE name LIKE ?").bind(`%#${prev}`),
+    ]);
+  }
   return {
     items: overlaid.items.length,
     projects: overlaid.projects.length,
