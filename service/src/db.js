@@ -88,6 +88,15 @@ function stagedName(name, tag) {
   return tag ? `${name}#${tag}` : name;
 }
 
+async function dropRenderedTag(env, tag) {
+  if (!tag) return;
+  await env.DB.batch([
+    env.DB.prepare("DELETE FROM rendered WHERE name LIKE ?").bind("%#" + tag),
+    env.DB.prepare("DELETE FROM rendered_meta WHERE name LIKE ?").bind("%#" + tag),
+  ]);
+}
+
+
 const RENDER_STALE_MS = 10 * 60 * 1000;
 
 async function purgeStaleRendered(env, liveTag) {
@@ -303,8 +312,18 @@ export async function renderAll(env) {
     "application/rss+xml; charset=utf-8",
   );
   await writeRendered(env, n("weeks-index"), JSON.stringify(weekIndex(overlaid.items)), jsonType);
+  const prev = await getSetting(env, "live_render_tag");
+  if (prev && prev > tag) {
+    await dropRenderedTag(env, tag);
+    return {
+      items: overlaid.items.length,
+      projects: overlaid.projects.length,
+      sources: overlaid.sources.length,
+    };
+  }
   await setSetting(env, "live_render_tag", tag);
   await purgeStaleRendered(env, tag);
+
 
 
   return {

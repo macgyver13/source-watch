@@ -306,7 +306,8 @@ export const ADMIN_HTML = `<!doctype html>
             "</div></td>" +
             "<td>" + esc(item.project) + "<div class='muted'>" + esc(item.source_type) + "</div></td>" +
             "<td>" + esc(item.patch && item.patch.status || item.status || "") + "</td>" +
-            "<td>" + esc(item.discovered_at || "") + "<div class='muted'>" + esc(item.activity_at || "") + "</div></td>" +
+            "<td>" + esc((item.patch && item.patch.discovered_at) || item.discovered_at || "") + "<div class='muted'>" + esc((item.patch && item.patch.activity_at) || item.activity_at || "") + "</div></td>" +
+
             "<td class='row-actions'>" +
               "<button data-act='hide' data-id='" + esc(item.id) + "' data-hidden='" + (item.hidden ? "0" : "1") + "'>" + (item.hidden ? "Unhide" : "Hide") + "</button>" +
               "<button data-act='promote' data-id='" + esc(item.id) + "'>Promote</button>" +

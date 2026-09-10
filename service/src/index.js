@@ -597,7 +597,8 @@ async function handleAdmin(request, env, path, url) {
       const hasLocator =
         kind === "docs_pages" ? Boolean(url)
         : kind === "github_repositories" ? Boolean(entry.repo || url)
-        : kind === "github_pull_requests" ? /github\.com\/[^/]+\/[^/]+\/pull\/\d+/i.test(url)
+        : kind === "github_pull_requests" ? /^https:\/\/github\.com\/[^/]+\/[^/]+\/pull\/\d+\/?$/i.test(url)
+
         : kind === "crates" ? Boolean(entry.name || url)
         : Boolean(url || entry.repo);
       if (!entry.id || !hasLocator) return json({ error: "invalid_seed" }, 400);
