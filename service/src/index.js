@@ -312,19 +312,24 @@ function annotateNamed(row, kind, overrides, exclusions) {
   });
   const hidden = Boolean(patch && patch.hidden);
   const excluded = Boolean(rule);
+  const projectPatch = kind === "source" ? overrides.project[slugify(row.project)] : null;
+  const projectHidden = Boolean(projectPatch && projectPatch.hidden);
   const whyHidden = [];
   if (hidden) whyHidden.push("hidden override");
+  if (projectHidden) whyHidden.push("project hidden");
   if (rule) whyHidden.push(`excluded ${rule.kind} ${rule.value}`);
   return {
     ...row,
     patch,
     hidden,
     excluded,
-    suppressed: hidden || excluded,
+    project_hidden: projectHidden,
+    suppressed: hidden || excluded || projectHidden,
     exclusion: rule ? { kind: rule.kind, value: rule.value, note: rule.note || "" } : null,
     why: whyHidden.length ? whyHidden.join(" · ") : inclusionWhy({ ...row, patch }),
   };
 }
+
 
 function applyVisibility(rows, visibility) {
   if (visibility === "all") return rows;
@@ -368,9 +373,25 @@ async function adminKindList(env, kind, url) {
   const overrides = await db.loadOverrides(env);
   const exclusions = await db.loadExclusions(env);
   const key = kind === "projects" ? "project" : "source";
-  let rows = (kind === "projects" ? raw.projects : raw.sources).map((row) =>
-    annotateNamed(row, key, overrides, exclusions),
+  const overlaid = applyOverlay({
+    items: raw.items,
+    projects: raw.projects,
+    sources: raw.sources,
+    overrides,
+    exclusions,
+  });
+  const publicIds = new Set(
+    (kind === "projects" ? overlaid.projects : overlaid.sources).map((row) => row.id),
   );
+  let rows = (kind === "projects" ? raw.projects : raw.sources).map((row) => {
+    const annotated = annotateNamed(row, key, overrides, exclusions);
+    if (annotated.suppressed || publicIds.has(row.id)) return annotated;
+    return {
+      ...annotated,
+      suppressed: true,
+      why: kind === "projects" ? "no visible items" : "hidden with project or items",
+    };
+  });
   rows = applyQuery(rows, q, ["name", "url", "id", "project"]);
   rows = applyVisibility(rows, visibility);
   const total = rows.length;
@@ -379,6 +400,7 @@ async function adminKindList(env, kind, url) {
     ? { projects: sliced, total, limit, offset }
     : { sources: sliced, total, limit, offset };
 }
+
 
 async function rowRef(env, kind, id) {
   const liveId = await db.getSetting(env, "live_ingest_id");

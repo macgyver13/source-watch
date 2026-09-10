@@ -116,6 +116,26 @@ class ServiceConfigMergeTests(unittest.TestCase):
         self.assertEqual(repos[1]["id"], "new-repo")
         self.assertEqual(len(cfg["seeded_sources"]["github_repositories"]), 1)
 
+    def test_merge_seed_additions_skips_same_repo_or_crate_name(self) -> None:
+        cfg = {
+            "seeded_sources": {
+                "github_repositories": [{"id": "keep", "repo": "acme/keep"}],
+                "crates": [{"id": "old-crate", "name": "foo-bar"}],
+            }
+        }
+        merged = build_seed_feed.merge_seed_additions(cfg, [
+            {"kind": "github_repositories", "entry": {
+                "id": "other-id",
+                "url": "https://github.com/acme/keep",
+            }},
+            {"kind": "crates", "entry": {"id": "new-crate", "name": "foo-bar"}},
+            {"kind": "crates", "entry": {"id": "fresh", "name": "baz"}},
+        ])
+        self.assertEqual(len(merged["seeded_sources"]["github_repositories"]), 1)
+        crates = merged["seeded_sources"]["crates"]
+        self.assertEqual([c["id"] for c in crates], ["old-crate", "fresh"])
+
+
 
 class ServiceExclusionTests(unittest.TestCase):
     def test_live_repo_exclusion_drops_noise_keeps_match(self) -> None:

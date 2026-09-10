@@ -173,8 +173,27 @@ def apply_service_config(watch: dict, remote: dict) -> dict:
     return out
 
 
+def seed_entry_keys(kind: str, entry: dict) -> set[tuple[str, str]]:
+    keys: set[tuple[str, str]] = set()
+    eid = str(entry.get("id") or "").strip().lower()
+    if eid:
+        keys.add(("id", eid))
+    url = str(entry.get("url") or "").strip().rstrip("/").lower()
+    if url:
+        keys.add(("url", url))
+    repo = str(entry.get("repo") or "").strip().lower()
+    if repo:
+        keys.add(("repo", repo))
+        keys.add(("url", f"https://github.com/{repo}"))
+    name = str(entry.get("name") or "").strip().lower()
+    if kind == "crates" and name:
+        keys.add(("name", name))
+        keys.add(("url", f"https://crates.io/crates/{name}"))
+    return keys
+
+
 def merge_seed_additions(cfg: dict, additions: list[dict]) -> dict:
-    """Append service seed additions unless id or url already exists."""
+    """Append service seed additions unless id, url, repo, or crate name already exists."""
     out = copy.deepcopy(cfg)
     seeded = out.setdefault("seeded_sources", {})
     if not isinstance(seeded, dict):
@@ -190,21 +209,18 @@ def merge_seed_additions(cfg: dict, additions: list[dict]) -> dict:
         bucket = seeded.setdefault(kind, [])
         if not isinstance(bucket, list):
             continue
-        new_id = str(entry.get("id") or "").strip()
-        new_url = str(entry.get("url") or "").strip()
+        incoming = seed_entry_keys(kind, entry)
         exists = False
         for existing in bucket:
             if not isinstance(existing, dict):
                 continue
-            if new_id and str(existing.get("id") or "").strip() == new_id:
-                exists = True
-                break
-            if new_url and str(existing.get("url") or "").strip() == new_url:
+            if incoming & seed_entry_keys(kind, existing):
                 exists = True
                 break
         if not exists:
             bucket.append(entry)
     return out
+
 
 
 
