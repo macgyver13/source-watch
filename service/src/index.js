@@ -476,6 +476,13 @@ function auditTarget(ref) {
   return ref.url || ref.title || ref.id;
 }
 
+async function ensureRendered(env) {
+  const counts = await db.renderUntilPublished(env);
+  if (counts.published === false) return json({ error: "render_not_published" }, 503);
+  return null;
+}
+
+
 async function putOverride(env, kind, id, patch) {
   const existingRow = await env.DB.prepare("SELECT patch FROM overrides WHERE kind = ? AND target_id = ?")
     .bind(kind, id)
@@ -501,8 +508,10 @@ async function putOverride(env, kind, id, patch) {
     .run();
   const ref = await rowRef(env, kind, id);
   await db.audit(env, "override_put", auditTarget(ref), JSON.stringify({ ...ref, patch: next }));
-  await db.renderAll(env);
+  const fail = await ensureRendered(env);
+  if (fail) return fail;
   return next;
+
 }
 
 
@@ -550,7 +559,7 @@ async function handleCollector(request, env, path) {
     if (!ingest) return json({ error: "unknown_ingest" }, 409);
     if (ingest.committed_at) return json({ error: "already_committed" }, 409);
     const rows = Array.isArray(body.rows) ? body.rows : [];
-    if (rows.length > 200) return json({ error: "chunk_too_large" }, 400);
+    if (rows.length > 500) return json({ error: "chunk_too_large" }, 400);
     const written = await db.insertRawRows(env, ingestId, kind, rows);
     return json({ written });
   }
@@ -561,9 +570,9 @@ async function handleCollector(request, env, path) {
     const result = await db.commitIngest(env, ingestId);
     if (!result) return json({ error: "unknown_ingest" }, 409);
     if (result.error === "already_committed") return json({ error: "already_committed" }, 409);
-    if (result.published === false) return json({ error: "render_not_published", ...result }, 409);
     return json(result);
   }
+
   return json({ error: "not_found" }, 404);
 }
 
@@ -587,15 +596,17 @@ async function handleAdmin(request, env, path, url) {
       const body = await readJson(request);
       if (!body || typeof body !== "object") return json({ error: "invalid_json" }, 400);
       const patch = await putOverride(env, kind, id, body);
+      if (patch instanceof Response) return patch;
       return json({ kind, id, patch });
     }
     if (method === "DELETE") {
       const ref = await rowRef(env, kind, id);
       await env.DB.prepare("DELETE FROM overrides WHERE kind = ? AND target_id = ?").bind(kind, id).run();
       await db.audit(env, "override_delete", auditTarget(ref), JSON.stringify(ref));
-
-      await db.renderAll(env);
+      const fail = await ensureRendered(env);
+      if (fail) return fail;
       return json({ ok: true });
+
     }
   }
 
@@ -612,16 +623,20 @@ async function handleAdmin(request, env, path, url) {
         .bind(kind, value, body?.note ? String(body.note) : null, db.nowIso())
         .run();
       await db.audit(env, "exclusion_add", `${kind}:${value}`, body?.note || null);
-      await db.renderAll(env);
+      const fail = await ensureRendered(env);
+      if (fail) return fail;
       return json({ ok: true });
+
     }
   }
   const exclusionDel = path.match(/^\/api\/admin\/exclusions\/(\d+)$/);
   if (exclusionDel && method === "DELETE") {
     await env.DB.prepare("DELETE FROM exclusions WHERE id = ?").bind(Number(exclusionDel[1])).run();
     await db.audit(env, "exclusion_delete", exclusionDel[1], null);
-    await db.renderAll(env);
+    const fail = await ensureRendered(env);
+    if (fail) return fail;
     return json({ ok: true });
+
   }
 
   if (path === "/api/admin/include-terms") {

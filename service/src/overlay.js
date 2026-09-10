@@ -27,6 +27,15 @@ export function githubRepoFromUrl(url) {
   }
 }
 
+export function urlPrefixMatches(link, value) {
+  const prefix = String(value || "").replace(/\/+$/, "").toLowerCase();
+  const href = String(link || "").toLowerCase();
+  if (!prefix) return false;
+  if (href === prefix) return true;
+  return href.startsWith(`${prefix}/`) || href.startsWith(`${prefix}?`) || href.startsWith(`${prefix}#`);
+}
+
+
 
 export function matchingExclusion(row, exclusions, fields = {}) {
   const haystack =
@@ -50,7 +59,8 @@ export function matchingExclusion(row, exclusions, fields = {}) {
     const value = String(rule.value || "").trim().toLowerCase();
     if (!value) continue;
     if (kind === "term" && text.includes(value)) return rule;
-    if (kind === "url_prefix" && link.startsWith(value)) return rule;
+    if (kind === "url_prefix" && urlPrefixMatches(link, value)) return rule;
+
     if (kind === "repo") {
       try {
         const raw = String(link || "");

@@ -272,5 +272,30 @@ test("githubRepoFromUrl accepts only owner/repo paths", () => {
   assert.equal(githubRepoFromUrl("https://notgithub.com/acme/lib"), "");
 });
 
+test("url_prefix exclusion does not match a longer pull number", () => {
+  const keep = {
+    ...itemA,
+    id: "pr-120",
+    source_url: "https://github.com/acme/lib/pull/120",
+  };
+  const drop = {
+    ...itemB,
+    id: "pr-12",
+    source_url: "https://github.com/acme/lib/pull/12",
+  };
+  const out = applyOverlay({
+    items: [keep, drop],
+    projects: [projectA, projectB],
+    sources: [
+      { ...sourceA, id: "pr-120", url: keep.source_url },
+      { ...sourceB, id: "pr-12", url: drop.source_url },
+    ],
+    overrides: {},
+    exclusions: [{ kind: "url_prefix", value: "https://github.com/acme/lib/pull/12" }],
+  });
+  assert.deepEqual(out.items.map((i) => i.id), ["pr-120"]);
+});
+
+
 
 

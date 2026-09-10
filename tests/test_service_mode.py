@@ -292,6 +292,23 @@ class ServiceExclusionTests(unittest.TestCase):
             source_type="github_repository",
         ))
 
+    def test_url_prefix_does_not_match_longer_pull_number(self) -> None:
+        rules = [{"kind": "url_prefix", "value": "https://github.com/acme/lib/pull/12"}]
+        self.assertTrue(build_seed_feed.url_prefix_matches(
+            "https://github.com/acme/lib/pull/12", rules[0]["value"],
+        ))
+        self.assertFalse(build_seed_feed.url_prefix_matches(
+            "https://github.com/acme/lib/pull/120", rules[0]["value"],
+        ))
+        self.assertFalse(build_seed_feed.excluded_by_service(
+            rules,
+            haystack="pr",
+            url="https://github.com/acme/lib/pull/120",
+            project="Lib",
+            source_type="github_pull_request",
+        ))
+
+
 
 
 class ServiceMainGateTests(unittest.TestCase):

@@ -638,7 +638,18 @@ def mentions_source_watch(*parts: object) -> bool:
     return any(token in str(part or "").lower() for part in parts)
 
 
+def url_prefix_matches(link: str, value: str) -> bool:
+    prefix = str(value or "").rstrip("/").lower()
+    href = str(link or "").lower()
+    if not prefix:
+        return False
+    if href == prefix:
+        return True
+    return href.startswith(prefix + "/") or href.startswith(prefix + "?") or href.startswith(prefix + "#")
+
+
 def repo_rule_matches(link: str, value: str) -> bool:
+
     raw = str(link or "").strip()
     if not raw:
         return False
@@ -674,7 +685,7 @@ def excluded_by_service(
             continue
         if kind == "term" and value in text:
             return True
-        if kind == "url_prefix" and link.startswith(value):
+        if kind == "url_prefix" and url_prefix_matches(link, value):
             return True
         if kind == "repo" and repo_rule_matches(link, value):
             return True

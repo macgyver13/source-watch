@@ -87,18 +87,31 @@ function stagedName(name, tag) {
   return tag ? `${name}#${tag}` : name;
 }
 
+async function liveRenderSeq(env) {
+  const packed = await getSetting(env, "live_render");
+  if (!packed) return 0;
+  try {
+    return Number(JSON.parse(packed).seq) || 0;
+  } catch {
+    return 0;
+  }
+}
+
 async function allocateRenderTag(env) {
   const started = Date.now();
+  const floor = (await liveRenderSeq(env)) + 1;
   const row = await env.DB.prepare(
     `INSERT INTO settings (key, value) VALUES ('render_seq', ?)
-     ON CONFLICT(key) DO UPDATE SET value = CAST(CAST(settings.value AS INTEGER) + 1 AS TEXT)
+     ON CONFLICT(key) DO UPDATE SET value = CAST(
+       MAX(CAST(settings.value AS INTEGER) + 1, CAST(excluded.value AS INTEGER)) AS TEXT)
      RETURNING value`,
-  ).bind("1").first();
-  const seq = Number(row?.value || 1);
+  ).bind(String(floor)).first();
+  const seq = Math.max(Number(row?.value || floor), floor);
   const tag = `g${seq}`;
   await setSetting(env, `render_started:${tag}`, String(started));
   return { tag, seq, started };
 }
+
 
 async function dropRenderedTag(env, tag) {
   if (!tag) return;
@@ -369,13 +382,24 @@ export async function renderAll(env, attempt = 0) {
   return counts;
 }
 
+export async function renderUntilPublished(env, attempts = 3) {
+  let last = { items: 0, projects: 0, sources: 0, published: false };
+  for (let i = 0; i < attempts; i++) {
+    last = await renderAll(env);
+    if (last.published !== false) return { ...last, published: true };
+  }
+  return last;
+}
+
+
 export async function commitIngest(env, ingestId) {
   const row = await getIngest(env, ingestId);
   if (!row) return null;
   const liveId = await getSetting(env, "live_ingest_id");
   if (row.committed_at) {
     if (liveId === ingestId) {
-      const counts = await renderAll(env);
+      const counts = await renderUntilPublished(env);
+
       return { ingest_id: ingestId, ...counts };
     }
     return { error: "already_committed" };
@@ -401,7 +425,8 @@ export async function commitIngest(env, ingestId) {
       "DELETE FROM ingests WHERE committed_at IS NULL AND started_at < ? AND ingest_id != ?",
     ).bind(staleBefore, ingestId),
   ]);
-  const counts = await renderAll(env);
+  const counts = await renderUntilPublished(env);
+
   return { ingest_id: ingestId, ...counts };
 }
 
