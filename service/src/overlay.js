@@ -38,13 +38,18 @@ export function matchingExclusion(row, exclusions, fields = {}) {
     if (kind === "term" && text.includes(value)) return rule;
     if (kind === "url_prefix" && link.startsWith(value)) return rule;
     if (kind === "repo") {
-      const needle = `github.com/${value}`;
-      const idx = link.indexOf(needle);
-      if (idx >= 0) {
-        const end = idx + needle.length;
-        if (end === link.length || "/?#:".includes(link[end])) return rule;
+      try {
+        const raw = String(link || "");
+        const parsed = new URL(raw.includes("://") ? raw : `https://${raw}`);
+        const host = String(parsed.hostname || "").toLowerCase();
+        if (host !== "github.com" && host !== "www.github.com") continue;
+        const path = parsed.pathname.replace(/^\/+/, "").toLowerCase();
+        if (path === value || path.startsWith(`${value}/`)) return rule;
+      } catch {
+        continue;
       }
     }
+
     if (
       kind === "project" &&
       projects.some((proj) => proj === value || slugify(proj) === slugify(value))

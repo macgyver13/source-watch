@@ -252,6 +252,13 @@ class ServiceExclusionTests(unittest.TestCase):
         self.assertFalse(build_seed_feed.repo_rule_matches(
             "https://github.com/acme/foobar", "acme/foo",
         ))
+        self.assertFalse(build_seed_feed.repo_rule_matches(
+            "https://notgithub.com/acme/foo", "acme/foo",
+        ))
+        self.assertFalse(build_seed_feed.repo_rule_matches(
+            "https://evil.example/github.com/acme/foo", "acme/foo",
+        ))
+
         self.assertFalse(build_seed_feed.excluded_by_service(
             [{"kind": "repo", "value": "acme/foo"}],
             haystack="acme/foobar atlas",

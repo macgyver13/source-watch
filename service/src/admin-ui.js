@@ -199,9 +199,22 @@ export const ADMIN_HTML = `<!doctype html>
 
 
     function repoFromUrl(url) {
-      var m = String(url || "").match(/github\\.com\\/([^/]+)\\/([^/#?]+)/i);
-      return m ? (m[1] + "/" + m[2]) : null;
+      try {
+        var u = new URL(String(url || ""));
+        var host = String(u.hostname || "").toLowerCase();
+        if (host !== "github.com" && host !== "www.github.com") return null;
+        var path = String(u.pathname || "");
+        while (path.charAt(0) === "/") path = path.slice(1);
+        var parts = path.split("/");
+        if (!parts[0] || !parts[1]) return null;
+        var repo = parts[1];
+        if (repo.slice(-4).toLowerCase() === ".git") repo = repo.slice(0, -4);
+        return parts[0] + "/" + repo;
+      } catch (e) {
+        return null;
+      }
     }
+
 
     function catalogQs() {
       var q = $("catalog-q").value;

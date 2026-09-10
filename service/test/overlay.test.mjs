@@ -206,3 +206,20 @@ test("repo exclusion does not match a longer repository name", () => {
   assert.deepEqual(out.items.map((i) => i.id), ["gh:acme-foobar"]);
 });
 
+test("repo exclusion ignores github.com in a non-github hostname path", () => {
+  const bait = {
+    ...itemA,
+    id: "bait",
+    source_url: "https://evil.example/github.com/acme/foo",
+  };
+  const out = applyOverlay({
+    items: [bait, itemB],
+    projects: [projectA, projectB],
+    sources: [{ ...sourceA, id: "bait", url: bait.source_url }, sourceB],
+    overrides: {},
+    exclusions: [{ kind: "repo", value: "acme/foo" }],
+  });
+  assert.ok(out.items.some((i) => i.id === "bait"));
+});
+
+

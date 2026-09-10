@@ -22,7 +22,8 @@ import sys
 from datetime import datetime, timezone
 from email.utils import format_datetime, parsedate_to_datetime
 from pathlib import Path
-from urllib.parse import urlencode
+from urllib.parse import urlencode, urlparse
+
 from urllib.request import Request, urlopen
 
 _SCRIPTS = Path(__file__).resolve().parent
@@ -603,12 +604,19 @@ def mentions_source_watch(*parts: object) -> bool:
 
 
 def repo_rule_matches(link: str, value: str) -> bool:
-    needle = f"github.com/{value}"
-    idx = link.find(needle)
-    if idx < 0:
+    raw = str(link or "").strip()
+    if not raw:
         return False
-    end = idx + len(needle)
-    return end == len(link) or link[end] in "/?#:"
+    parsed = urlparse(raw if "://" in raw else f"https://{raw}")
+    host = (parsed.hostname or "").lower()
+    if host not in ("github.com", "www.github.com"):
+        return False
+    path = (parsed.path or "").lstrip("/").lower()
+    needle = str(value or "").strip().lower()
+    if not needle:
+        return False
+    return path == needle or path.startswith(f"{needle}/")
+
 
 
 def excluded_by_service(
