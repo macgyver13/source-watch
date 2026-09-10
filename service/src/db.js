@@ -88,6 +88,16 @@ function stagedName(name, tag) {
   return tag ? `${name}#${tag}` : name;
 }
 
+async function allocateRenderTag(env) {
+  const row = await env.DB.prepare(
+    `INSERT INTO settings (key, value) VALUES ('render_seq', ?)
+     ON CONFLICT(key) DO UPDATE SET value = CAST(CAST(settings.value AS INTEGER) + 1 AS TEXT)
+     RETURNING value`,
+  ).bind(String(Date.now())).first();
+  return `g${row?.value || Date.now()}`;
+}
+
+
 async function dropRenderedTag(env, tag) {
   if (!tag) return;
   await env.DB.batch([
@@ -302,7 +312,8 @@ export async function renderAll(env) {
   const projects = { schema_version: "source-watch.projects.v0", projects: overlaid.projects };
   const sources = { schema_version: "source-watch.sources.v0", sources: overlaid.sources };
   const jsonType = "application/json; charset=utf-8";
-  const tag = `g${Date.now()}`;
+  const tag = await allocateRenderTag(env);
+
   const n = (name) => stagedName(name, tag);
   await writeRendered(env, n("feed.json"), JSON.stringify(feed), jsonType);
   await writeRendered(env, n("projects.json"), JSON.stringify(projects), jsonType);
