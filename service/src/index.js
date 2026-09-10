@@ -562,7 +562,9 @@ async function handleAdmin(request, env, path, url) {
       if (!SEED_KINDS.has(kind) || !entry || typeof entry !== "object" || Array.isArray(entry)) {
         return json({ error: "invalid_seed" }, 400);
       }
-      if (!entry.id || !(entry.url || entry.repo)) return json({ error: "invalid_seed" }, 400);
+      const hasLocator = Boolean(entry.url || entry.repo || (kind === "crates" && entry.name));
+      if (!entry.id || !hasLocator) return json({ error: "invalid_seed" }, 400);
+
       await env.DB.prepare("INSERT INTO seed_additions (kind, entry, created_at) VALUES (?, ?, ?)").bind(
         kind,
         JSON.stringify(entry),

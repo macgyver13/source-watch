@@ -260,21 +260,26 @@ export async function commitIngest(env, ingestId) {
   const row = await getIngest(env, ingestId);
   if (!row) return null;
   const at = nowIso();
+  const staleBefore = new Date(Date.now() - 60 * 60 * 1000).toISOString().replace(/\.\d{3}Z$/, "Z");
+  const staleUncommitted =
+    "SELECT ingest_id FROM ingests WHERE committed_at IS NULL AND started_at < ? AND ingest_id != ?";
+  const otherCommitted =
+    "SELECT ingest_id FROM ingests WHERE committed_at IS NOT NULL AND ingest_id != ?";
   await env.DB.batch([
     env.DB.prepare("UPDATE ingests SET committed_at = ? WHERE ingest_id = ?").bind(at, ingestId),
     env.DB.prepare("INSERT OR REPLACE INTO settings (key, value) VALUES ('live_ingest_id', ?)").bind(ingestId),
     env.DB.prepare("INSERT OR REPLACE INTO settings (key, value) VALUES ('last_ingest_at', ?)").bind(at),
+    env.DB.prepare(`DELETE FROM raw_items WHERE ingest_id IN (${otherCommitted})`).bind(ingestId),
+    env.DB.prepare(`DELETE FROM raw_projects WHERE ingest_id IN (${otherCommitted})`).bind(ingestId),
+    env.DB.prepare(`DELETE FROM raw_sources WHERE ingest_id IN (${otherCommitted})`).bind(ingestId),
+    env.DB.prepare(`DELETE FROM raw_items WHERE ingest_id IN (${staleUncommitted})`).bind(staleBefore, ingestId),
+    env.DB.prepare(`DELETE FROM raw_projects WHERE ingest_id IN (${staleUncommitted})`).bind(staleBefore, ingestId),
+    env.DB.prepare(`DELETE FROM raw_sources WHERE ingest_id IN (${staleUncommitted})`).bind(staleBefore, ingestId),
     env.DB.prepare(
-      "DELETE FROM raw_items WHERE ingest_id IN (SELECT ingest_id FROM ingests WHERE committed_at IS NOT NULL AND ingest_id != ?)",
-    ).bind(ingestId),
-    env.DB.prepare(
-      "DELETE FROM raw_projects WHERE ingest_id IN (SELECT ingest_id FROM ingests WHERE committed_at IS NOT NULL AND ingest_id != ?)",
-    ).bind(ingestId),
-    env.DB.prepare(
-      "DELETE FROM raw_sources WHERE ingest_id IN (SELECT ingest_id FROM ingests WHERE committed_at IS NOT NULL AND ingest_id != ?)",
-    ).bind(ingestId),
+      "DELETE FROM ingests WHERE committed_at IS NULL AND started_at < ? AND ingest_id != ?",
+    ).bind(staleBefore, ingestId),
   ]);
-
   const counts = await renderAll(env);
   return { ingest_id: ingestId, ...counts };
 }
+
