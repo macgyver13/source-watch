@@ -1,6 +1,7 @@
 import { ADMIN_HTML } from "./admin-ui.js";
 import * as db from "./db.js";
-import { applyOverlay, matchingExclusion, slugify } from "./overlay.js";
+import { applyOverlay, matchingExclusion, slugify, sourceIdForItem } from "./overlay.js";
+
 
 
 const PUBLIC_FILES = {
@@ -272,6 +273,7 @@ function annotateItem(item, overrides, exclusions) {
   const patch = overrides.item[item.id] || null;
   const projectId = slugify(item.project);
   const projectPatch = overrides.project[projectId];
+  const sourcePatch = overrides.source[sourceIdForItem(item)];
   const rule = matchingExclusion(item, exclusions, {
     haystack: `${item.title || ""} ${item.summary || ""} ${item.source_url || ""} ${(item.tags || []).join(" ")}`,
     url: item.source_url,
@@ -280,10 +282,12 @@ function annotateItem(item, overrides, exclusions) {
   });
   const hidden = Boolean(patch && patch.hidden);
   const projectHidden = Boolean(projectPatch && projectPatch.hidden);
+  const sourceHidden = Boolean(sourcePatch && sourcePatch.hidden);
   const excluded = Boolean(rule);
   const whyHidden = [];
   if (hidden) whyHidden.push("hidden override");
   if (projectHidden) whyHidden.push("project hidden");
+  if (sourceHidden) whyHidden.push("source hidden");
   if (rule) whyHidden.push(`excluded ${rule.kind} ${rule.value}`);
   return {
     ...item,
@@ -291,7 +295,8 @@ function annotateItem(item, overrides, exclusions) {
     hidden,
     excluded,
     project_hidden: projectHidden,
-    suppressed: hidden || excluded || projectHidden,
+    source_hidden: sourceHidden,
+    suppressed: hidden || excluded || projectHidden || sourceHidden,
     exclusion: rule ? { kind: rule.kind, value: rule.value, note: rule.note || "" } : null,
     why: whyHidden.length ? whyHidden.join(" · ") : inclusionWhy({ ...item, patch }),
   };

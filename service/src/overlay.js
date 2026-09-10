@@ -91,10 +91,11 @@ function applyNamedPatch(row, patch, titleKey) {
   return out;
 }
 
-function sourceIdForItem(item) {
+export function sourceIdForItem(item) {
   const id = String(item?.id || "");
   return id.startsWith("seed:") ? id.slice(5) : id;
 }
+
 
 function maxIso(values) {
   let best = "";
@@ -240,7 +241,11 @@ export function renderRss(items, watch) {
 
 export function renderJsonl(items) {
   return (items || [])
-    .map((item) => JSON.stringify(item, Object.keys(item).sort()))
+    .map((item) => {
+      const ordered = {};
+      for (const key of Object.keys(item).sort()) ordered[key] = item[key];
+      return JSON.stringify(ordered);
+    })
     .join("\n");
 }
 

@@ -21,6 +21,7 @@ def require_ingest_token() -> str:
 
 class ServiceClient:
     CHUNK_ROWS = 200
+    TIMEOUT = 30
 
     def __init__(self, base_url: str, token: str, opener=None) -> None:
         url = str(base_url or "").strip()
@@ -29,6 +30,13 @@ class ServiceClient:
         self.base_url = url
         self.token = token
         self.opener = opener or urlopen
+
+    def _open(self, request):
+        try:
+            return self.opener(request, timeout=self.TIMEOUT)
+        except TypeError:
+            return self.opener(request)
+
 
     def _headers(self) -> dict[str, str]:
         return {
@@ -46,7 +54,8 @@ class ServiceClient:
             headers["Content-Type"] = "application/json"
         request = Request(url, data=data, headers=headers, method=method)
         try:
-            with self.opener(request) as response:
+            with self._open(request) as response:
+
                 status = getattr(response, "status", None) or response.getcode()
                 raw = response.read()
         except HTTPError as exc:

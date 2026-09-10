@@ -102,6 +102,17 @@ test("renderJsonl matches item count and sorts keys", () => {
   }
 });
 
+test("renderJsonl preserves nested evidence fields", () => {
+  const item = {
+    ...itemA,
+    evidence: [{ url: "https://example.com/a", retrieved_at: "2026-01-01T00:00:00Z", query: "atlas" }],
+  };
+  const parsed = JSON.parse(renderJsonl([item]));
+  assert.equal(parsed.evidence[0].url, "https://example.com/a");
+  assert.equal(parsed.evidence[0].query, "atlas");
+});
+
+
 test("renderRss starts with xml declaration and escapes ampersand", () => {
   const xml = renderRss([{ ...itemA, title: "Foo & Bar" }], { name: "Watch", base_url: "https://example.com/", description: "d" });
   assert.ok(xml.startsWith('<?xml version="1.0" encoding="UTF-8"?>'));
