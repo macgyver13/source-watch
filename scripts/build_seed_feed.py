@@ -320,6 +320,14 @@ def github_headers() -> dict[str, str]:
     return headers
 
 
+COLLECTOR_FAILURES: list[str] = []
+
+
+def note_collector_failure(msg: str) -> None:
+    COLLECTOR_FAILURES.append(msg)
+    print(f"warning: {msg}", file=sys.stderr)
+
+
 def search_github_repositories(query: str, max_results: int = 10) -> list[dict]:
     params = urlencode({"q": query, "per_page": max(1, min(int(max_results), 25)), "sort": "updated", "order": "desc"})
     request = Request(f"{GITHUB_SEARCH_API}?{params}", headers=github_headers())
@@ -327,7 +335,7 @@ def search_github_repositories(query: str, max_results: int = 10) -> list[dict]:
         with urlopen(request, timeout=30) as response:
             payload = json.loads(response.read().decode("utf-8"))
     except Exception as exc:
-        print(f"warning: GitHub repository search failed for query {query!r}: {exc}", file=sys.stderr)
+        note_collector_failure(f"GitHub repository search failed for query {query!r}: {exc}")
         return []
     return payload.get("items", [])
 
@@ -376,8 +384,9 @@ def search_github_pull_requests(query: str, max_results: int = 10) -> list[dict]
         with urlopen(request, timeout=30) as response:
             payload = json.loads(response.read().decode("utf-8"))
     except Exception as exc:
-        print(f"warning: GitHub pull request search failed for query {query!r}: {exc}", file=sys.stderr)
+        note_collector_failure(f"GitHub pull request search failed for query {query!r}: {exc}")
         return []
+
     items = payload.get("items", []) if isinstance(payload, dict) else []
     return [hit for hit in items if isinstance(hit, dict) and github_pr_url(hit)]
 
@@ -408,9 +417,10 @@ def delving_get_json(url: str) -> dict | None:
         with urlopen(request, timeout=30) as response:
             payload = json.loads(response.read().decode("utf-8"))
     except Exception as exc:
-        print(f"warning: Delving GET {url} failed: {exc}", file=sys.stderr)
+        note_collector_failure(f"Delving GET {url} failed: {exc}")
         return None
     return payload if isinstance(payload, dict) else None
+
 
 
 def discourse_tag_names(tags) -> list[str]:
@@ -456,7 +466,9 @@ def topic_matches_relevance_rules(topic: dict, watch: dict | None = None) -> boo
 def search_delving_topics(query: str, max_results: int = 10) -> list[dict]:
     limit = max(1, min(int(max_results), 25))
     params = urlencode({"q": query})
-    payload = delving_get_json(f"{DELVING_ORIGIN}/search.json?{params}") or {}
+    payload = delving_get_json(f"{DELVING_ORIGIN}/search.json?{params}")
+    if not isinstance(payload, dict):
+        return []
     topics = list(payload.get("topics") or [])
     blurbs: dict[object, str] = {}
     for post in payload.get("posts") or []:
@@ -488,7 +500,9 @@ def list_delving_category(category: str, max_results: int = 30) -> list[dict]:
     if not path:
         return []
     limit = max(1, min(int(max_results), 30))
-    payload = delving_get_json(f"{DELVING_ORIGIN}/c/{path}/l/latest.json") or {}
+    payload = delving_get_json(f"{DELVING_ORIGIN}/c/{path}/l/latest.json")
+    if not isinstance(payload, dict):
+        return []
     topics = (payload.get("topic_list") or {}).get("topics") or []
     return list(topics)[:limit]
 
@@ -1465,7 +1479,9 @@ def main() -> int:
         help="allow a service-mode ingest that skipped live collectors",
     )
     args = parser.parse_args()
+    COLLECTOR_FAILURES.clear()
     seed_only = args.seed_only or skip_live_collectors()
+
     watch = load_watch()
     cfg = parse_yaml(CONFIG)
     serving = watch["serving"]
@@ -1506,8 +1522,15 @@ def main() -> int:
     client_watch = watch_client_payload(watch)
     mode = "seed-only" if seed_only else "live collector refresh"
     if service is not None:
+        if COLLECTOR_FAILURES:
+            raise SystemExit(
+                "live collector HTTP failed; refusing to ingest a partial feed:\n"
+                + "\n".join(COLLECTOR_FAILURES)
+            )
         ingest_watch = dict(client_watch)
         ingest_watch["base_url"] = watch.get("base_url") or ""
+
+
         result = service.ingest({
             "generated_at": feed["generated_at"],
             "watch": ingest_watch,

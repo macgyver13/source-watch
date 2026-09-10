@@ -319,11 +319,12 @@ export const ADMIN_HTML = `<!doctype html>
         paintPager(data.total, "projects");
 
         var rows = (data.projects || []).map(function (p) {
+          var displayName = (p.patch && p.patch.title) || p.name;
           return "<tr class='" + (p.suppressed ? "hidden-row" : "") + "'><td>" +
-            "<b>" + esc(p.name) + "</b><div class='why'>" + esc(p.why || p.id) + "</div></td>" +
+            "<b>" + esc(displayName) + "</b><div class='why'>" + esc(p.why || p.id) + "</div></td>" +
             "<td class='row-actions'>" +
             "<button data-kind='project' data-act='hide-kind' data-id='" + esc(p.id) + "' data-hidden='" + (p.hidden ? "0" : "1") + "'>" + (p.hidden ? "Unhide" : "Hide") + "</button>" +
-            "<button data-act='rename' data-id='" + esc(p.id) + "' data-name='" + esc(p.name) + "'>Rename</button>" +
+            "<button data-act='rename' data-id='" + esc(p.id) + "' data-name='" + esc(displayName) + "'>Rename</button>" +
             "</td></tr>";
         }).join("");
         $("projects-table").innerHTML = "<table><tbody>" + (rows || "<tr><td class='muted'>No projects</td></tr>") + "</tbody></table>";
