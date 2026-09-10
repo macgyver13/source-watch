@@ -89,6 +89,16 @@ class ServiceConfigMergeTests(unittest.TestCase):
         self.assertEqual(watch["relevance"]["required_any"], ["Lattice"])
         self.assertEqual(watch["discovered_after"], "2024-01-01T00:00:00Z")
 
+    def test_apply_service_config_empty_floor_clears_yaml(self) -> None:
+        watch = build_seed_feed.normalize_watch({
+            "discovered_after": "2024-01-01T00:00:00Z",
+        })
+        merged = build_seed_feed.apply_service_config(watch, {"settings": {"discovered_after": ""}})
+        self.assertEqual(merged["discovered_after"], "")
+        unchanged = build_seed_feed.apply_service_config(watch, {"settings": {}})
+        self.assertEqual(unchanged["discovered_after"], "2024-01-01T00:00:00Z")
+
+
     def test_merge_seed_additions_appends_new_and_skips_existing_url(self) -> None:
         cfg = {
             "seeded_sources": {

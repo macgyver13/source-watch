@@ -291,14 +291,17 @@ export const ADMIN_HTML = `<!doctype html>
           var url = item.source_url || "";
           var dim = item.suppressed ? "hidden-row" : "";
           var displayTitle = (item.patch && item.patch.title) || item.title;
+          var titleVal = displayTitle || "";
+          var summaryVal = (item.patch && item.patch.summary) || item.summary || "";
+          var discVal = toLocal(item.patch && item.patch.discovered_at || item.discovered_at);
+          var actVal = toLocal(item.patch && item.patch.activity_at || item.activity_at);
           return "<tr class='" + dim + "'>" +
             "<td>" + linkCell(displayTitle, url, esc(item.why || "") + (item.id ? " · " + esc(item.id) : "")) +
-
             "<div class='edit' data-edit='" + esc(item.id) + "'>" +
-              "<input data-f='title' value='" + esc(item.patch && item.patch.title || item.title || "") + "' placeholder='title'>" +
-              "<input data-f='summary' value='" + esc(item.patch && item.patch.summary || item.summary || "") + "' placeholder='summary'>" +
-              "<input data-f='discovered_at' type='datetime-local' value='" + esc(toLocal(item.patch && item.patch.discovered_at || item.discovered_at)) + "'>" +
-              "<input data-f='activity_at' type='datetime-local' value='" + esc(toLocal(item.patch && item.patch.activity_at || item.activity_at)) + "'>" +
+              "<input data-f='title' data-orig='" + esc(titleVal) + "' value='" + esc(titleVal) + "' placeholder='title'>" +
+              "<input data-f='summary' data-orig='" + esc(summaryVal) + "' value='" + esc(summaryVal) + "' placeholder='summary'>" +
+              "<input data-f='discovered_at' type='datetime-local' data-orig='" + esc(discVal) + "' value='" + esc(discVal) + "'>" +
+              "<input data-f='activity_at' type='datetime-local' data-orig='" + esc(actVal) + "' value='" + esc(actVal) + "'>" +
               "<button data-act='save-edit' data-id='" + esc(item.id) + "'>Save</button>" +
             "</div></td>" +
             "<td>" + esc(item.project) + "<div class='muted'>" + esc(item.source_type) + "</div></td>" +
@@ -461,9 +464,13 @@ export const ADMIN_HTML = `<!doctype html>
         var patch = {};
         box.querySelectorAll("[data-f]").forEach(function (input) {
           var key = input.getAttribute("data-f");
+          var orig = input.getAttribute("data-orig") || "";
           var val = input.value;
+          if (val === orig) return;
           patch[key] = (key === "discovered_at" || key === "activity_at") ? fromLocal(val) : val;
         });
+        if (!Object.keys(patch).length) return;
+
         api("/api/admin/overrides/item/" + encodeURIComponent(id), { method: "PUT", body: patch }).then(afterMutation);
       } else if (act === "clear") {
         api("/api/admin/overrides/item/" + encodeURIComponent(id), { method: "DELETE" }).then(afterMutation);

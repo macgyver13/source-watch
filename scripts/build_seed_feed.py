@@ -167,9 +167,17 @@ def apply_service_config(watch: dict, remote: dict) -> dict:
             continue
         existing.append(term)
     settings = remote.get("settings") if isinstance(remote.get("settings"), dict) else {}
-    discovered = optional_iso(settings.get("discovered_after"))
-    if discovered:
-        out["discovered_after"] = discovered
+    if "discovered_after" in settings:
+        raw = settings.get("discovered_after")
+        if raw is None:
+            pass
+        elif not str(raw).strip():
+            out["discovered_after"] = ""
+        else:
+            discovered = optional_iso(raw)
+            if discovered:
+                out["discovered_after"] = discovered
+
     return out
 
 

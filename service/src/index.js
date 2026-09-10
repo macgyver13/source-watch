@@ -215,7 +215,7 @@ async function collectorConfig(env) {
   return {
     exclusions,
     include_terms: includeTerms,
-    settings: { discovered_after: discoveredAfter || "" },
+    settings: discoveredAfter == null ? {} : { discovered_after: discoveredAfter },
     seed_additions: seedAdditions.map((row) => ({ kind: row.kind, entry: row.entry })),
   };
 }
