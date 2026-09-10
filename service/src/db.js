@@ -111,14 +111,14 @@ async function dropRenderedTag(env, tag) {
 }
 
 export async function publishLiveRenderTag(env, tag, seq) {
+  const payload = JSON.stringify({ seq: Number(seq), tag: String(tag) });
   const result = await env.DB.prepare(
-    `INSERT INTO settings (key, value) VALUES ('live_render_seq', ?)
+    `INSERT INTO settings (key, value) VALUES ('live_render', ?)
      ON CONFLICT(key) DO UPDATE SET value = excluded.value
-     WHERE CAST(settings.value AS INTEGER) < CAST(excluded.value AS INTEGER)`,
-  ).bind(String(seq)).run();
-  if (!result?.meta?.changes) return false;
-  await setSetting(env, "live_render_tag", tag);
-  return true;
+     WHERE CAST(json_extract(settings.value, '$.seq') AS INTEGER)
+         < CAST(json_extract(excluded.value, '$.seq') AS INTEGER)`,
+  ).bind(payload).run();
+  return Boolean(result?.meta?.changes);
 }
 
 const RENDER_STALE_MS = 10 * 60 * 1000;
@@ -137,8 +137,18 @@ async function purgeStaleRendered(env, liveTag) {
 }
 
 export async function liveRenderTag(env) {
+  const packed = await getSetting(env, "live_render");
+  if (packed) {
+    try {
+      const parsed = JSON.parse(packed);
+      if (parsed && typeof parsed.tag === "string" && parsed.tag) return parsed.tag;
+    } catch {
+      /* fall through */
+    }
+  }
   return getSetting(env, "live_render_tag");
 }
+
 
 export async function readRenderedWithTag(env, name, tag) {
   const live = stagedName(name, tag);

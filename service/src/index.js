@@ -1,10 +1,14 @@
 import { ADMIN_HTML } from "./admin-ui.js";
 import * as db from "./db.js";
-import { applyOverlay, matchingExclusion, slugify, sourceIdForItem } from "./overlay.js";
+import { applyItemPatch, applyNamedPatch, applyOverlay, matchingExclusion, slugify, sourceIdForItem } from "./overlay.js";
 
 
+
+
+const PUBLIC_CACHE = "public, max-age=0, must-revalidate";
 
 const PUBLIC_FILES = {
+
   "/feed.json": { name: "feed.json", type: "application/json; charset=utf-8" },
   "/projects.json": { name: "projects.json", type: "application/json; charset=utf-8" },
   "/sources.json": { name: "sources.json", type: "application/json; charset=utf-8" },
@@ -134,7 +138,8 @@ async function serveRendered(request, env, spec) {
       status: 304,
       headers: {
         ETag: `"${meta.etag}"`,
-        "Cache-Control": "public, max-age=60",
+        "Cache-Control": PUBLIC_CACHE,
+
       },
     });
   }
@@ -152,7 +157,8 @@ async function serveRendered(request, env, spec) {
     headers: {
       "Content-Type": type,
       ETag: `"${etag}"`,
-      "Cache-Control": "public, max-age=60",
+      "Cache-Control": PUBLIC_CACHE,
+
     },
   });
 }
@@ -176,7 +182,8 @@ async function serveWeeks(request, env, path) {
     const assetReq = new Request(new URL("/weeks/live/", request.url), request);
     const res = await env.ASSETS.fetch(assetReq);
     const headers = new Headers(res.headers);
-    headers.set("Cache-Control", "public, max-age=60");
+    headers.set("Cache-Control", PUBLIC_CACHE);
+
     return new Response(res.body, { status: res.status, statusText: res.statusText, headers });
   }
   return env.ASSETS.fetch(request);
@@ -273,16 +280,18 @@ function inclusionWhy(row) {
 
 function annotateItem(item, overrides, exclusions) {
   const patch = overrides.item[item.id] || null;
+  const effective = applyItemPatch({ ...item }, patch);
   const projectId = slugify(item.project);
   const projectPatch = overrides.project[projectId];
-  const displayProject = (patch && patch.project) || (projectPatch && projectPatch.title) || item.project;
+  const displayProject = effective.project || (projectPatch && projectPatch.title) || item.project;
   const sourcePatch = overrides.source[sourceIdForItem(item)];
-  const rule = matchingExclusion(item, exclusions, {
-    haystack: `${item.title || ""} ${item.summary || ""} ${item.source_url || ""} ${(item.tags || []).join(" ")}`,
-    url: item.source_url,
+  const rule = matchingExclusion(effective, exclusions, {
+    haystack: `${effective.title || ""} ${effective.summary || ""} ${effective.source_url || ""} ${(effective.tags || []).join(" ")}`,
+    url: effective.source_url,
     project: [item.project, displayProject],
-    sourceType: item.source_type,
+    sourceType: effective.source_type,
   });
+
 
   const hidden = Boolean(patch && patch.hidden);
   const projectHidden = Boolean(projectPatch && projectPatch.hidden);
@@ -310,15 +319,16 @@ function annotateItem(item, overrides, exclusions) {
 
 function annotateNamed(row, kind, overrides, exclusions) {
   const patch = overrides[kind][row.id] || null;
+  const effective = applyNamedPatch({ ...row }, patch, "name");
   const projectPatch = kind === "source" ? overrides.project[slugify(row.project)] : kind === "project" ? patch : null;
   const displayProject = kind === "project"
     ? ((patch && patch.title) || row.name)
     : ((projectPatch && projectPatch.title) || row.project);
-  const rule = matchingExclusion(row, exclusions, {
-    haystack: `${row.name || ""} ${row.url || ""}`,
-    url: row.url,
+  const rule = matchingExclusion(effective, exclusions, {
+    haystack: `${effective.name || ""} ${effective.url || ""}`,
+    url: effective.url,
     project: kind === "project" ? [row.name, row.id, displayProject] : [row.project, displayProject],
-    sourceType: row.source_type,
+    sourceType: effective.source_type,
   });
   const hidden = Boolean(patch && patch.hidden);
   const excluded = Boolean(rule);
@@ -470,10 +480,15 @@ async function handleCollector(request, env, path) {
     return json(await collectorConfig(env));
   }
   if (method === "GET" && path === "/api/collector/state") {
-    const liveId = await db.getSetting(env, "live_ingest_id");
-    const raw = await db.loadRaw(env, liveId);
-    return json(raw);
+    for (let attempt = 0; attempt < 2; attempt++) {
+      const liveId = await db.getSetting(env, "live_ingest_id");
+      const raw = await db.loadRaw(env, liveId);
+      const still = await db.getSetting(env, "live_ingest_id");
+      if (still === liveId) return json(raw);
+    }
+    return json({ error: "ingest_changed" }, 409);
   }
+
   if (method === "POST" && path === "/api/ingest/begin") {
     const body = await readJson(request);
     if (!body || typeof body !== "object") return json({ error: "invalid_json" }, 400);

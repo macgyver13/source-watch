@@ -76,7 +76,8 @@ function applyTags(tags, patch) {
   return out;
 }
 
-function applyItemPatch(item, patch) {
+export function applyItemPatch(item, patch) {
+
   if (!patch) return item;
   const out = { ...item };
   if (patch.title != null) out.title = patch.title;
@@ -92,7 +93,8 @@ function applyItemPatch(item, patch) {
   return out;
 }
 
-function applyNamedPatch(row, patch, titleKey) {
+export function applyNamedPatch(row, patch, titleKey) {
+
   if (!patch) return row;
   const out = { ...row };
   if (patch.title != null) out[titleKey] = patch.title;
