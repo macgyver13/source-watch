@@ -234,7 +234,9 @@ export async function renderAll(env) {
   await writeRendered(env, "feed.json", JSON.stringify(feed), jsonType);
   await writeRendered(env, "projects.json", JSON.stringify(projects), jsonType);
   await writeRendered(env, "sources.json", JSON.stringify(sources), jsonType);
-  await writeRendered(env, "watch.json", JSON.stringify(watch), jsonType);
+  const publicWatch = { ...watch };
+  delete publicWatch.base_url;
+  await writeRendered(env, "watch.json", JSON.stringify(publicWatch), jsonType);
   await writeRendered(env, "items.jsonl", renderJsonl(overlaid.items), "application/jsonl; charset=utf-8");
   await writeRendered(
     env,
@@ -262,10 +264,17 @@ export async function commitIngest(env, ingestId) {
     env.DB.prepare("UPDATE ingests SET committed_at = ? WHERE ingest_id = ?").bind(at, ingestId),
     env.DB.prepare("INSERT OR REPLACE INTO settings (key, value) VALUES ('live_ingest_id', ?)").bind(ingestId),
     env.DB.prepare("INSERT OR REPLACE INTO settings (key, value) VALUES ('last_ingest_at', ?)").bind(at),
-    env.DB.prepare("DELETE FROM raw_items WHERE ingest_id != ?").bind(ingestId),
-    env.DB.prepare("DELETE FROM raw_projects WHERE ingest_id != ?").bind(ingestId),
-    env.DB.prepare("DELETE FROM raw_sources WHERE ingest_id != ?").bind(ingestId),
+    env.DB.prepare(
+      "DELETE FROM raw_items WHERE ingest_id IN (SELECT ingest_id FROM ingests WHERE committed_at IS NOT NULL AND ingest_id != ?)",
+    ).bind(ingestId),
+    env.DB.prepare(
+      "DELETE FROM raw_projects WHERE ingest_id IN (SELECT ingest_id FROM ingests WHERE committed_at IS NOT NULL AND ingest_id != ?)",
+    ).bind(ingestId),
+    env.DB.prepare(
+      "DELETE FROM raw_sources WHERE ingest_id IN (SELECT ingest_id FROM ingests WHERE committed_at IS NOT NULL AND ingest_id != ?)",
+    ).bind(ingestId),
   ]);
+
   const counts = await renderAll(env);
   return { ingest_id: ingestId, ...counts };
 }

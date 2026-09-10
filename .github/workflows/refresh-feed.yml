@@ -3,9 +3,14 @@ name: Refresh feed
 on:
   workflow_dispatch:
 
+concurrency:
+  group: refresh-feed
+  cancel-in-progress: false
+
 jobs:
   refresh:
     runs-on: ubuntu-latest
+
     permissions:
       contents: read
     steps:

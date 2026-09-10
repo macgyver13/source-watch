@@ -34,7 +34,16 @@ export function matchingExclusion(row, exclusions, fields = {}) {
     if (!value) continue;
     if (kind === "term" && text.includes(value)) return rule;
     if (kind === "url_prefix" && link.startsWith(value)) return rule;
-    if (kind === "repo" && link.includes(`github.com/${value}`)) return rule;
+
+    if (kind === "repo") {
+      const needle = `github.com/${value}`;
+      const idx = link.indexOf(needle);
+      if (idx >= 0) {
+        const end = idx + needle.length;
+        if (end === link.length || "/?#:".includes(link[end])) return rule;
+      }
+    }
+
     if (kind === "project" && (proj === value || slugify(proj) === slugify(value))) return rule;
     if (kind === "source_type" && stype === value) return rule;
   }
@@ -104,6 +113,15 @@ export function applyOverlay({ items, projects, sources, overrides, exclusions }
   const rawProjects = Array.isArray(projects) ? projects : [];
   const rawSources = Array.isArray(sources) ? sources : [];
 
+  const projectNewName = new Map();
+  for (const raw of rawProjects) {
+    const patch = projectPatches.get(raw.id);
+    if (patch && patch.title != null) {
+      projectNewName.set(raw.id, patch.title);
+      projectNewName.set(slugify(raw.name), patch.title);
+    }
+  }
+
   const surviving = [];
   for (const raw of rawItems) {
     const item = applyItemPatch({ ...raw }, itemPatches.get(raw.id));
@@ -112,6 +130,9 @@ export function applyOverlay({ items, projects, sources, overrides, exclusions }
     const projectId = slugify(item.project);
     const projectPatch = projectPatches.get(projectId);
     if (projectPatch && projectPatch.hidden === true) continue;
+    const sid = sourceIdForItem(item);
+    const sourcePatch = sourcePatches.get(sid);
+    if (sourcePatch && sourcePatch.hidden === true) continue;
     const haystack = `${item.title || ""} ${item.summary || ""} ${item.source_url || ""} ${(item.tags || []).join(" ")}`;
     if (
       matchesExclusion(item, exclusions, {
@@ -123,6 +144,8 @@ export function applyOverlay({ items, projects, sources, overrides, exclusions }
     ) {
       continue;
     }
+    const renamed = projectNewName.get(projectId);
+    if (renamed) item.project = renamed;
     surviving.push(item);
   }
   surviving.sort((a, b) => String(b.discovered_at || "").localeCompare(String(a.discovered_at || "")));
@@ -145,6 +168,8 @@ export function applyOverlay({ items, projects, sources, overrides, exclusions }
     ) {
       continue;
     }
+    const renamed = projectNewName.get(slugify(source.project));
+    if (renamed) source.project = renamed;
     outSources.push(source);
   }
   const keptSourceIds = new Set(outSources.map((s) => s.id));
@@ -154,7 +179,10 @@ export function applyOverlay({ items, projects, sources, overrides, exclusions }
   for (const raw of rawProjects) {
     const patch = projectPatches.get(raw.id);
     if (patch && patch.hidden === true) continue;
-    const mine = surviving.filter((item) => slugify(item.project) === slugify(raw.name) || slugify(item.project) === raw.id);
+    const displayName = (patch && patch.title != null) ? patch.title : raw.name;
+    const mine = surviving.filter(
+      (item) => slugify(item.project) === slugify(displayName) || slugify(item.project) === raw.id,
+    );
     if (!mine.length) continue;
     const project = applyNamedPatch({ ...raw }, patch, "name");
     project.latest_discovered_at = maxIso(mine.map((i) => i.discovered_at));
@@ -170,6 +198,7 @@ export function applyOverlay({ items, projects, sources, overrides, exclusions }
 
   return { items: surviving, projects: outProjects, sources: outSources };
 }
+
 
 function esc(s) {
   return String(s ?? "")

@@ -170,8 +170,9 @@ export const ADMIN_HTML = `<!doctype html>
 
     function esc(s) {
       return String(s == null ? "" : s)
-        .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+        .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
     }
+
 
     function toLocal(iso) {
       if (!iso) return "";

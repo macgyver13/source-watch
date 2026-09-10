@@ -564,6 +564,15 @@ def mentions_source_watch(*parts: object) -> bool:
     return any(token in str(part or "").lower() for part in parts)
 
 
+def repo_rule_matches(link: str, value: str) -> bool:
+    needle = f"github.com/{value}"
+    idx = link.find(needle)
+    if idx < 0:
+        return False
+    end = idx + len(needle)
+    return end == len(link) or link[end] in "/?#:"
+
+
 def excluded_by_service(
     exclusions,
     *,
@@ -586,13 +595,14 @@ def excluded_by_service(
             return True
         if kind == "url_prefix" and link.startswith(value):
             return True
-        if kind == "repo" and f"github.com/{value}" in link:
+        if kind == "repo" and repo_rule_matches(link, value):
             return True
         if kind == "project" and (proj == value or slugify(proj) == slugify(value)):
             return True
         if kind == "source_type" and stype == value:
             return True
     return False
+
 
 
 
@@ -1480,15 +1490,18 @@ def main() -> int:
     client_watch = watch_client_payload(watch)
     mode = "seed-only" if seed_only else "live collector refresh"
     if service is not None:
+        ingest_watch = dict(client_watch)
+        ingest_watch["base_url"] = watch.get("base_url") or ""
         result = service.ingest({
             "generated_at": feed["generated_at"],
-            "watch": client_watch,
+            "watch": ingest_watch,
             "feed_title": feed["title"],
             "feed_description": feed["description"],
             "items": items,
             "projects": projects_list,
             "sources": sources_list,
         })
+
         print(f"ingested {len(items)} items into {serving['service_url']} "
               f"(ingest {result['ingest_id']}, {mode})")
         return 0

@@ -212,6 +212,25 @@ class ServiceExclusionTests(unittest.TestCase):
             finally:
                 build_seed_feed.OUT = old_out
 
+    def test_repo_exclusion_does_not_match_name_prefix(self) -> None:
+        self.assertTrue(build_seed_feed.repo_rule_matches(
+            "https://github.com/acme/foo", "acme/foo",
+        ))
+        self.assertTrue(build_seed_feed.repo_rule_matches(
+            "https://github.com/acme/foo/pull/1", "acme/foo",
+        ))
+        self.assertFalse(build_seed_feed.repo_rule_matches(
+            "https://github.com/acme/foobar", "acme/foo",
+        ))
+        self.assertFalse(build_seed_feed.excluded_by_service(
+            [{"kind": "repo", "value": "acme/foo"}],
+            haystack="acme/foobar atlas",
+            url="https://github.com/acme/foobar",
+            project="Foobar",
+            source_type="github_repository",
+        ))
+
+
 
 class ServiceMainGateTests(unittest.TestCase):
     def test_seed_only_without_allow_partial_ingest_exits(self) -> None:

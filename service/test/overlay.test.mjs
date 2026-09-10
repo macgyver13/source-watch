@@ -114,3 +114,59 @@ test("weekIndex uses ISO week-year on 2026-01-01", () => {
   assert.deepEqual(weeks, [{ slug: "2026-W01", count: 1 }]);
   assert.equal(isoWeekSlug("2026-01-01T00:00:00Z"), "2026-W01");
 });
+
+test("hiding a source drops its items from the feed", () => {
+  const out = applyOverlay({
+    items: [itemA, itemB],
+    projects: [projectA, projectB],
+    sources: [sourceA, sourceB],
+    overrides: { source: { a: { hidden: true } } },
+    exclusions: [],
+  });
+  assert.deepEqual(out.items.map((i) => i.id), ["seed:b"]);
+  assert.deepEqual(out.sources.map((s) => s.id), ["b"]);
+  assert.deepEqual(out.projects.map((p) => p.id), ["beta"]);
+});
+
+test("project title patch renames member items and sources", () => {
+  const out = applyOverlay({
+    items: [itemA, itemB],
+    projects: [projectA, projectB],
+    sources: [sourceA, sourceB],
+    overrides: { project: { alpha: { title: "Alpha Renamed" } } },
+    exclusions: [],
+  });
+  const alphaItem = out.items.find((i) => i.id === "seed:a");
+  const alphaSource = out.sources.find((s) => s.id === "a");
+  const alphaProject = out.projects.find((p) => p.id === "alpha");
+  assert.equal(alphaItem.project, "Alpha Renamed");
+  assert.equal(alphaSource.project, "Alpha Renamed");
+  assert.equal(alphaProject.name, "Alpha Renamed");
+});
+
+test("repo exclusion does not match a longer repository name", () => {
+  const keep = {
+    ...itemA,
+    id: "gh:acme-foobar",
+    source_url: "https://github.com/acme/foobar",
+    summary: "keep",
+  };
+  const drop = {
+    ...itemB,
+    id: "gh:acme-foo",
+    source_url: "https://github.com/acme/foo",
+    summary: "drop",
+  };
+  const out = applyOverlay({
+    items: [keep, drop],
+    projects: [projectA, projectB],
+    sources: [
+      { ...sourceA, id: "gh:acme-foobar", url: keep.source_url },
+      { ...sourceB, id: "gh:acme-foo", url: drop.source_url },
+    ],
+    overrides: {},
+    exclusions: [{ kind: "repo", value: "acme/foo" }],
+  });
+  assert.deepEqual(out.items.map((i) => i.id), ["gh:acme-foobar"]);
+});
+
