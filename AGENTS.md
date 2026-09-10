@@ -109,7 +109,8 @@ Worker origin hosts Hugo assets, live `/feed.json` (and related artifacts) from 
 
 5. Set wrangler `vars.GITHUB_DISPATCH_REPO` to `owner/repo` (this instance). Keep `GITHUB_DISPATCH_WORKFLOW=refresh-feed.yml` and `GITHUB_DISPATCH_REF` on the branch that has the workflow.
 6. `python3 scripts/sync_hugo_content.py` (writes the service Hugo shell, including `weeks/live`).
-7. If this was a static site: `python3 scripts/promote_to_service.py --dry-run` then without `--dry-run`. It deletes generated `site/static` feed JSON, `data/public/*`, dated week pages, and item-derived content dirs. `config/` is untouched. Then `sync_hugo_content.py` again.
+7. If this was a static site: `python3 scripts/promote_to_service.py --dry-run` then without `--dry-run`. It deletes generated `site/static` feed JSON, dated week pages, and item-derived content dirs. `data/public/` is kept so the first ingest can preserve `discovered_at`. `config/` is untouched. Then `sync_hugo_content.py` again.
+
 8. Deploy: dashboard Build command `hugo --source site --minify`, Deploy command `npx wrangler deploy`, `HUGO_VERSION=0.164.0`. Or locally `npx wrangler deploy`.
 9. Set `serving.service_url` and `base_url` to `https://<worker>.<subdomain>.workers.dev/` (trailing slash). Re-sync Hugo if `base_url` changed.
 10. First ingest (from a machine with the token, or Actions `workflow_dispatch`):

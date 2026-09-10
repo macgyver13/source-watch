@@ -257,6 +257,7 @@ export const ADMIN_HTML = `<!doctype html>
       if (tab === "items") return loadItems();
       if (tab === "projects") return loadProjects();
       if (tab === "sources") return loadSources();
+      if (tab === "audit") return loadAudit();
       $("catalog-prev").disabled = true;
       $("catalog-next").disabled = true;
       $("catalog-count").textContent = "";
@@ -265,9 +266,8 @@ export const ADMIN_HTML = `<!doctype html>
         loadTerms();
         loadSeeds();
         loadSettings();
-        return;
       }
-      if (tab === "audit") return loadAudit();
+
     }
 
     function loadState() {
@@ -404,7 +404,8 @@ export const ADMIN_HTML = `<!doctype html>
     }
 
     function loadAudit() {
-      return api("/api/admin/audit?limit=100").then(function (data) {
+      return api("/api/admin/audit" + catalogQs()).then(function (data) {
+        paintPager(data.total, "events");
         var rows = (data.audit || []).map(function (r) {
           var target = r.target || "";
           var targetHtml = /^https?:\\/\\//.test(target)
@@ -419,7 +420,6 @@ export const ADMIN_HTML = `<!doctype html>
     function afterMutation() {
       loadState();
       loadTab();
-      if (tab !== "audit") loadAudit();
     }
 
     $("login-btn").onclick = function () {

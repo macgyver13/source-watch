@@ -650,13 +650,15 @@ async function handleAdmin(request, env, path, url) {
   }
 
   if (method === "GET" && path === "/api/admin/audit") {
-    const limit = Math.min(Math.max(Number(url.searchParams.get("limit")) || 100, 1), 500);
+    const { limit, offset } = pageFrom(url);
+    const countRow = await env.DB.prepare("SELECT COUNT(*) AS n FROM audit_log").first();
+    const total = Number(countRow?.n || 0);
     const { results } = await env.DB.prepare(
-      "SELECT id, at, action, target, detail FROM audit_log ORDER BY id DESC LIMIT ?",
+      "SELECT id, at, action, target, detail FROM audit_log ORDER BY id DESC LIMIT ? OFFSET ?",
     )
-      .bind(limit)
+      .bind(limit, offset)
       .all();
-    return json({ audit: results || [] });
+    return json({ audit: results || [], total, limit, offset });
   }
 
   if (method === "POST" && path === "/api/admin/refresh") {

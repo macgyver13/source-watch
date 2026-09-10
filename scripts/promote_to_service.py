@@ -10,7 +10,6 @@ ROOT = Path(__file__).resolve().parents[1]
 WATCH = ROOT / "config" / "watch.yaml"
 STATIC = ROOT / "site" / "static"
 CONTENT = ROOT / "site" / "content"
-DATA_PUBLIC = ROOT / "data" / "public"
 
 STATIC_ARTIFACTS = [
     "feed.json",
@@ -50,10 +49,7 @@ def collect_targets() -> list[Path]:
         path = STATIC / name
         if path.exists():
             paths.append(path)
-    if DATA_PUBLIC.exists():
-        for path in sorted(DATA_PUBLIC.rglob("*")):
-            if path.is_file():
-                paths.append(path)
+
     weeks = CONTENT / "weeks"
     if weeks.exists():
         for path in sorted(weeks.iterdir()):
@@ -86,6 +82,8 @@ def main() -> int:
             path.unlink()
         print(f"removed {rel}")
     print("run python3 scripts/sync_hugo_content.py next")
+    print("data/public is kept so the first ingest can preserve discovered_at")
+
     return 0
 
 

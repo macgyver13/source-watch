@@ -1140,6 +1140,20 @@ def load_existing_artifacts() -> tuple[dict[str, dict], dict[str, dict], dict[st
     return existing_items, existing_projects, existing_sources
 
 
+def existing_state_loader(remote_state, local_loader=None):
+    """Use live service rows, or local artifacts when D1 has never been ingested."""
+    load_local = local_loader or load_existing_artifacts
+
+    def load():
+        items, projects, sources = remote_state()
+        if items or projects or sources:
+            return items, projects, sources
+        return load_local()
+
+    return load
+
+
+
 def discovery_time(old: dict, observed_at: str) -> str:
     """Return the stable first-seen timestamp for a previously known record."""
     return (
@@ -1515,7 +1529,8 @@ def main() -> int:
         exclusions = remote.get("exclusions") or []
         watch = apply_service_config(watch, remote)
         cfg = merge_seed_additions(cfg, remote.get("seed_additions") or [])
-        existing_loader = service.collector_state
+        existing_loader = existing_state_loader(service.collector_state)
+
     items, projects, sources = build_items(
         cfg,
         watch=watch,

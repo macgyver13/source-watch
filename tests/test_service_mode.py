@@ -242,6 +242,15 @@ class ServiceExclusionTests(unittest.TestCase):
             finally:
                 build_seed_feed.OUT = old_out
 
+    def test_empty_remote_state_falls_back_to_local_artifacts(self) -> None:
+        local = ({"seed:x": {"id": "seed:x", "discovered_at": "2025-01-02T00:00:00Z"}}, {}, {})
+        empty = build_seed_feed.existing_state_loader(lambda: ({}, {}, {}), lambda: local)
+        self.assertEqual(empty()[0]["seed:x"]["discovered_at"], "2025-01-02T00:00:00Z")
+        remote = ({"seed:y": {"id": "seed:y"}}, {}, {})
+        live = build_seed_feed.existing_state_loader(lambda: remote, lambda: local)
+        self.assertEqual(live()[0], remote[0])
+
+
     def test_repo_exclusion_does_not_match_name_prefix(self) -> None:
         self.assertTrue(build_seed_feed.repo_rule_matches(
             "https://github.com/acme/foo", "acme/foo",
