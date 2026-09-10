@@ -89,76 +89,66 @@ function stagedName(name, tag) {
 }
 
 async function allocateRenderTag(env) {
+  const started = Date.now();
   const row = await env.DB.prepare(
     `INSERT INTO settings (key, value) VALUES ('render_seq', ?)
      ON CONFLICT(key) DO UPDATE SET value = CAST(CAST(settings.value AS INTEGER) + 1 AS TEXT)
      RETURNING value`,
-  ).bind(String(Date.now())).first();
-  return `g${row?.value || Date.now()}`;
+  ).bind("1").first();
+  const seq = Number(row?.value || 1);
+  const tag = `g${seq}`;
+  await setSetting(env, `render_started:${tag}`, String(started));
+  return { tag, seq, started };
 }
-
 
 async function dropRenderedTag(env, tag) {
   if (!tag) return;
   await env.DB.batch([
     env.DB.prepare("DELETE FROM rendered WHERE name LIKE ?").bind("%#" + tag),
     env.DB.prepare("DELETE FROM rendered_meta WHERE name LIKE ?").bind("%#" + tag),
+    env.DB.prepare("DELETE FROM settings WHERE key = ?").bind(`render_started:${tag}`),
   ]);
 }
 
-
-export async function publishLiveRenderTag(env, tag) {
+export async function publishLiveRenderTag(env, tag, seq) {
   const result = await env.DB.prepare(
-    `INSERT INTO settings (key, value) VALUES ('live_render_tag', ?)
+    `INSERT INTO settings (key, value) VALUES ('live_render_seq', ?)
      ON CONFLICT(key) DO UPDATE SET value = excluded.value
-     WHERE settings.value < excluded.value`,
-  ).bind(tag).run();
-  return Boolean(result?.meta?.changes);
+     WHERE CAST(settings.value AS INTEGER) < CAST(excluded.value AS INTEGER)`,
+  ).bind(String(seq)).run();
+  if (!result?.meta?.changes) return false;
+  await setSetting(env, "live_render_tag", tag);
+  return true;
 }
-
 
 const RENDER_STALE_MS = 10 * 60 * 1000;
 
 async function purgeStaleRendered(env, liveTag) {
   const cutoff = Date.now() - RENDER_STALE_MS;
   const { results } = await env.DB.prepare(
-    "SELECT DISTINCT name FROM rendered WHERE name LIKE '%#g%'",
+    "SELECT key, value FROM settings WHERE key LIKE 'render_started:%'",
   ).all();
-  const stale = [];
   for (const row of results || []) {
-    const name = String(row.name || "");
-    const match = name.match(/#g(\d+)$/);
-    if (!match) continue;
-    if (`g${match[1]}` === liveTag) continue;
-    if (Number(match[1]) >= cutoff) continue;
-    stale.push(name);
-  }
-  if (!stale.length) return;
-  const stmts = [];
-  for (const name of stale) {
-    stmts.push(env.DB.prepare("DELETE FROM rendered WHERE name = ?").bind(name));
-    stmts.push(env.DB.prepare("DELETE FROM rendered_meta WHERE name = ?").bind(name));
-  }
-  for (let i = 0; i < stmts.length; i += 40) {
-    await env.DB.batch(stmts.slice(i, i + 40));
+    const tag = String(row.key || "").slice("render_started:".length);
+    if (!tag || tag === liveTag) continue;
+    if (Number(row.value) >= cutoff) continue;
+    await dropRenderedTag(env, tag);
   }
 }
 
-
-async function liveRenderedName(env, name) {
-  const tag = await getSetting(env, "live_render_tag");
-  return stagedName(name, tag);
+export async function liveRenderTag(env) {
+  return getSetting(env, "live_render_tag");
 }
 
-export async function readRendered(env, name) {
-  const live = await liveRenderedName(env, name);
+export async function readRenderedWithTag(env, name, tag) {
+  const live = stagedName(name, tag);
   const body = await readRenderedExact(env, live);
   if (body != null || live === name) return body;
   return readRenderedExact(env, name);
 }
 
-export async function readRenderedMeta(env, name) {
-  const live = await liveRenderedName(env, name);
+export async function readRenderedMetaWithTag(env, name, tag) {
+  const live = stagedName(name, tag);
   const meta = await env.DB.prepare(
     "SELECT etag, content_type, bytes, updated_at FROM rendered_meta WHERE name = ?",
   ).bind(live).first();
@@ -167,6 +157,15 @@ export async function readRenderedMeta(env, name) {
     "SELECT etag, content_type, bytes, updated_at FROM rendered_meta WHERE name = ?",
   ).bind(name).first();
 }
+
+export async function readRendered(env, name) {
+  return readRenderedWithTag(env, name, await liveRenderTag(env));
+}
+
+export async function readRenderedMeta(env, name) {
+  return readRenderedMetaWithTag(env, name, await liveRenderTag(env));
+}
+
 
 
 export async function getSetting(env, key) {
@@ -281,12 +280,19 @@ export async function insertRawRows(env, ingestId, kind, rows) {
   return valid.length;
 }
 
-export async function renderAll(env) {
+export async function renderAll(env, attempt = 0) {
+  const { tag, seq } = await allocateRenderTag(env);
   const liveId = await getSetting(env, "live_ingest_id");
   const ingest = await getIngest(env, liveId);
   const raw = await loadRaw(env, liveId);
   const overrides = await loadOverrides(env);
   const exclusions = await loadExclusions(env);
+  const stillLive = await getSetting(env, "live_ingest_id");
+  if (stillLive !== liveId) {
+    await dropRenderedTag(env, tag);
+    if (attempt >= 1) return { items: 0, projects: 0, sources: 0 };
+    return renderAll(env, attempt + 1);
+  }
   const overlaid = applyOverlay({
     items: raw.items,
     projects: raw.projects,
@@ -312,8 +318,6 @@ export async function renderAll(env) {
   const projects = { schema_version: "source-watch.projects.v0", projects: overlaid.projects };
   const sources = { schema_version: "source-watch.sources.v0", sources: overlaid.sources };
   const jsonType = "application/json; charset=utf-8";
-  const tag = await allocateRenderTag(env);
-
   const n = (name) => stagedName(name, tag);
   await writeRendered(env, n("feed.json"), JSON.stringify(feed), jsonType);
   await writeRendered(env, n("projects.json"), JSON.stringify(projects), jsonType);
@@ -333,7 +337,7 @@ export async function renderAll(env) {
     "application/rss+xml; charset=utf-8",
   );
   await writeRendered(env, n("weeks-index"), JSON.stringify(weekIndex(overlaid.items)), jsonType);
-  const published = await publishLiveRenderTag(env, tag);
+  const published = await publishLiveRenderTag(env, tag, seq);
   if (!published) {
     await dropRenderedTag(env, tag);
     return {
@@ -343,10 +347,6 @@ export async function renderAll(env) {
     };
   }
   await purgeStaleRendered(env, tag);
-
-
-
-
   return {
     items: overlaid.items.length,
     projects: overlaid.projects.length,
@@ -357,7 +357,16 @@ export async function renderAll(env) {
 export async function commitIngest(env, ingestId) {
   const row = await getIngest(env, ingestId);
   if (!row) return null;
+  const liveId = await getSetting(env, "live_ingest_id");
+  if (row.committed_at) {
+    if (liveId === ingestId) {
+      const counts = await renderAll(env);
+      return { ingest_id: ingestId, ...counts };
+    }
+    return { error: "already_committed" };
+  }
   const at = nowIso();
+
   const staleBefore = new Date(Date.now() - 60 * 60 * 1000).toISOString().replace(/\.\d{3}Z$/, "Z");
   const staleUncommitted =
     "SELECT ingest_id FROM ingests WHERE committed_at IS NULL AND started_at < ? AND ingest_id != ?";

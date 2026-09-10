@@ -155,6 +155,23 @@ test("project title patch renames member items and sources", () => {
   assert.equal(alphaProject.name, "Alpha Renamed");
 });
 
+test("colliding project rename keeps original names and item membership", () => {
+  const out = applyOverlay({
+    items: [itemA, itemB],
+    projects: [projectA, projectB],
+    sources: [sourceA, sourceB],
+    overrides: { project: { alpha: { title: "Beta" } } },
+    exclusions: [],
+  });
+  const alpha = out.projects.find((p) => p.id === "alpha");
+  const beta = out.projects.find((p) => p.id === "beta");
+  assert.equal(alpha.name, "Alpha");
+  assert.equal(beta.name, "Beta");
+  assert.equal(out.items.find((i) => i.id === "seed:a").project, "Alpha");
+  assert.equal(out.items.find((i) => i.id === "seed:b").project, "Beta");
+});
+
+
 test("project exclusion matches renamed display name", () => {
   const out = applyOverlay({
     items: [itemA, itemB],

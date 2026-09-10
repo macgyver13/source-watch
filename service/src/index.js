@@ -126,7 +126,8 @@ async function readJson(request) {
 }
 
 async function serveRendered(request, env, spec) {
-  const meta = await db.readRenderedMeta(env, spec.name);
+  const tag = await db.liveRenderTag(env);
+  const meta = await db.readRenderedMetaWithTag(env, spec.name, tag);
   const inm = (request.headers.get("If-None-Match") || "").replaceAll('"', "");
   if (meta && inm && inm === meta.etag) {
     return new Response(null, {
@@ -137,7 +138,8 @@ async function serveRendered(request, env, spec) {
       },
     });
   }
-  let body = meta ? await db.readRendered(env, spec.name) : null;
+  let body = meta ? await db.readRenderedWithTag(env, spec.name, tag) : null;
+
   let type = meta?.content_type || spec.type;
   let etag = meta?.etag;
   if (body == null) {
@@ -445,9 +447,10 @@ async function putOverride(env, kind, id, patch) {
   }
   const next = { ...current };
   for (const [key, value] of Object.entries(patch || {})) {
-    if (value === null) delete next[key];
+    if (value === null || (key === "title" && typeof value === "string" && !value.trim())) delete next[key];
     else next[key] = value;
   }
+
   await env.DB.prepare(
     "INSERT OR REPLACE INTO overrides (kind, target_id, patch, updated_at) VALUES (?, ?, ?, ?)",
   )
@@ -507,6 +510,7 @@ async function handleCollector(request, env, path) {
     const ingestId = String(body.ingest_id || "");
     const result = await db.commitIngest(env, ingestId);
     if (!result) return json({ error: "unknown_ingest" }, 409);
+    if (result.error === "already_committed") return json({ error: "already_committed" }, 409);
     return json(result);
   }
   return json({ error: "not_found" }, 404);
@@ -581,7 +585,6 @@ async function handleAdmin(request, env, path, url) {
         .bind(bucket, term, body?.note ? String(body.note) : null, db.nowIso())
         .run();
       await db.audit(env, "include_term_add", `${bucket}:${term}`, body?.note || null);
-      await db.renderAll(env);
       return json({ ok: true });
     }
   }
@@ -589,7 +592,6 @@ async function handleAdmin(request, env, path, url) {
   if (termDel && method === "DELETE") {
     await env.DB.prepare("DELETE FROM include_terms WHERE id = ?").bind(Number(termDel[1])).run();
     await db.audit(env, "include_term_delete", termDel[1], null);
-    await db.renderAll(env);
     return json({ ok: true });
   }
 
@@ -603,8 +605,21 @@ async function handleAdmin(request, env, path, url) {
         return json({ error: "invalid_seed" }, 400);
       }
       const url = String(entry.url || "").trim();
-      const repo = String(entry.repo || "").trim();
+      let repo = String(entry.repo || "").trim();
       const name = String(entry.name || "").trim();
+      if (kind === "github_repositories" && !repo && url) {
+        try {
+          const parsed = new URL(url);
+          const host = parsed.hostname.toLowerCase();
+          if (host === "github.com" || host === "www.github.com") {
+            const parts = parsed.pathname.replace(/^\/+/, "").split("/");
+            if (parts[0] && parts[1]) repo = `${parts[0]}/${parts[1].replace(/\.git$/i, "")}`;
+          }
+        } catch {
+          repo = "";
+        }
+        if (repo) entry = { ...entry, repo };
+      }
       const hasLocator =
         kind === "docs_pages" ? Boolean(url)
         : kind === "github_repositories"
@@ -613,16 +628,12 @@ async function handleAdmin(request, env, path, url) {
         : kind === "crates" ? Boolean(name) || /^https:\/\/crates\.io\/crates\/[^/]+\/?$/i.test(url)
         : Boolean(url || repo);
       if (!String(entry.id || "").trim() || !hasLocator) return json({ error: "invalid_seed" }, 400);
-
-
-
       await env.DB.prepare("INSERT INTO seed_additions (kind, entry, created_at) VALUES (?, ?, ?)").bind(
         kind,
         JSON.stringify(entry),
         db.nowIso(),
       ).run();
       await db.audit(env, "seed_add", kind, JSON.stringify(entry));
-      await db.renderAll(env);
       return json({ ok: true });
     }
   }
@@ -630,7 +641,6 @@ async function handleAdmin(request, env, path, url) {
   if (seedDel && method === "DELETE") {
     await env.DB.prepare("DELETE FROM seed_additions WHERE id = ?").bind(Number(seedDel[1])).run();
     await db.audit(env, "seed_delete", seedDel[1], null);
-    await db.renderAll(env);
     return json({ ok: true });
   }
 
@@ -644,7 +654,6 @@ async function handleAdmin(request, env, path, url) {
       const value = body.discovered_after == null ? "" : String(body.discovered_after);
       await db.setSetting(env, "discovered_after", value);
       await db.audit(env, "settings_put", "discovered_after", value);
-      await db.renderAll(env);
       return json({ discovered_after: value });
     }
   }

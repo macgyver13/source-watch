@@ -409,9 +409,10 @@ def github_get_json(path: str) -> dict | None:
         with urlopen(request, timeout=30) as response:
             payload = json.loads(response.read().decode("utf-8"))
     except Exception as exc:
-        print(f"warning: GitHub GET {path} failed: {exc}", file=sys.stderr)
+        note_collector_failure(f"GitHub GET {path} failed: {exc}")
         return None
     return payload if isinstance(payload, dict) else None
+
 
 def delving_headers() -> dict[str, str]:
     return {
@@ -552,6 +553,13 @@ def live_seed_github(entry: dict, kind: str, github_json_fetcher) -> tuple[str |
     if kind == "github_repositories":
         repo = str(entry.get("repo") or "").strip()
         if not repo:
+            parsed = urlparse(str(entry.get("url") or ""))
+            host = (parsed.hostname or "").lower()
+            if host in ("github.com", "www.github.com"):
+                parts = [p for p in (parsed.path or "").split("/") if p]
+                if len(parts) >= 2:
+                    repo = parts[0] + "/" + parts[1].removesuffix(".git")
+        if not repo:
             return None, None
         payload = github_json_fetcher(f"/repos/{repo}") or {}
         created = optional_iso(payload.get("created_at"))
@@ -559,6 +567,7 @@ def live_seed_github(entry: dict, kind: str, github_json_fetcher) -> tuple[str |
             payload.get("pushed_at") or payload.get("updated_at")
         )
         return created, activity
+
     if kind == "github_pull_requests":
         match = PR_URL_RE.match(str(entry.get("url") or ""))
         if not match:

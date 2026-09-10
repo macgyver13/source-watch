@@ -445,8 +445,19 @@ export const ADMIN_HTML = `<!doctype html>
     };
 
     $("refresh-btn").onclick = function () {
-      api("/api/admin/refresh", { method: "POST" }).then(function () { afterMutation(); });
+      api("/api/admin/refresh", { method: "POST" }).then(function (data) {
+        var note = $("refresh-note");
+        if (data._status === 202 && data.dispatched) {
+          note.textContent = "Refresh dispatched.";
+          afterMutation();
+          return;
+        }
+        note.textContent = data.error === "refresh_not_configured"
+          ? "refresh not configured"
+          : ("Refresh failed" + (data.status ? " (" + data.status + ")" : "") + (data.body ? ": " + String(data.body).slice(0, 180) : data.error ? ": " + data.error : "."));
+      });
     };
+
     $("tabs").onclick = function (ev) {
       var btn = ev.target.closest("button[data-tab]");
       if (btn) setTab(btn.getAttribute("data-tab"));
