@@ -22,11 +22,14 @@ export function matchingExclusion(row, exclusions, fields = {}) {
           .filter(Boolean)
           .join(" ");
   const url = fields.url != null ? fields.url : row?.source_url || row?.url || "";
-  const project = fields.project != null ? fields.project : row?.project || "";
+  const projectField = fields.project != null ? fields.project : row?.project || "";
+  const projects = (Array.isArray(projectField) ? projectField : [projectField])
+    .map((name) => String(name || "").toLowerCase())
+    .filter(Boolean);
+
   const sourceType = fields.sourceType != null ? fields.sourceType : row?.source_type || "";
   const text = String(haystack || "").toLowerCase();
   const link = String(url || "").toLowerCase();
-  const proj = String(project || "").toLowerCase();
   const stype = String(sourceType || "").toLowerCase();
   for (const rule of exclusions || []) {
     const kind = String(rule.kind || "").trim().toLowerCase();
@@ -34,7 +37,6 @@ export function matchingExclusion(row, exclusions, fields = {}) {
     if (!value) continue;
     if (kind === "term" && text.includes(value)) return rule;
     if (kind === "url_prefix" && link.startsWith(value)) return rule;
-
     if (kind === "repo") {
       const needle = `github.com/${value}`;
       const idx = link.indexOf(needle);
@@ -43,8 +45,12 @@ export function matchingExclusion(row, exclusions, fields = {}) {
         if (end === link.length || "/?#:".includes(link[end])) return rule;
       }
     }
-
-    if (kind === "project" && (proj === value || slugify(proj) === slugify(value))) return rule;
+    if (
+      kind === "project" &&
+      projects.some((proj) => proj === value || slugify(proj) === slugify(value))
+    ) {
+      return rule;
+    }
     if (kind === "source_type" && stype === value) return rule;
   }
   return null;
@@ -128,24 +134,24 @@ export function applyOverlay({ items, projects, sources, overrides, exclusions }
     const item = applyItemPatch({ ...raw }, itemPatches.get(raw.id));
     const itemPatch = itemPatches.get(raw.id);
     if (itemPatch && itemPatch.hidden === true) continue;
-    const projectId = slugify(item.project);
-    const projectPatch = projectPatches.get(projectId);
+    const originalProjectId = slugify(raw.project);
+    const projectPatch = projectPatches.get(originalProjectId) || projectPatches.get(slugify(item.project));
     if (projectPatch && projectPatch.hidden === true) continue;
     const sid = sourceIdForItem(item);
     const sourcePatch = sourcePatches.get(sid);
     if (sourcePatch && sourcePatch.hidden === true) continue;
+    const renamed = projectNewName.get(originalProjectId) || projectNewName.get(slugify(item.project));
     const haystack = `${item.title || ""} ${item.summary || ""} ${item.source_url || ""} ${(item.tags || []).join(" ")}`;
     if (
       matchesExclusion(item, exclusions, {
         haystack,
         url: item.source_url,
-        project: item.project,
+        project: [raw.project, item.project, renamed],
         sourceType: item.source_type,
       })
     ) {
       continue;
     }
-    const renamed = projectNewName.get(projectId);
     if (renamed) item.project = renamed;
     surviving.push(item);
   }
@@ -158,21 +164,22 @@ export function applyOverlay({ items, projects, sources, overrides, exclusions }
     const patch = sourcePatches.get(raw.id);
     if (patch && patch.hidden === true) continue;
     const source = applyNamedPatch({ ...raw }, patch, "name");
+    const renamed = projectNewName.get(slugify(source.project));
     const haystack = `${source.name || ""} ${source.url || ""}`;
     if (
       matchesExclusion(source, exclusions, {
         haystack,
         url: source.url,
-        project: source.project,
+        project: [source.project, renamed],
         sourceType: source.source_type,
       })
     ) {
       continue;
     }
-    const renamed = projectNewName.get(slugify(source.project));
     if (renamed) source.project = renamed;
     outSources.push(source);
   }
+
   const keptSourceIds = new Set(outSources.map((s) => s.id));
   outSources.sort((a, b) => String(a.name || "").localeCompare(String(b.name || ""), undefined, { sensitivity: "base" }));
 

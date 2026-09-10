@@ -311,7 +311,8 @@ export const ADMIN_HTML = `<!doctype html>
             "<td class='row-actions'>" +
               "<button data-act='hide' data-id='" + esc(item.id) + "' data-hidden='" + (item.hidden ? "0" : "1") + "'>" + (item.hidden ? "Unhide" : "Hide") + "</button>" +
               "<button data-act='promote' data-id='" + esc(item.id) + "'>Promote</button>" +
-              "<button data-act='exclude' data-id='" + esc(item.id) + "' data-url='" + esc(url) + "' data-title='" + esc(item.title || "") + "'>Exclude</button>" +
+              "<button data-act='exclude' data-id='" + esc(item.id) + "' data-url='" + esc(url) + "' data-title='" + esc(displayTitle || "") + "'>Exclude</button>" +
+
               "<button data-act='edit' data-id='" + esc(item.id) + "'>Edit</button>" +
               "<button data-act='clear' data-id='" + esc(item.id) + "'>Clear override</button>" +
             "</td></tr>";

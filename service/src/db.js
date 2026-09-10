@@ -97,6 +97,16 @@ async function dropRenderedTag(env, tag) {
 }
 
 
+export async function publishLiveRenderTag(env, tag) {
+  const result = await env.DB.prepare(
+    `INSERT INTO settings (key, value) VALUES ('live_render_tag', ?)
+     ON CONFLICT(key) DO UPDATE SET value = excluded.value
+     WHERE settings.value < excluded.value`,
+  ).bind(tag).run();
+  return Boolean(result?.meta?.changes);
+}
+
+
 const RENDER_STALE_MS = 10 * 60 * 1000;
 
 async function purgeStaleRendered(env, liveTag) {
@@ -312,8 +322,8 @@ export async function renderAll(env) {
     "application/rss+xml; charset=utf-8",
   );
   await writeRendered(env, n("weeks-index"), JSON.stringify(weekIndex(overlaid.items)), jsonType);
-  const prev = await getSetting(env, "live_render_tag");
-  if (prev && prev > tag) {
+  const published = await publishLiveRenderTag(env, tag);
+  if (!published) {
     await dropRenderedTag(env, tag);
     return {
       items: overlaid.items.length,
@@ -321,8 +331,8 @@ export async function renderAll(env) {
       sources: overlaid.sources.length,
     };
   }
-  await setSetting(env, "live_render_tag", tag);
   await purgeStaleRendered(env, tag);
+
 
 
 

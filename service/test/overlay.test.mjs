@@ -155,6 +155,31 @@ test("project title patch renames member items and sources", () => {
   assert.equal(alphaProject.name, "Alpha Renamed");
 });
 
+test("project exclusion matches renamed display name", () => {
+  const out = applyOverlay({
+    items: [itemA, itemB],
+    projects: [projectA, projectB],
+    sources: [sourceA, sourceB],
+    overrides: { project: { alpha: { title: "Alpha Renamed" } } },
+    exclusions: [{ kind: "project", value: "Alpha Renamed" }],
+  });
+  assert.deepEqual(out.items.map((i) => i.id), ["seed:b"]);
+  assert.equal(out.projects.length, 1);
+  assert.equal(out.projects[0].id, "beta");
+});
+
+test("project exclusion still matches original name after rename", () => {
+  const out = applyOverlay({
+    items: [itemA, itemB],
+    projects: [projectA, projectB],
+    sources: [sourceA, sourceB],
+    overrides: { project: { alpha: { title: "Alpha Renamed" } } },
+    exclusions: [{ kind: "project", value: "Alpha" }],
+  });
+  assert.deepEqual(out.items.map((i) => i.id), ["seed:b"]);
+});
+
+
 test("repo exclusion does not match a longer repository name", () => {
   const keep = {
     ...itemA,

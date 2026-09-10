@@ -273,13 +273,15 @@ function annotateItem(item, overrides, exclusions) {
   const patch = overrides.item[item.id] || null;
   const projectId = slugify(item.project);
   const projectPatch = overrides.project[projectId];
+  const displayProject = (patch && patch.project) || (projectPatch && projectPatch.title) || item.project;
   const sourcePatch = overrides.source[sourceIdForItem(item)];
   const rule = matchingExclusion(item, exclusions, {
     haystack: `${item.title || ""} ${item.summary || ""} ${item.source_url || ""} ${(item.tags || []).join(" ")}`,
     url: item.source_url,
-    project: item.project,
+    project: [item.project, displayProject],
     sourceType: item.source_type,
   });
+
   const hidden = Boolean(patch && patch.hidden);
   const projectHidden = Boolean(projectPatch && projectPatch.hidden);
   const sourceHidden = Boolean(sourcePatch && sourcePatch.hidden);
@@ -291,6 +293,7 @@ function annotateItem(item, overrides, exclusions) {
   if (rule) whyHidden.push(`excluded ${rule.kind} ${rule.value}`);
   return {
     ...item,
+    project: displayProject,
     patch,
     hidden,
     excluded,
@@ -300,26 +303,32 @@ function annotateItem(item, overrides, exclusions) {
     exclusion: rule ? { kind: rule.kind, value: rule.value, note: rule.note || "" } : null,
     why: whyHidden.length ? whyHidden.join(" · ") : inclusionWhy({ ...item, patch }),
   };
+
 }
 
 function annotateNamed(row, kind, overrides, exclusions) {
   const patch = overrides[kind][row.id] || null;
+  const projectPatch = kind === "source" ? overrides.project[slugify(row.project)] : kind === "project" ? patch : null;
+  const displayProject = kind === "project"
+    ? ((patch && patch.title) || row.name)
+    : ((projectPatch && projectPatch.title) || row.project);
   const rule = matchingExclusion(row, exclusions, {
     haystack: `${row.name || ""} ${row.url || ""}`,
     url: row.url,
-    project: row.project,
+    project: kind === "project" ? [row.name, row.id, displayProject] : [row.project, displayProject],
     sourceType: row.source_type,
   });
   const hidden = Boolean(patch && patch.hidden);
   const excluded = Boolean(rule);
-  const projectPatch = kind === "source" ? overrides.project[slugify(row.project)] : null;
-  const projectHidden = Boolean(projectPatch && projectPatch.hidden);
+  const projectHidden = Boolean(kind !== "project" && projectPatch && projectPatch.hidden);
   const whyHidden = [];
   if (hidden) whyHidden.push("hidden override");
   if (projectHidden) whyHidden.push("project hidden");
   if (rule) whyHidden.push(`excluded ${rule.kind} ${rule.value}`);
   return {
     ...row,
+    name: kind === "project" ? displayProject : row.name,
+    project: kind === "source" ? displayProject : row.project,
     patch,
     hidden,
     excluded,
@@ -593,15 +602,18 @@ async function handleAdmin(request, env, path, url) {
       if (!SEED_KINDS.has(kind) || !entry || typeof entry !== "object" || Array.isArray(entry)) {
         return json({ error: "invalid_seed" }, 400);
       }
-      const url = String(entry.url || "");
+      const url = String(entry.url || "").trim();
+      const repo = String(entry.repo || "").trim();
+      const name = String(entry.name || "").trim();
       const hasLocator =
         kind === "docs_pages" ? Boolean(url)
-        : kind === "github_repositories" ? Boolean(entry.repo || url)
+        : kind === "github_repositories"
+          ? /^[^/\s]+\/[^/\s]+$/.test(repo) || /^https:\/\/github\.com\/[^/]+\/[^/]+\/?$/i.test(url)
         : kind === "github_pull_requests" ? /^https:\/\/github\.com\/[^/]+\/[^/]+\/pull\/\d+\/?$/i.test(url)
+        : kind === "crates" ? Boolean(name) || /^https:\/\/crates\.io\/crates\/[^/]+\/?$/i.test(url)
+        : Boolean(url || repo);
+      if (!String(entry.id || "").trim() || !hasLocator) return json({ error: "invalid_seed" }, 400);
 
-        : kind === "crates" ? Boolean(entry.name || url)
-        : Boolean(url || entry.repo);
-      if (!entry.id || !hasLocator) return json({ error: "invalid_seed" }, 400);
 
 
       await env.DB.prepare("INSERT INTO seed_additions (kind, entry, created_at) VALUES (?, ?, ?)").bind(
