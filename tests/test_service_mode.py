@@ -145,6 +145,22 @@ class ServiceConfigMergeTests(unittest.TestCase):
         crates = merged["seeded_sources"]["crates"]
         self.assertEqual([c["id"] for c in crates], ["old-crate", "fresh"])
 
+    def test_merge_seed_additions_skips_id_from_another_kind(self) -> None:
+        cfg = {
+            "seeded_sources": {
+                "github_repositories": [{"id": "shared", "repo": "acme/keep"}],
+            }
+        }
+        merged = build_seed_feed.merge_seed_additions(cfg, [
+            {"kind": "docs_pages", "entry": {
+                "id": "shared",
+                "url": "https://example.com/docs",
+            }},
+        ])
+        self.assertNotIn("docs_pages", merged["seeded_sources"])
+        self.assertEqual(len(merged["seeded_sources"]["github_repositories"]), 1)
+
+
 
 
 class ServiceExclusionTests(unittest.TestCase):

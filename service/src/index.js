@@ -662,7 +662,13 @@ async function handleAdmin(request, env, path, url) {
         : kind === "github_pull_requests" ? /^https:\/\/github\.com\/[^/]+\/[^/]+\/pull\/\d+\/?$/i.test(url)
         : kind === "crates" ? Boolean(name) || /^https:\/\/crates\.io\/crates\/[^/]+\/?$/i.test(url)
         : Boolean(url || repo);
-      if (!String(entry.id || "").trim() || !hasLocator) return json({ error: "invalid_seed" }, 400);
+      const seedId = String(entry.id || "").trim().toLowerCase();
+      if (!seedId || !hasLocator) return json({ error: "invalid_seed" }, 400);
+      const existingSeeds = await db.loadSeedAdditions(env);
+      if (existingSeeds.some((row) => String(row.entry?.id || "").trim().toLowerCase() === seedId)) {
+        return json({ error: "duplicate_seed_id" }, 409);
+      }
+
       await env.DB.prepare("INSERT INTO seed_additions (kind, entry, created_at) VALUES (?, ?, ?)").bind(
         kind,
         JSON.stringify(entry),

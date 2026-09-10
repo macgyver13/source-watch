@@ -339,7 +339,8 @@ export const ADMIN_HTML = `<!doctype html>
         paintPager(data.total, "projects");
 
         var rows = (data.projects || []).map(function (p) {
-          var displayName = (p.patch && p.patch.title) || p.name;
+          var displayName = p.name || (p.patch && p.patch.title);
+
           return "<tr class='" + (p.suppressed ? "hidden-row" : "") + "'><td>" +
             "<b>" + esc(displayName) + "</b><div class='why'>" + esc(p.why || p.id) + "</div></td>" +
             "<td class='row-actions'>" +

@@ -202,12 +202,30 @@ def seed_entry_keys(kind: str, entry: dict) -> set[tuple[str, str]]:
 
 
 def merge_seed_additions(cfg: dict, additions: list[dict]) -> dict:
-    """Append service seed additions unless id, url, repo, or crate name already exists."""
+    """Append service seed additions unless id, url, repo, or crate name already exists.
+
+    IDs are unique across every seeded_sources bucket. Locators stay kind-specific.
+    """
     out = copy.deepcopy(cfg)
     seeded = out.setdefault("seeded_sources", {})
     if not isinstance(seeded, dict):
         seeded = {}
         out["seeded_sources"] = seeded
+
+    def existing_ids() -> set[str]:
+        ids: set[str] = set()
+        for other in seeded.values():
+            if not isinstance(other, list):
+                continue
+            for existing in other:
+                if not isinstance(existing, dict):
+                    continue
+                eid = str(existing.get("id") or "").strip().lower()
+                if eid:
+                    ids.add(eid)
+        return ids
+
+    known_ids = existing_ids()
     for addition in additions or []:
         if not isinstance(addition, dict):
             continue
@@ -215,9 +233,13 @@ def merge_seed_additions(cfg: dict, additions: list[dict]) -> dict:
         entry = addition.get("entry")
         if not kind or not isinstance(entry, dict):
             continue
+        incoming_id = str(entry.get("id") or "").strip().lower()
+        if incoming_id and incoming_id in known_ids:
+            continue
         bucket = seeded.setdefault(kind, [])
         if not isinstance(bucket, list):
             continue
+
         incoming = seed_entry_keys(kind, entry)
         exists = False
         for existing in bucket:
@@ -228,7 +250,10 @@ def merge_seed_additions(cfg: dict, additions: list[dict]) -> dict:
                 break
         if not exists:
             bucket.append(entry)
+            if incoming_id:
+                known_ids.add(incoming_id)
     return out
+
 
 
 
