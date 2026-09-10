@@ -506,24 +506,28 @@ async function putOverride(env, kind, id, patch) {
     else next[key] = value;
   }
 
+  const written = JSON.stringify(next);
   await env.DB.prepare(
     "INSERT OR REPLACE INTO overrides (kind, target_id, patch, updated_at) VALUES (?, ?, ?, ?)",
   )
-    .bind(kind, id, JSON.stringify(next), db.nowIso())
+    .bind(kind, id, written, db.nowIso())
     .run();
   const fail = await ensureRendered(env);
   if (fail) {
     if (!existingRow) {
-      await env.DB.prepare("DELETE FROM overrides WHERE kind = ? AND target_id = ?").bind(kind, id).run();
+      await env.DB.prepare("DELETE FROM overrides WHERE kind = ? AND target_id = ? AND patch = ?")
+        .bind(kind, id, written)
+        .run();
     } else {
       await env.DB.prepare(
-        "INSERT OR REPLACE INTO overrides (kind, target_id, patch, updated_at) VALUES (?, ?, ?, ?)",
+        "UPDATE overrides SET patch = ?, updated_at = ? WHERE kind = ? AND target_id = ? AND patch = ?",
       )
-        .bind(kind, id, existingRow.patch, db.nowIso())
+        .bind(existingRow.patch, db.nowIso(), kind, id, written)
         .run();
     }
     return fail;
   }
+
   const ref = await rowRef(env, kind, id);
   await db.audit(env, "override_put", auditTarget(ref), JSON.stringify({ ...ref, patch: next }));
   return next;
@@ -586,7 +590,10 @@ async function handleCollector(request, env, path) {
     const ingestId = String(body.ingest_id || "");
     const result = await db.commitIngest(env, ingestId);
     if (!result) return json({ error: "unknown_ingest" }, 409);
-    if (result.error === "already_committed") return json({ error: "already_committed" }, 409);
+    if (result.error === "already_committed" || result.error === "stale_ingest") {
+      return json({ error: result.error }, 409);
+    }
+
     return json(result);
   }
 
@@ -625,14 +632,20 @@ async function handleAdmin(request, env, path, url) {
       const fail = await ensureRendered(env);
       if (fail) {
         if (existing) {
-          await env.DB.prepare(
-            "INSERT OR REPLACE INTO overrides (kind, target_id, patch, updated_at) VALUES (?, ?, ?, ?)",
-          )
-            .bind(kind, id, existing.patch, existing.updated_at || db.nowIso())
-            .run();
+          const current = await env.DB.prepare(
+            "SELECT target_id FROM overrides WHERE kind = ? AND target_id = ?",
+          ).bind(kind, id).first();
+          if (!current) {
+            await env.DB.prepare(
+              "INSERT INTO overrides (kind, target_id, patch, updated_at) VALUES (?, ?, ?, ?)",
+            )
+              .bind(kind, id, existing.patch, existing.updated_at || db.nowIso())
+              .run();
+          }
         }
         return fail;
       }
+
       await db.audit(env, "override_delete", auditTarget(ref), JSON.stringify(ref));
       return json({ ok: true });
     }
@@ -738,6 +751,19 @@ async function handleAdmin(request, env, path, url) {
       if (existingSeeds.some((row) => String(row.entry?.id || "").trim().toLowerCase() === seedId)) {
         return json({ error: "duplicate_seed_id" }, 409);
       }
+      const liveId = await db.getSetting(env, "live_ingest_id");
+      const raw = await db.loadRaw(env, liveId);
+      const catalogIds = new Set();
+      for (const row of [...raw.items, ...raw.sources, ...raw.projects]) {
+        const rid = String(row.id || "").trim().toLowerCase();
+        if (!rid) continue;
+        catalogIds.add(rid);
+        if (rid.startsWith("seed:")) catalogIds.add(rid.slice(5));
+      }
+      if (catalogIds.has(seedId) || catalogIds.has(`seed:${seedId}`)) {
+        return json({ error: "duplicate_seed_id" }, 409);
+      }
+
 
       await env.DB.prepare("INSERT INTO seed_additions (kind, entry, created_at) VALUES (?, ?, ?)").bind(
         kind,

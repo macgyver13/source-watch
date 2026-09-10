@@ -399,10 +399,17 @@ export async function commitIngest(env, ingestId) {
   if (row.committed_at) {
     if (liveId === ingestId) {
       const counts = await renderUntilPublished(env);
-
       return { ingest_id: ingestId, ...counts };
     }
     return { error: "already_committed" };
+  }
+  if (liveId && liveId !== ingestId) {
+    const live = await getIngest(env, liveId);
+    const liveStamp = String(live?.generated_at || live?.started_at || "");
+    const mine = String(row.generated_at || row.started_at || "");
+    if (live?.committed_at && liveStamp && mine && liveStamp > mine) {
+      return { error: "stale_ingest" };
+    }
   }
   const at = nowIso();
 
