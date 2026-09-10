@@ -477,10 +477,15 @@ function auditTarget(ref) {
 }
 
 async function ensureRendered(env) {
-  const counts = await db.renderUntilPublished(env);
-  if (counts.published === false) return json({ error: "render_not_published" }, 503);
-  return null;
+  try {
+    const counts = await db.renderUntilPublished(env);
+    if (counts.published === false) return json({ error: "render_not_published" }, 503);
+    return null;
+  } catch (err) {
+    return json({ error: "render_failed", detail: String(err && err.message || err).slice(0, 200) }, 503);
+  }
 }
+
 
 
 async function putOverride(env, kind, id, patch) {
@@ -506,13 +511,25 @@ async function putOverride(env, kind, id, patch) {
   )
     .bind(kind, id, JSON.stringify(next), db.nowIso())
     .run();
+  const fail = await ensureRendered(env);
+  if (fail) {
+    if (!existingRow) {
+      await env.DB.prepare("DELETE FROM overrides WHERE kind = ? AND target_id = ?").bind(kind, id).run();
+    } else {
+      await env.DB.prepare(
+        "INSERT OR REPLACE INTO overrides (kind, target_id, patch, updated_at) VALUES (?, ?, ?, ?)",
+      )
+        .bind(kind, id, existingRow.patch, db.nowIso())
+        .run();
+    }
+    return fail;
+  }
   const ref = await rowRef(env, kind, id);
   await db.audit(env, "override_put", auditTarget(ref), JSON.stringify({ ...ref, patch: next }));
-  const fail = await ensureRendered(env);
-  if (fail) return fail;
   return next;
-
 }
+
+
 
 
 async function handleCollector(request, env, path) {
@@ -600,13 +617,24 @@ async function handleAdmin(request, env, path, url) {
       return json({ kind, id, patch });
     }
     if (method === "DELETE") {
+      const existing = await env.DB.prepare("SELECT patch, updated_at FROM overrides WHERE kind = ? AND target_id = ?")
+        .bind(kind, id)
+        .first();
       const ref = await rowRef(env, kind, id);
       await env.DB.prepare("DELETE FROM overrides WHERE kind = ? AND target_id = ?").bind(kind, id).run();
-      await db.audit(env, "override_delete", auditTarget(ref), JSON.stringify(ref));
       const fail = await ensureRendered(env);
-      if (fail) return fail;
+      if (fail) {
+        if (existing) {
+          await env.DB.prepare(
+            "INSERT OR REPLACE INTO overrides (kind, target_id, patch, updated_at) VALUES (?, ?, ?, ?)",
+          )
+            .bind(kind, id, existing.patch, existing.updated_at || db.nowIso())
+            .run();
+        }
+        return fail;
+      }
+      await db.audit(env, "override_delete", auditTarget(ref), JSON.stringify(ref));
       return json({ ok: true });
-
     }
   }
 
@@ -617,27 +645,47 @@ async function handleAdmin(request, env, path, url) {
       const kind = String(body?.kind || "").trim();
       const value = String(body?.value || "").trim();
       if (!EXCLUSION_KINDS.has(kind) || !value) return json({ error: "invalid_exclusion" }, 400);
-      await env.DB.prepare(
+      const inserted = await env.DB.prepare(
         "INSERT OR IGNORE INTO exclusions (kind, value, note, created_at) VALUES (?, ?, ?, ?)",
       )
         .bind(kind, value, body?.note ? String(body.note) : null, db.nowIso())
         .run();
-      await db.audit(env, "exclusion_add", `${kind}:${value}`, body?.note || null);
       const fail = await ensureRendered(env);
-      if (fail) return fail;
+      if (fail) {
+        if (inserted?.meta?.changes) {
+          await env.DB.prepare("DELETE FROM exclusions WHERE kind = ? AND value = ?").bind(kind, value).run();
+        }
+        return fail;
+      }
+      await db.audit(env, "exclusion_add", `${kind}:${value}`, body?.note || null);
       return json({ ok: true });
+
 
     }
   }
   const exclusionDel = path.match(/^\/api\/admin\/exclusions\/(\d+)$/);
   if (exclusionDel && method === "DELETE") {
-    await env.DB.prepare("DELETE FROM exclusions WHERE id = ?").bind(Number(exclusionDel[1])).run();
-    await db.audit(env, "exclusion_delete", exclusionDel[1], null);
+    const exclusionId = Number(exclusionDel[1]);
+    const existing = await env.DB.prepare(
+      "SELECT id, kind, value, note, created_at FROM exclusions WHERE id = ?",
+    ).bind(exclusionId).first();
+    await env.DB.prepare("DELETE FROM exclusions WHERE id = ?").bind(exclusionId).run();
     const fail = await ensureRendered(env);
-    if (fail) return fail;
+    if (fail) {
+      if (existing) {
+        await env.DB.prepare(
+          "INSERT OR REPLACE INTO exclusions (id, kind, value, note, created_at) VALUES (?, ?, ?, ?, ?)",
+        )
+          .bind(existing.id, existing.kind, existing.value, existing.note, existing.created_at)
+          .run();
+      }
+      return fail;
+    }
+    await db.audit(env, "exclusion_delete", exclusionDel[1], null);
     return json({ ok: true });
-
   }
+
+
 
   if (path === "/api/admin/include-terms") {
     if (method === "GET") return json({ include_terms: await db.loadIncludeTerms(env) });
