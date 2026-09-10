@@ -1,6 +1,7 @@
 import { ADMIN_HTML } from "./admin-ui.js";
 import * as db from "./db.js";
-import { applyItemPatch, applyNamedPatch, applyOverlay, matchingExclusion, slugify, sourceIdForItem } from "./overlay.js";
+import { applyItemPatch, applyNamedPatch, applyOverlay, matchingExclusion, resolveProjectDisplayNames, slugify, sourceIdForItem } from "./overlay.js";
+
 
 
 
@@ -22,6 +23,20 @@ const EXCLUSION_KINDS = new Set(["term", "url_prefix", "repo", "project", "sourc
 const INCLUDE_BUCKETS = new Set(["always_match", "required_any", "context_any"]);
 const SEED_KINDS = new Set(["docs_pages", "github_repositories", "github_pull_requests", "crates"]);
 const RAW_KINDS = new Set(["items", "projects", "sources"]);
+
+function githubRepoFromUrl(url) {
+  try {
+    const parsed = new URL(url);
+    const host = String(parsed.hostname || "").toLowerCase();
+    if (host !== "github.com" && host !== "www.github.com") return "";
+    const parts = parsed.pathname.replace(/^\/+|\/+$/g, "").split("/").filter(Boolean);
+    if (parts.length !== 2 || !parts[0] || !parts[1]) return "";
+    return `${parts[0]}/${parts[1].replace(/\.git$/i, "")}`;
+  } catch {
+    return "";
+  }
+}
+
 
 function json(data, status = 200, extra = {}) {
   return new Response(JSON.stringify(data), {
@@ -130,21 +145,34 @@ async function readJson(request) {
 }
 
 async function serveRendered(request, env, spec) {
-  const tag = await db.liveRenderTag(env);
-  const meta = await db.readRenderedMetaWithTag(env, spec.name, tag);
+  let tag = await db.liveRenderTag(env);
+  let meta = await db.readRenderedMetaWithTag(env, spec.name, tag);
+  let body = meta ? await db.readRenderedWithTag(env, spec.name, tag) : null;
+  if (body == null) {
+    const again = await db.liveRenderTag(env);
+    if (again && again !== tag) {
+      tag = again;
+      meta = await db.readRenderedMetaWithTag(env, spec.name, tag);
+      body = meta ? await db.readRenderedWithTag(env, spec.name, tag) : null;
+    }
+  }
+  if (body == null) {
+    const prev = await db.getSetting(env, "prev_render_tag");
+    if (prev) {
+      meta = await db.readRenderedMetaWithTag(env, spec.name, prev);
+      body = meta ? await db.readRenderedWithTag(env, spec.name, prev) : null;
+    }
+  }
   const inm = (request.headers.get("If-None-Match") || "").replaceAll('"', "");
-  if (meta && inm && inm === meta.etag) {
+  if (meta && body != null && inm && inm === meta.etag) {
     return new Response(null, {
       status: 304,
       headers: {
         ETag: `"${meta.etag}"`,
         "Cache-Control": PUBLIC_CACHE,
-
       },
     });
   }
-  let body = meta ? await db.readRenderedWithTag(env, spec.name, tag) : null;
-
   let type = meta?.content_type || spec.type;
   let etag = meta?.etag;
   if (body == null) {
@@ -152,6 +180,7 @@ async function serveRendered(request, env, spec) {
     etag = await db.etagOf(body);
     type = spec.type;
   }
+
   return new Response(body, {
     status: 200,
     headers: {
@@ -278,12 +307,12 @@ function inclusionWhy(row) {
   return bits.join(" · ");
 }
 
-function annotateItem(item, overrides, exclusions) {
+function annotateItem(item, overrides, exclusions, displayNames) {
   const patch = overrides.item[item.id] || null;
   const effective = applyItemPatch({ ...item }, patch);
   const projectId = slugify(item.project);
   const projectPatch = overrides.project[projectId];
-  const displayProject = effective.project || (projectPatch && projectPatch.title) || item.project;
+  const displayProject = (displayNames && displayNames.get(projectId)) || effective.project || item.project;
   const sourcePatch = overrides.source[sourceIdForItem(item)];
   const rule = matchingExclusion(effective, exclusions, {
     haystack: `${effective.title || ""} ${effective.summary || ""} ${effective.source_url || ""} ${(effective.tags || []).join(" ")}`,
@@ -291,8 +320,6 @@ function annotateItem(item, overrides, exclusions) {
     project: [item.project, displayProject],
     sourceType: effective.source_type,
   });
-
-
   const hidden = Boolean(patch && patch.hidden);
   const projectHidden = Boolean(projectPatch && projectPatch.hidden);
   const sourceHidden = Boolean(sourcePatch && sourcePatch.hidden);
@@ -314,16 +341,15 @@ function annotateItem(item, overrides, exclusions) {
     exclusion: rule ? { kind: rule.kind, value: rule.value, note: rule.note || "" } : null,
     why: whyHidden.length ? whyHidden.join(" · ") : inclusionWhy({ ...item, patch }),
   };
-
 }
 
-function annotateNamed(row, kind, overrides, exclusions) {
+function annotateNamed(row, kind, overrides, exclusions, displayNames) {
   const patch = overrides[kind][row.id] || null;
   const effective = applyNamedPatch({ ...row }, patch, "name");
   const projectPatch = kind === "source" ? overrides.project[slugify(row.project)] : kind === "project" ? patch : null;
   const displayProject = kind === "project"
-    ? ((patch && patch.title) || row.name)
-    : ((projectPatch && projectPatch.title) || row.project);
+    ? ((displayNames && displayNames.get(row.id)) || row.name)
+    : ((displayNames && displayNames.get(slugify(row.project))) || row.project);
   const rule = matchingExclusion(effective, exclusions, {
     haystack: `${effective.name || ""} ${effective.url || ""}`,
     url: effective.url,
@@ -350,6 +376,7 @@ function annotateNamed(row, kind, overrides, exclusions) {
     why: whyHidden.length ? whyHidden.join(" · ") : inclusionWhy({ ...row, patch }),
   };
 }
+
 
 
 function applyVisibility(rows, visibility) {
@@ -379,7 +406,9 @@ async function adminItems(env, url) {
   const raw = await db.loadRaw(env, liveId);
   const overrides = await db.loadOverrides(env);
   const exclusions = await db.loadExclusions(env);
-  let rows = raw.items.map((item) => annotateItem(item, overrides, exclusions));
+  const displayNames = resolveProjectDisplayNames(raw.projects, overrides.project);
+  let rows = raw.items.map((item) => annotateItem(item, overrides, exclusions, displayNames));
+
   rows = applyQuery(rows, q, ["title", "summary", "source_url", "id", "project"]);
   if (status) {
     rows = rows.filter((item) => (item.patch?.status || item.status) === status);
@@ -398,6 +427,7 @@ async function adminKindList(env, kind, url) {
   const overrides = await db.loadOverrides(env);
   const exclusions = await db.loadExclusions(env);
   const key = kind === "projects" ? "project" : "source";
+  const displayNames = resolveProjectDisplayNames(raw.projects, overrides.project);
   const overlaid = applyOverlay({
     items: raw.items,
     projects: raw.projects,
@@ -409,7 +439,7 @@ async function adminKindList(env, kind, url) {
     (kind === "projects" ? overlaid.projects : overlaid.sources).map((row) => row.id),
   );
   let rows = (kind === "projects" ? raw.projects : raw.sources).map((row) => {
-    const annotated = annotateNamed(row, key, overrides, exclusions);
+    const annotated = annotateNamed(row, key, overrides, exclusions, displayNames);
     if (annotated.suppressed || publicIds.has(row.id)) return annotated;
     return {
       ...annotated,
@@ -615,30 +645,20 @@ async function handleAdmin(request, env, path, url) {
     if (method === "POST") {
       const body = await readJson(request);
       const kind = String(body?.kind || "").trim();
-      const entry = body?.entry;
+      let entry = body?.entry;
       if (!SEED_KINDS.has(kind) || !entry || typeof entry !== "object" || Array.isArray(entry)) {
         return json({ error: "invalid_seed" }, 400);
       }
       const url = String(entry.url || "").trim();
       let repo = String(entry.repo || "").trim();
       const name = String(entry.name || "").trim();
-      if (kind === "github_repositories" && !repo && url) {
-        try {
-          const parsed = new URL(url);
-          const host = parsed.hostname.toLowerCase();
-          if (host === "github.com" || host === "www.github.com") {
-            const parts = parsed.pathname.replace(/^\/+/, "").split("/");
-            if (parts[0] && parts[1]) repo = `${parts[0]}/${parts[1].replace(/\.git$/i, "")}`;
-          }
-        } catch {
-          repo = "";
-        }
-        if (repo) entry = { ...entry, repo };
+      if (kind === "github_repositories") {
+        if (!/^[^/\s]+\/[^/\s]+$/.test(repo)) repo = githubRepoFromUrl(url);
+        if (repo) entry = { ...entry, repo, url: `https://github.com/${repo}` };
       }
       const hasLocator =
         kind === "docs_pages" ? Boolean(url)
-        : kind === "github_repositories"
-          ? /^[^/\s]+\/[^/\s]+$/.test(repo) || /^https:\/\/github\.com\/[^/]+\/[^/]+\/?$/i.test(url)
+        : kind === "github_repositories" ? /^[^/\s]+\/[^/\s]+$/.test(String(entry.repo || ""))
         : kind === "github_pull_requests" ? /^https:\/\/github\.com\/[^/]+\/[^/]+\/pull\/\d+\/?$/i.test(url)
         : kind === "crates" ? Boolean(name) || /^https:\/\/crates\.io\/crates\/[^/]+\/?$/i.test(url)
         : Boolean(url || repo);

@@ -111,6 +111,7 @@ async function dropRenderedTag(env, tag) {
 }
 
 export async function publishLiveRenderTag(env, tag, seq) {
+  const prev = await liveRenderTag(env);
   const payload = JSON.stringify({ seq: Number(seq), tag: String(tag) });
   const result = await env.DB.prepare(
     `INSERT INTO settings (key, value) VALUES ('live_render', ?)
@@ -118,23 +119,27 @@ export async function publishLiveRenderTag(env, tag, seq) {
      WHERE CAST(json_extract(settings.value, '$.seq') AS INTEGER)
          < CAST(json_extract(excluded.value, '$.seq') AS INTEGER)`,
   ).bind(payload).run();
-  return Boolean(result?.meta?.changes);
+  if (!result?.meta?.changes) return false;
+  if (prev && prev !== tag) await setSetting(env, "prev_render_tag", prev);
+  return true;
 }
 
 const RENDER_STALE_MS = 10 * 60 * 1000;
 
 async function purgeStaleRendered(env, liveTag) {
   const cutoff = Date.now() - RENDER_STALE_MS;
+  const prev = await getSetting(env, "prev_render_tag");
   const { results } = await env.DB.prepare(
     "SELECT key, value FROM settings WHERE key LIKE 'render_started:%'",
   ).all();
   for (const row of results || []) {
     const tag = String(row.key || "").slice("render_started:".length);
-    if (!tag || tag === liveTag) continue;
+    if (!tag || tag === liveTag || tag === prev) continue;
     if (Number(row.value) >= cutoff) continue;
     await dropRenderedTag(env, tag);
   }
 }
+
 
 export async function liveRenderTag(env) {
   const packed = await getSetting(env, "live_render");

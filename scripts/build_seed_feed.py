@@ -557,8 +557,9 @@ def live_seed_github(entry: dict, kind: str, github_json_fetcher) -> tuple[str |
             host = (parsed.hostname or "").lower()
             if host in ("github.com", "www.github.com"):
                 parts = [p for p in (parsed.path or "").split("/") if p]
-                if len(parts) >= 2:
+                if len(parts) == 2:
                     repo = parts[0] + "/" + parts[1].removesuffix(".git")
+
         if not repo:
             return None, None
         payload = github_json_fetcher(f"/repos/{repo}") or {}

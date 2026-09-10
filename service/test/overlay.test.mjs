@@ -171,6 +171,29 @@ test("colliding project rename keeps original names and item membership", () => 
   assert.equal(out.items.find((i) => i.id === "seed:b").project, "Beta");
 });
 
+test("chained colliding renames revert every involved project", () => {
+  const projectC = {
+    id: "gamma",
+    name: "Gamma",
+    sources: [],
+    discovered_at: "2025-10-01T00:00:00Z",
+    activity_at: "2025-10-02T00:00:00Z",
+    latest_discovered_at: "2025-10-01T00:00:00Z",
+  };
+  const itemC = { ...itemB, id: "seed:c", project: "Gamma", source_url: "https://example.com/c" };
+  const out = applyOverlay({
+    items: [itemA, itemB, itemC],
+    projects: [projectA, projectB, projectC],
+    sources: [sourceA, sourceB],
+    overrides: { project: { alpha: { title: "Beta" }, beta: { title: "Gamma" } } },
+    exclusions: [],
+  });
+  assert.equal(out.projects.find((p) => p.id === "alpha").name, "Alpha");
+  assert.equal(out.projects.find((p) => p.id === "beta").name, "Beta");
+  assert.equal(out.projects.find((p) => p.id === "gamma").name, "Gamma");
+});
+
+
 
 test("project exclusion matches renamed display name", () => {
   const out = applyOverlay({

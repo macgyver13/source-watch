@@ -119,6 +119,41 @@ function maxIso(values) {
   return best || "";
 }
 
+export function resolveProjectDisplayNames(projects, projectPatches) {
+
+  const rawProjects = Array.isArray(projects) ? projects : [];
+  const patches = asMap(projectPatches);
+  const displayNameById = new Map();
+  for (const raw of rawProjects) {
+    const patch = patches.get(raw.id);
+    const title = patch && patch.title != null ? String(patch.title).trim() : "";
+    displayNameById.set(raw.id, title || raw.name);
+  }
+  let changed = true;
+  while (changed) {
+    changed = false;
+    const slugOwners = new Map();
+    for (const [id, name] of displayNameById) {
+      const slug = slugify(name);
+      const owners = slugOwners.get(slug) || [];
+      owners.push(id);
+      slugOwners.set(slug, owners);
+    }
+    for (const owners of slugOwners.values()) {
+      if (owners.length < 2) continue;
+      for (const id of owners) {
+        const raw = rawProjects.find((project) => project.id === id);
+        if (!raw) continue;
+        if (displayNameById.get(id) !== raw.name) {
+          displayNameById.set(id, raw.name);
+          changed = true;
+        }
+      }
+    }
+  }
+  return displayNameById;
+}
+
 export function applyOverlay({ items, projects, sources, overrides, exclusions }) {
   const itemPatches = asMap(overrides?.item);
   const projectPatches = asMap(overrides?.project);
@@ -127,26 +162,7 @@ export function applyOverlay({ items, projects, sources, overrides, exclusions }
   const rawProjects = Array.isArray(projects) ? projects : [];
   const rawSources = Array.isArray(sources) ? sources : [];
 
-  const displayNameById = new Map();
-  for (const raw of rawProjects) {
-    const patch = projectPatches.get(raw.id);
-    const title = patch && patch.title != null ? String(patch.title).trim() : "";
-    displayNameById.set(raw.id, title || raw.name);
-  }
-  const slugOwners = new Map();
-  for (const [id, name] of displayNameById) {
-    const slug = slugify(name);
-    const owners = slugOwners.get(slug) || [];
-    owners.push(id);
-    slugOwners.set(slug, owners);
-  }
-  for (const owners of slugOwners.values()) {
-    if (owners.length < 2) continue;
-    for (const id of owners) {
-      const raw = rawProjects.find((project) => project.id === id);
-      if (raw) displayNameById.set(id, raw.name);
-    }
-  }
+  const displayNameById = resolveProjectDisplayNames(rawProjects, projectPatches);
   const projectNewName = new Map();
   for (const raw of rawProjects) {
     const display = displayNameById.get(raw.id);
@@ -155,6 +171,7 @@ export function applyOverlay({ items, projects, sources, overrides, exclusions }
       projectNewName.set(slugify(raw.name), display);
     }
   }
+
 
   const surviving = [];
   for (const raw of rawItems) {
