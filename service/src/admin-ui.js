@@ -67,8 +67,11 @@ export const ADMIN_HTML = `<!doctype html>
           <option value="all">all</option>
         </select>
         <button id="catalog-search">Search</button>
+        <button id="catalog-prev">Prev</button>
         <span class="count" id="catalog-count"></span>
+        <button id="catalog-next">Next</button>
       </div>
+
       <div class="tabs" id="tabs">
         <button data-tab="items" class="on">Items</button>
         <button data-tab="projects">Projects</button>
@@ -140,6 +143,9 @@ export const ADMIN_HTML = `<!doctype html>
     var TOKEN_KEY = "sw_admin_token";
     var token = sessionStorage.getItem(TOKEN_KEY) || "";
     var tab = "items";
+    var PAGE = 100;
+    var catalogOffset = 0;
+
 
     function $(id) { return document.getElementById(id); }
 
@@ -174,14 +180,23 @@ export const ADMIN_HTML = `<!doctype html>
     }
 
 
+    function pad2(n) { return String(n).padStart(2, "0"); }
     function toLocal(iso) {
       if (!iso) return "";
-      return String(iso).replace(/Z$/, "").slice(0, 16);
+      var d = new Date(iso);
+      if (isNaN(d.getTime())) return "";
+      return d.getFullYear() + "-" + pad2(d.getMonth() + 1) + "-" + pad2(d.getDate()) +
+        "T" + pad2(d.getHours()) + ":" + pad2(d.getMinutes());
     }
     function fromLocal(v) {
       if (!v) return null;
-      return v.length === 16 ? v + ":00Z" : (v.endsWith("Z") ? v : v + "Z");
+      var m = String(v).match(/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})(?::(\d{2}))?/);
+      if (!m) return null;
+      var d = new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]), Number(m[4]), Number(m[5]), Number(m[6] || 0));
+      if (isNaN(d.getTime())) return null;
+      return d.toISOString().replace(/\.\d{3}Z$/, "Z");
     }
+
 
     function repoFromUrl(url) {
       var m = String(url || "").match(/github\\.com\\/([^/]+)\\/([^/#?]+)/i);
@@ -191,13 +206,23 @@ export const ADMIN_HTML = `<!doctype html>
     function catalogQs() {
       var q = $("catalog-q").value;
       var vis = $("catalog-vis").value;
-      var qs = "?limit=100&visibility=" + encodeURIComponent(vis);
+      var qs = "?limit=" + PAGE + "&offset=" + catalogOffset + "&visibility=" + encodeURIComponent(vis);
       if (q) qs += "&q=" + encodeURIComponent(q);
       return qs;
     }
 
+    function paintPager(total, noun) {
+      total = Number(total) || 0;
+      var start = total ? catalogOffset + 1 : 0;
+      var end = Math.min(catalogOffset + PAGE, total);
+      $("catalog-count").textContent = start ? (start + "–" + end + " of " + total + " " + noun) : ("0 " + noun);
+      $("catalog-prev").disabled = catalogOffset <= 0;
+      $("catalog-next").disabled = catalogOffset + PAGE >= total;
+    }
+
     function setTab(name) {
       tab = name;
+      catalogOffset = 0;
       document.querySelectorAll(".tabs button").forEach(function (b) {
         b.classList.toggle("on", b.getAttribute("data-tab") === name);
       });
@@ -206,6 +231,7 @@ export const ADMIN_HTML = `<!doctype html>
       });
       loadTab();
     }
+
 
     function showApp() {
       $("login").hidden = true;
@@ -218,6 +244,9 @@ export const ADMIN_HTML = `<!doctype html>
       if (tab === "items") return loadItems();
       if (tab === "projects") return loadProjects();
       if (tab === "sources") return loadSources();
+      $("catalog-prev").disabled = true;
+      $("catalog-next").disabled = true;
+      $("catalog-count").textContent = "";
       if (tab === "rules") {
         loadExclusions();
         loadTerms();
@@ -256,7 +285,8 @@ export const ADMIN_HTML = `<!doctype html>
 
     function loadItems() {
       return api("/api/admin/items" + catalogQs()).then(function (data) {
-        $("catalog-count").textContent = (data.total || 0) + " items";
+        paintPager(data.total, "items");
+
         var rows = (data.items || []).map(function (item) {
           var url = item.source_url || "";
           var dim = item.suppressed ? "hidden-row" : "";
@@ -286,7 +316,8 @@ export const ADMIN_HTML = `<!doctype html>
 
     function loadProjects() {
       return api("/api/admin/projects" + catalogQs()).then(function (data) {
-        $("catalog-count").textContent = (data.total || 0) + " projects";
+        paintPager(data.total, "projects");
+
         var rows = (data.projects || []).map(function (p) {
           return "<tr class='" + (p.suppressed ? "hidden-row" : "") + "'><td>" +
             "<b>" + esc(p.name) + "</b><div class='why'>" + esc(p.why || p.id) + "</div></td>" +
@@ -301,7 +332,8 @@ export const ADMIN_HTML = `<!doctype html>
 
     function loadSources() {
       return api("/api/admin/sources" + catalogQs()).then(function (data) {
-        $("catalog-count").textContent = (data.total || 0) + " sources";
+        paintPager(data.total, "sources");
+
         var rows = (data.sources || []).map(function (s) {
           return "<tr class='" + (s.suppressed ? "hidden-row" : "") + "'><td>" +
             linkCell(s.name, s.url, esc(s.why || s.id)) + "</td>" +
@@ -381,7 +413,16 @@ export const ADMIN_HTML = `<!doctype html>
       $("app").hidden = true;
       $("login").hidden = false;
     };
-    $("catalog-search").onclick = loadTab;
+    $("catalog-search").onclick = function () { catalogOffset = 0; loadTab(); };
+    $("catalog-prev").onclick = function () {
+      catalogOffset = Math.max(0, catalogOffset - PAGE);
+      loadTab();
+    };
+    $("catalog-next").onclick = function () {
+      catalogOffset += PAGE;
+      loadTab();
+    };
+
     $("refresh-btn").onclick = function () {
       api("/api/admin/refresh", { method: "POST" }).then(function () { afterMutation(); });
     };
