@@ -15,13 +15,12 @@ export async function etagOf(body) {
 }
 
 export function emptyPayload(name) {
-  const generated = nowIso();
   if (name === "feed.json") {
     return JSON.stringify({
       schema_version: "source-watch.feed.v0",
       title: "Source Watch",
       description: "Public-source activity feed.",
-      generated_at: generated,
+      generated_at: "1970-01-01T00:00:00Z",
       items: [],
     });
   }
@@ -116,9 +115,11 @@ export async function publishLiveRenderTag(env, tag, seq) {
   const result = await env.DB.prepare(
     `INSERT INTO settings (key, value) VALUES ('live_render', ?)
      ON CONFLICT(key) DO UPDATE SET value = excluded.value
-     WHERE CAST(json_extract(settings.value, '$.seq') AS INTEGER)
+     WHERE json_extract(settings.value, '$.seq') IS NULL
+        OR CAST(json_extract(settings.value, '$.seq') AS INTEGER)
          < CAST(json_extract(excluded.value, '$.seq') AS INTEGER)`,
   ).bind(payload).run();
+
   if (!result?.meta?.changes) return false;
   if (prev && prev !== tag) await setSetting(env, "prev_render_tag", prev);
   return true;
@@ -305,7 +306,8 @@ export async function renderAll(env, attempt = 0) {
   const stillLive = await getSetting(env, "live_ingest_id");
   if (stillLive !== liveId) {
     await dropRenderedTag(env, tag);
-    if (attempt >= 1) return { items: 0, projects: 0, sources: 0 };
+    if (attempt >= 1) return { items: 0, projects: 0, sources: 0, published: false };
+
     return renderAll(env, attempt + 1);
   }
   const overlaid = applyOverlay({
@@ -353,20 +355,18 @@ export async function renderAll(env, attempt = 0) {
   );
   await writeRendered(env, n("weeks-index"), JSON.stringify(weekIndex(overlaid.items)), jsonType);
   const published = await publishLiveRenderTag(env, tag, seq);
-  if (!published) {
-    await dropRenderedTag(env, tag);
-    return {
-      items: overlaid.items.length,
-      projects: overlaid.projects.length,
-      sources: overlaid.sources.length,
-    };
-  }
-  await purgeStaleRendered(env, tag);
-  return {
+  const counts = {
     items: overlaid.items.length,
     projects: overlaid.projects.length,
     sources: overlaid.sources.length,
+    published,
   };
+  if (!published) {
+    await dropRenderedTag(env, tag);
+    return counts;
+  }
+  await purgeStaleRendered(env, tag);
+  return counts;
 }
 
 export async function commitIngest(env, ingestId) {

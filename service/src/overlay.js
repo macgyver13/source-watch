@@ -14,6 +14,20 @@ function asMap(bucket) {
   return new Map(Object.entries(bucket));
 }
 
+export function githubRepoFromUrl(url) {
+  try {
+    const parsed = new URL(String(url || ""));
+    const host = String(parsed.hostname || "").toLowerCase();
+    if (host !== "github.com" && host !== "www.github.com") return "";
+    const parts = parsed.pathname.replace(/^\/+|\/+$/g, "").split("/").filter(Boolean);
+    if (parts.length !== 2 || !parts[0] || !parts[1]) return "";
+    return `${parts[0]}/${parts[1].replace(/\.git$/i, "")}`;
+  } catch {
+    return "";
+  }
+}
+
+
 export function matchingExclusion(row, exclusions, fields = {}) {
   const haystack =
     fields.haystack != null

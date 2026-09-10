@@ -1,6 +1,7 @@
 import { ADMIN_HTML } from "./admin-ui.js";
 import * as db from "./db.js";
-import { applyItemPatch, applyNamedPatch, applyOverlay, matchingExclusion, resolveProjectDisplayNames, slugify, sourceIdForItem } from "./overlay.js";
+import { applyItemPatch, applyNamedPatch, applyOverlay, githubRepoFromUrl, matchingExclusion, resolveProjectDisplayNames, slugify, sourceIdForItem } from "./overlay.js";
+
 
 
 
@@ -24,18 +25,6 @@ const INCLUDE_BUCKETS = new Set(["always_match", "required_any", "context_any"])
 const SEED_KINDS = new Set(["docs_pages", "github_repositories", "github_pull_requests", "crates"]);
 const RAW_KINDS = new Set(["items", "projects", "sources"]);
 
-function githubRepoFromUrl(url) {
-  try {
-    const parsed = new URL(url);
-    const host = String(parsed.hostname || "").toLowerCase();
-    if (host !== "github.com" && host !== "www.github.com") return "";
-    const parts = parsed.pathname.replace(/^\/+|\/+$/g, "").split("/").filter(Boolean);
-    if (parts.length !== 2 || !parts[0] || !parts[1]) return "";
-    return `${parts[0]}/${parts[1].replace(/\.git$/i, "")}`;
-  } catch {
-    return "";
-  }
-}
 
 
 function json(data, status = 200, extra = {}) {
@@ -208,13 +197,27 @@ async function serveWeeks(request, env, path) {
   }
   const weekMatch = path.match(/^\/weeks\/(\d{4}-W\d{1,2})\/?$/);
   if (weekMatch) {
+
+    const slug = weekMatch[1];
+    const padded = slug.replace(/-W(\d)$/, "-W0$1");
+    const indexBody = await db.readRendered(env, "weeks-index");
+    let weeks = [];
+    try {
+      weeks = indexBody ? JSON.parse(indexBody) : [];
+    } catch {
+      weeks = [];
+    }
+    const known = new Set((Array.isArray(weeks) ? weeks : []).map((row) => row.slug));
+    if (!known.has(slug) && !known.has(padded)) {
+      return new Response("Not found", { status: 404, headers: { "Cache-Control": PUBLIC_CACHE } });
+    }
     const assetReq = new Request(new URL("/weeks/live/", request.url), request);
     const res = await env.ASSETS.fetch(assetReq);
     const headers = new Headers(res.headers);
     headers.set("Cache-Control", PUBLIC_CACHE);
-
     return new Response(res.body, { status: res.status, statusText: res.statusText, headers });
   }
+
   return env.ASSETS.fetch(request);
 }
 
@@ -545,7 +548,9 @@ async function handleCollector(request, env, path) {
     if (!ingestId || !RAW_KINDS.has(kind)) return json({ error: "invalid_chunk" }, 400);
     const ingest = await db.getIngest(env, ingestId);
     if (!ingest) return json({ error: "unknown_ingest" }, 409);
+    if (ingest.committed_at) return json({ error: "already_committed" }, 409);
     const rows = Array.isArray(body.rows) ? body.rows : [];
+    if (rows.length > 200) return json({ error: "chunk_too_large" }, 400);
     const written = await db.insertRawRows(env, ingestId, kind, rows);
     return json({ written });
   }
@@ -556,6 +561,7 @@ async function handleCollector(request, env, path) {
     const result = await db.commitIngest(env, ingestId);
     if (!result) return json({ error: "unknown_ingest" }, 409);
     if (result.error === "already_committed") return json({ error: "already_committed" }, 409);
+    if (result.published === false) return json({ error: "render_not_published", ...result }, 409);
     return json(result);
   }
   return json({ error: "not_found" }, 404);
@@ -569,6 +575,7 @@ async function handleAdmin(request, env, path, url) {
   if (method === "GET" && path === "/api/admin/items") return json(await adminItems(env, url));
   if (method === "GET" && path === "/api/admin/projects") return json(await adminKindList(env, "projects", url));
   if (method === "GET" && path === "/api/admin/sources") return json(await adminKindList(env, "sources", url));
+
 
 
   const overrideMatch = path.match(/^\/api\/admin\/overrides\/([^/]+)\/(.+)$/);

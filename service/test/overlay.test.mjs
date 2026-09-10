@@ -2,11 +2,13 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import {
   applyOverlay,
+  githubRepoFromUrl,
   isoWeekSlug,
   renderJsonl,
   renderRss,
   weekIndex,
 } from "../src/overlay.js";
+
 
 const projectA = {
   id: "alpha",
@@ -261,5 +263,14 @@ test("repo exclusion ignores github.com in a non-github hostname path", () => {
   });
   assert.ok(out.items.some((i) => i.id === "bait"));
 });
+
+test("githubRepoFromUrl accepts only owner/repo paths", () => {
+  assert.equal(githubRepoFromUrl("https://github.com/acme/lib"), "acme/lib");
+  assert.equal(githubRepoFromUrl("https://github.com/acme/lib.git"), "acme/lib");
+  assert.equal(githubRepoFromUrl("https://github.com/acme/lib/pull/12"), "");
+  assert.equal(githubRepoFromUrl("https://github.com/acme/lib/issues/1"), "");
+  assert.equal(githubRepoFromUrl("https://notgithub.com/acme/lib"), "");
+});
+
 
 

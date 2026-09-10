@@ -205,8 +205,9 @@ export const ADMIN_HTML = `<!doctype html>
         if (host !== "github.com" && host !== "www.github.com") return null;
         var path = String(u.pathname || "");
         while (path.charAt(0) === "/") path = path.slice(1);
-        var parts = path.split("/");
-        if (!parts[0] || !parts[1]) return null;
+        while (path.slice(-1) === "/") path = path.slice(0, -1);
+        var parts = path.split("/").filter(Boolean);
+        if (parts.length !== 2 || !parts[0] || !parts[1]) return null;
         var repo = parts[1];
         if (repo.slice(-4).toLowerCase() === ".git") repo = repo.slice(0, -4);
         return parts[0] + "/" + repo;
@@ -346,7 +347,9 @@ export const ADMIN_HTML = `<!doctype html>
             "<td class='row-actions'>" +
             "<button data-kind='project' data-act='hide-kind' data-id='" + esc(p.id) + "' data-hidden='" + (p.hidden ? "0" : "1") + "'>" + (p.hidden ? "Unhide" : "Hide") + "</button>" +
             "<button data-act='rename' data-id='" + esc(p.id) + "' data-name='" + esc(displayName) + "'>Rename</button>" +
+            "<button data-kind='project' data-act='clear-kind' data-id='" + esc(p.id) + "'>Clear override</button>" +
             "</td></tr>";
+
         }).join("");
         $("projects-table").innerHTML = "<table><tbody>" + (rows || "<tr><td class='muted'>No projects</td></tr>") + "</tbody></table>";
       });
@@ -359,7 +362,9 @@ export const ADMIN_HTML = `<!doctype html>
         var rows = (data.sources || []).map(function (s) {
           return "<tr class='" + (s.suppressed ? "hidden-row" : "") + "'><td>" +
             linkCell(s.name, s.url, esc(s.why || s.id)) + "</td>" +
-            "<td class='row-actions'><button data-kind='source' data-act='hide-kind' data-id='" + esc(s.id) + "' data-hidden='" + (s.hidden ? "0" : "1") + "'>" + (s.hidden ? "Unhide" : "Hide") + "</button></td></tr>";
+            "<td class='row-actions'><button data-kind='source' data-act='hide-kind' data-id='" + esc(s.id) + "' data-hidden='" + (s.hidden ? "0" : "1") + "'>" + (s.hidden ? "Unhide" : "Hide") + "</button>" +
+            "<button data-kind='source' data-act='clear-kind' data-id='" + esc(s.id) + "'>Clear override</button></td></tr>";
+
         }).join("");
         $("sources-table").innerHTML = "<table><tbody>" + (rows || "<tr><td class='muted'>No sources</td></tr>") + "</tbody></table>";
       });
@@ -506,9 +511,14 @@ export const ADMIN_HTML = `<!doctype html>
         var hide = btn.getAttribute("data-hidden") === "1";
         api("/api/admin/overrides/" + kind + "/" + encodeURIComponent(id), { method: "PUT", body: { hidden: hide } }).then(afterMutation);
       } else if (act === "rename") {
-        var name = prompt("New project name", btn.getAttribute("data-name") || "");
-        if (!name) return;
-        api("/api/admin/overrides/project/" + encodeURIComponent(id), { method: "PUT", body: { title: name } }).then(afterMutation);
+        var name = prompt("New project name (empty clears the rename)", btn.getAttribute("data-name") || "");
+        if (name == null) return;
+        var title = String(name).trim();
+        api("/api/admin/overrides/project/" + encodeURIComponent(id), { method: "PUT", body: { title: title || null } }).then(afterMutation);
+      } else if (act === "clear-kind") {
+        var clearKind = btn.getAttribute("data-kind");
+        api("/api/admin/overrides/" + clearKind + "/" + encodeURIComponent(id), { method: "DELETE" }).then(afterMutation);
+
       } else if (act === "del-excl") {
         api("/api/admin/exclusions/" + id, { method: "DELETE" }).then(afterMutation);
       } else if (act === "del-term") {
