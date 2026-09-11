@@ -50,6 +50,7 @@ export const ADMIN_HTML = `<!doctype html>
   <div id="app" hidden>
     <header>
       <h1>Source Watch admin</h1>
+      <p class="err" id="op-err"></p>
       <button id="logout">Sign out</button>
     </header>
     <main>
@@ -149,6 +150,30 @@ export const ADMIN_HTML = `<!doctype html>
 
     function $(id) { return document.getElementById(id); }
 
+    function clearError() {
+      $("op-err").textContent = "";
+      $("login-err").textContent = "";
+    }
+    function showError(err) {
+      if (!err || err.message === "401") return;
+      var names = {
+        duplicate_seed_id: "seed id already exists",
+        duplicate_seed_locator: "seed url/repo/name already exists",
+        duplicate_exclusion: "exclusion already exists",
+        duplicate_term: "include term already exists",
+        override_conflict: "changed by another session; reload"
+      };
+      var code = err.data && err.data.error;
+      var detail = names[code] || (err.data && (err.data.detail || err.data.error));
+      var message = "Failed" + (err.status ? " (" + err.status + ")" : "") + (detail ? ": " + String(detail).slice(0, 200) : "");
+      $("op-err").textContent = message;
+      if ($("app").hidden) $("login-err").textContent = message;
+    }
+    function runMutation(req) {
+      clearError();
+      return req.then(afterMutation).catch(showError);
+    }
+
     function api(path, opts) {
       opts = opts || {};
       return fetch(path, {
@@ -169,6 +194,12 @@ export const ADMIN_HTML = `<!doctype html>
         }
         return res.json().catch(function () { return {}; }).then(function (data) {
           data._status = res.status;
+          if (!res.ok) {
+            var err = new Error(data.error || ("HTTP " + res.status));
+            err.status = res.status;
+            err.data = data;
+            throw err;
+          }
           return data;
         });
       });
@@ -235,16 +266,32 @@ export const ADMIN_HTML = `<!doctype html>
     }
 
 
+    function pageQs() { return "?limit=" + PAGE + "&offset=" + catalogOffset; }
     function catalogQs() {
       var q = $("catalog-q").value;
       var vis = $("catalog-vis").value;
-      var qs = "?limit=" + PAGE + "&offset=" + catalogOffset + "&visibility=" + encodeURIComponent(vis);
+      var qs = pageQs() + "&visibility=" + encodeURIComponent(vis);
       if (q) qs += "&q=" + encodeURIComponent(q);
       return qs;
+    }
+    function updateToolbar() {
+      var hideSearch = tab === "rules" || tab === "audit";
+      var hidePager = tab === "rules";
+      $("catalog-q").hidden = hideSearch;
+      $("catalog-vis").hidden = hideSearch;
+      $("catalog-search").hidden = hideSearch;
+      $("catalog-prev").hidden = hidePager;
+      $("catalog-next").hidden = hidePager;
+      $("catalog-count").hidden = hidePager;
     }
 
     function paintPager(total, noun) {
       total = Number(total) || 0;
+      if (catalogOffset > 0 && catalogOffset >= total) {
+        catalogOffset = total > 0 ? (Math.ceil(total / PAGE) - 1) * PAGE : 0;
+        loadTab();
+        return;
+      }
       var start = total ? catalogOffset + 1 : 0;
       var end = Math.min(catalogOffset + PAGE, total);
       $("catalog-count").textContent = start ? (start + "–" + end + " of " + total + " " + noun) : ("0 " + noun);
@@ -273,18 +320,18 @@ export const ADMIN_HTML = `<!doctype html>
     }
 
     function loadTab() {
-      if (tab === "items") return loadItems();
-      if (tab === "projects") return loadProjects();
-      if (tab === "sources") return loadSources();
-      if (tab === "audit") return loadAudit();
+      updateToolbar();
+      var request;
+      if (tab === "items") request = loadItems();
+      else if (tab === "projects") request = loadProjects();
+      else if (tab === "sources") request = loadSources();
+      else if (tab === "audit") request = loadAudit();
+      if (request) return request.catch(showError);
       $("catalog-prev").disabled = true;
       $("catalog-next").disabled = true;
       $("catalog-count").textContent = "";
       if (tab === "rules") {
-        loadExclusions();
-        loadTerms();
-        loadSeeds();
-        loadSettings();
+        return Promise.all([loadExclusions(), loadTerms(), loadSeeds(), loadSettings()]).catch(showError);
       }
 
     }
@@ -305,7 +352,7 @@ export const ADMIN_HTML = `<!doctype html>
           btn.disabled = true;
           btn.textContent = "refresh not configured";
         }
-      });
+      }).catch(showError);
     }
 
     function linkCell(label, url, extra) {
@@ -428,7 +475,7 @@ export const ADMIN_HTML = `<!doctype html>
     }
 
     function loadAudit() {
-      return api("/api/admin/audit" + catalogQs()).then(function (data) {
+      return api("/api/admin/audit" + pageQs()).then(function (data) {
         paintPager(data.total, "events");
         var rows = (data.audit || []).map(function (r) {
           var target = r.target || "";
@@ -447,10 +494,11 @@ export const ADMIN_HTML = `<!doctype html>
     }
 
     $("login-btn").onclick = function () {
+      clearError();
       token = $("token").value.trim();
       if (!token) return;
       sessionStorage.setItem(TOKEN_KEY, token);
-      api("/api/admin/state").then(showApp).catch(function () {});
+      api("/api/admin/state").then(showApp).catch(showError);
     };
     $("logout").onclick = function () {
       sessionStorage.removeItem(TOKEN_KEY);
@@ -469,8 +517,10 @@ export const ADMIN_HTML = `<!doctype html>
     };
 
     $("refresh-btn").onclick = function () {
+      clearError();
+      var note = $("refresh-note");
+      note.textContent = "";
       api("/api/admin/refresh", { method: "POST" }).then(function (data) {
-        var note = $("refresh-note");
         if (data._status === 202 && data.dispatched) {
           note.textContent = "Refresh dispatched.";
           afterMutation();
@@ -479,6 +529,12 @@ export const ADMIN_HTML = `<!doctype html>
         note.textContent = data.error === "refresh_not_configured"
           ? "refresh not configured"
           : ("Refresh failed" + (data.status ? " (" + data.status + ")" : "") + (data.body ? ": " + String(data.body).slice(0, 180) : data.error ? ": " + data.error : "."));
+      }).catch(function (err) {
+        var data = err && err.data || {};
+        note.textContent = data.error === "refresh_not_configured"
+          ? "refresh not configured"
+          : ("Refresh failed" + (data.status ? " (" + data.status + ")" : "") + (data.body ? ": " + String(data.body).slice(0, 180) : data.error ? ": " + data.error : "."));
+        showError(err);
       });
     };
 
@@ -494,9 +550,9 @@ export const ADMIN_HTML = `<!doctype html>
       var id = btn.getAttribute("data-id");
       if (act === "hide") {
         var hidden = btn.getAttribute("data-hidden") === "1";
-        api("/api/admin/overrides/item/" + encodeURIComponent(id), { method: "PUT", body: { hidden: hidden } }).then(afterMutation);
+        runMutation(api("/api/admin/overrides/item/" + encodeURIComponent(id), { method: "PUT", body: { hidden: hidden } }));
       } else if (act === "promote") {
-        api("/api/admin/overrides/item/" + encodeURIComponent(id), { method: "PUT", body: { status: "seeded" } }).then(afterMutation);
+        runMutation(api("/api/admin/overrides/item/" + encodeURIComponent(id), { method: "PUT", body: { status: "seeded" } }));
       } else if (act === "exclude") {
         var url = btn.getAttribute("data-url") || "";
         var repo = repoFromUrl(url);
@@ -504,7 +560,7 @@ export const ADMIN_HTML = `<!doctype html>
           ? { kind: "repo", value: repo, note: "from admin" }
           : { kind: "url_prefix", value: url, note: "from admin" };
         if (!body.value) body = { kind: "term", value: btn.getAttribute("data-title") || id, note: "from admin" };
-        api("/api/admin/exclusions", { method: "POST", body: body }).then(afterMutation);
+        runMutation(api("/api/admin/exclusions", { method: "POST", body: body }));
       } else if (act === "edit") {
         var el = document.querySelector(".edit[data-edit=\\"" + id.replace(/"/g, "") + "\\"]");
         if (el) el.classList.toggle("open");
@@ -522,66 +578,70 @@ export const ADMIN_HTML = `<!doctype html>
         var patch = collectEditPatch(fields);
         if (!Object.keys(patch).length) return;
 
-        api("/api/admin/overrides/item/" + encodeURIComponent(id), { method: "PUT", body: patch }).then(afterMutation);
+        runMutation(api("/api/admin/overrides/item/" + encodeURIComponent(id), { method: "PUT", body: patch }));
       } else if (act === "clear") {
-        api("/api/admin/overrides/item/" + encodeURIComponent(id), { method: "DELETE" }).then(afterMutation);
+        runMutation(api("/api/admin/overrides/item/" + encodeURIComponent(id), { method: "DELETE" }));
       } else if (act === "hide-kind") {
         var kind = btn.getAttribute("data-kind");
         var hide = btn.getAttribute("data-hidden") === "1";
-        api("/api/admin/overrides/" + kind + "/" + encodeURIComponent(id), { method: "PUT", body: { hidden: hide } }).then(afterMutation);
+        runMutation(api("/api/admin/overrides/" + kind + "/" + encodeURIComponent(id), { method: "PUT", body: { hidden: hide } }));
       } else if (act === "rename") {
         var name = prompt("New project name (empty clears the rename)", btn.getAttribute("data-name") || "");
         if (name == null) return;
         var title = String(name).trim();
-        api("/api/admin/overrides/project/" + encodeURIComponent(id), { method: "PUT", body: { title: title || null } }).then(afterMutation);
+        runMutation(api("/api/admin/overrides/project/" + encodeURIComponent(id), { method: "PUT", body: { title: title || null } }));
       } else if (act === "clear-kind") {
         var clearKind = btn.getAttribute("data-kind");
-        api("/api/admin/overrides/" + clearKind + "/" + encodeURIComponent(id), { method: "DELETE" }).then(afterMutation);
+        runMutation(api("/api/admin/overrides/" + clearKind + "/" + encodeURIComponent(id), { method: "DELETE" }));
 
       } else if (act === "del-excl") {
-        api("/api/admin/exclusions/" + id, { method: "DELETE" }).then(afterMutation);
+        runMutation(api("/api/admin/exclusions/" + id, { method: "DELETE" }));
       } else if (act === "del-term") {
-        api("/api/admin/include-terms/" + id, { method: "DELETE" }).then(afterMutation);
+        runMutation(api("/api/admin/include-terms/" + id, { method: "DELETE" }));
       } else if (act === "del-seed") {
-        api("/api/admin/seed-additions/" + id, { method: "DELETE" }).then(afterMutation);
+        runMutation(api("/api/admin/seed-additions/" + id, { method: "DELETE" }));
       }
     });
 
     $("excl-form").onsubmit = function (ev) {
       ev.preventDefault();
-      api("/api/admin/exclusions", { method: "POST", body: { kind: this.kind.value, value: this.value.value, note: this.note.value } }).then(function () {
-        $("excl-form").reset();
+      var form = this;
+      clearError();
+      api("/api/admin/exclusions", { method: "POST", body: { kind: form.kind.value, value: form.value.value, note: form.note.value } }).then(function () {
+        form.reset();
         afterMutation();
-      });
+      }).catch(showError);
     };
     $("term-form").onsubmit = function (ev) {
       ev.preventDefault();
-      api("/api/admin/include-terms", { method: "POST", body: { bucket: this.bucket.value, term: this.term.value, note: this.note.value } }).then(function () {
-        $("term-form").reset();
+      var form = this;
+      clearError();
+      api("/api/admin/include-terms", { method: "POST", body: { bucket: form.bucket.value, term: form.term.value, note: form.note.value } }).then(function () {
+        form.reset();
         afterMutation();
-      });
+      }).catch(showError);
     };
     $("seed-form").onsubmit = function (ev) {
       ev.preventDefault();
+      var form = this;
       var entry;
-      try { entry = JSON.parse(this.entry.value); } catch (err) { alert("entry must be JSON"); return; }
-      api("/api/admin/seed-additions", { method: "POST", body: { kind: this.kind.value, entry: entry } }).then(function (res) {
-        if (res._status >= 400) {
-          alert(res.error === "duplicate_seed_id" ? "seed id already exists" : res.error === "duplicate_seed_locator" ? "seed url/repo/name already exists" : (res.error || "seed rejected"));
-          return;
-        }
-        $("seed-form").reset();
+      try { entry = JSON.parse(form.entry.value); } catch (err) { alert("entry must be JSON"); return; }
+      clearError();
+      api("/api/admin/seed-additions", { method: "POST", body: { kind: form.kind.value, entry: entry } }).then(function () {
+        form.reset();
         afterMutation();
-      });
+      }).catch(showError);
     };
     $("settings-form").onsubmit = function (ev) {
       ev.preventDefault();
-      var v = this.discovered_after.value;
-      api("/api/admin/settings", { method: "PUT", body: { discovered_after: v ? v + "T00:00:00Z" : "" } }).then(afterMutation);
+      var form = this;
+      var v = form.discovered_after.value;
+      clearError();
+      api("/api/admin/settings", { method: "PUT", body: { discovered_after: v ? v + "T00:00:00Z" : "" } }).then(afterMutation).catch(showError);
     };
 
     if (token) {
-      api("/api/admin/state").then(showApp).catch(function () {});
+      api("/api/admin/state").then(showApp).catch(showError);
     }
   })();
   </script>

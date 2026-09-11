@@ -51,3 +51,29 @@ test("unchanged datetime-local with seconds omitted is not a patch", () => {
   ]);
   assert.deepEqual(patch, {});
 });
+
+test("fromLocal fills omitted seconds and ADMIN_HTML keeps digit classes", () => {
+  const { fromLocal } = loadEditHelpers();
+  assert.match(fromLocal("2026-09-01T12:30"), /^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:00Z$/);
+  assert.ok(!/\(d\{[0-9]/.test(ADMIN_HTML));
+});
+
+test("admin console surfaces failed mutations and scopes the toolbar", () => {
+  assert.match(ADMIN_HTML, /id="op-err"/);
+  assert.match(ADMIN_HTML, /if \(!res\.ok\)/);
+  assert.match(ADMIN_HTML, /catalogOffset >= total/);
+  assert.match(ADMIN_HTML, /function pageQs\(\)/);
+  assert.match(ADMIN_HTML, /function updateToolbar\(\)/);
+  assert.match(ADMIN_HTML, /tab === "rules" \|\| tab === "audit"/);
+  assert.doesNotMatch(ADMIN_HTML, /_status >= 400/);
+});
+
+test("admin console surfaces read failures and replaces stale refresh feedback", () => {
+  assert.match(ADMIN_HTML, /\$\("login-err"\)\.textContent = ""/);
+  assert.match(ADMIN_HTML, /if \(request\) return request\.catch\(showError\)/);
+  assert.match(ADMIN_HTML, /Promise\.all\(\[loadExclusions\(\), loadTerms\(\), loadSeeds\(\), loadSettings\(\)\]\)\.catch\(showError\)/);
+  assert.match(ADMIN_HTML, /api\("\/api\/admin\/state"\)\.then\(showApp\)\.catch\(showError\)/);
+  assert.doesNotMatch(ADMIN_HTML, /catch\(function \(\) \{\}\)/);
+  assert.match(ADMIN_HTML, /note\.textContent = ""/);
+  assert.match(ADMIN_HTML, /data\.body \? ": " \+ String\(data\.body\)\.slice\(0, 180\)/);
+});

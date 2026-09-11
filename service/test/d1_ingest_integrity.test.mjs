@@ -312,12 +312,19 @@ test("D1 ingest integrity: multi-slice chunk is all-or-nothing with commit", asy
 
 test("D1 admin: case-equivalent exclusion is 409 and reversible", async () => {
   await withWorker(async (worker) => {
+    let r = await req(worker, "/api/admin/exclusions", { token: ADMIN });
+    for (const row of r.json?.exclusions || []) {
+      if (row.kind === "term" && String(row.value).toLowerCase() === "noise") {
+        const del = await req(worker, `/api/admin/exclusions/${row.id}`, { method: "DELETE", token: ADMIN });
+        assert.equal(del.status, 200, del.text);
+      }
+    }
     const at = "2026-09-11T12:00:00Z";
     const rows = catalog(at, "seed:noise-doc", "Quiet Doc");
     rows.item.summary = "contains Noise in the summary";
     const ingestId = await beginIngest(worker, at, "Noise Watch");
     await chunkCatalog(worker, ingestId, rows);
-    let r = await commit(worker, ingestId);
+    r = await commit(worker, ingestId);
     assert.equal(r.status, 200, r.text);
 
     r = await req(worker, "/feed.json");
@@ -357,6 +364,14 @@ test("D1 admin: case-equivalent exclusion is 409 and reversible", async () => {
 
 test("D1 admin: seed locator uniqueness is atomic", async () => {
   await withWorker(async (worker) => {
+    let r = await req(worker, "/api/admin/seed-additions", { token: ADMIN });
+    for (const row of r.json?.seed_additions || []) {
+      const repo = String(row.entry?.repo || "").toLowerCase();
+      if (repo === "acme/integrity-widget") {
+        const del = await req(worker, `/api/admin/seed-additions/${row.id}`, { method: "DELETE", token: ADMIN });
+        assert.equal(del.status, 200, del.text);
+      }
+    }
     const first = {
       kind: "github_repositories",
       entry: { id: "seed-one", repo: "acme/integrity-widget" },
@@ -365,7 +380,7 @@ test("D1 admin: seed locator uniqueness is atomic", async () => {
       kind: "github_repositories",
       entry: { id: "seed-two", repo: "acme/integrity-widget" },
     };
-    let r = await req(worker, "/api/admin/seed-additions", {
+    r = await req(worker, "/api/admin/seed-additions", {
       method: "POST",
       token: ADMIN,
       body: first,
