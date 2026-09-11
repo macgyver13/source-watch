@@ -3,6 +3,7 @@ import test from "node:test";
 import {
   applyOverlay,
   githubRepoFromUrl,
+  isHttpUrl,
   isoWeekSlug,
   renderJsonl,
   renderRss,
@@ -335,6 +336,42 @@ test("url_prefix exclusion does not match a longer pull number", () => {
     exclusions: [{ kind: "url_prefix", value: "https://github.com/acme/lib/pull/12" }],
   });
   assert.deepEqual(out.items.map((i) => i.id), ["pr-120"]);
+});
+
+test("term exclusion on a source name drops its items", () => {
+  const named = { ...sourceA, name: "SecretSourceName" };
+  const out = applyOverlay({
+    items: [itemA, itemB],
+    projects: [projectA, projectB],
+    sources: [named, sourceB],
+    overrides: {},
+    exclusions: [{ kind: "term", value: "SecretSourceName" }],
+  });
+  assert.deepEqual(out.items.map((i) => i.id), ["seed:b"]);
+  assert.deepEqual(out.sources.map((s) => s.id), ["b"]);
+  assert.deepEqual(out.projects.map((p) => p.id), ["beta"]);
+});
+
+test("item project patch no longer moves the item", () => {
+  const out = applyOverlay({
+    items: [itemA, itemB],
+    projects: [projectA, projectB],
+    sources: [sourceA, sourceB],
+    overrides: { item: { "seed:a": { project: "Beta" } } },
+    exclusions: [],
+  });
+  assert.equal(out.items.find((i) => i.id === "seed:a").project, "Alpha");
+  const beta = out.projects.find((p) => p.id === "beta");
+  assert.ok(beta);
+  assert.deepEqual(beta.sources, ["b"]);
+  assert.ok(out.projects.find((p) => p.id === "alpha"));
+});
+
+test("isHttpUrl rejects javascript: and accepts https", () => {
+  assert.equal(isHttpUrl("javascript:alert(1)"), false);
+  assert.equal(isHttpUrl("https://example.com/a"), true);
+  assert.equal(isHttpUrl("http://localhost:8787/"), true);
+  assert.equal(isHttpUrl("/relative"), false);
 });
 
 

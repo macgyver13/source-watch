@@ -210,6 +210,12 @@ export const ADMIN_HTML = `<!doctype html>
         .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
     }
 
+    function safeHref(u) {
+      var s = String(u == null ? "" : u).trim();
+      if (s.charAt(0) === "#" || s.charAt(0) === "/") return s;
+      return /^https?:\\/\\//i.test(s) ? s : "";
+    }
+
 
     function pad2(n) { return String(n).padStart(2, "0"); }
     function toLocal(iso) {
@@ -356,8 +362,9 @@ export const ADMIN_HTML = `<!doctype html>
     }
 
     function linkCell(label, url, extra) {
-      var title = url
-        ? "<a href=\\"" + esc(url) + "\\" target=\\"_blank\\" rel=\\"noopener\\">" + esc(label || url) + "</a>"
+      var href = safeHref(url);
+      var title = href
+        ? "<a href=\\"" + esc(href) + "\\" target=\\"_blank\\" rel=\\"noopener\\">" + esc(label || url) + "</a>"
         : "<b>" + esc(label || "") + "</b>";
       return title + (extra ? "<div class='why'>" + extra + "</div>" : "");
     }
@@ -459,7 +466,8 @@ export const ADMIN_HTML = `<!doctype html>
       return api("/api/admin/seed-additions").then(function (data) {
         var rows = (data.seed_additions || []).map(function (r) {
           var url = r.entry && (r.entry.url || r.entry.repo) || "";
-          return "<tr><td>" + esc(r.kind) + "</td><td>" + (url ? "<a href=\\"" + esc(url.indexOf("http") === 0 ? url : "https://github.com/" + url) + "\\" target=\\"_blank\\" rel=\\"noopener\\">" + esc(url) + "</a>" : "") +
+          var href = safeHref(url.indexOf("http") === 0 ? url : (url ? "https://github.com/" + url : ""));
+          return "<tr><td>" + esc(r.kind) + "</td><td>" + (href ? "<a href=\\"" + esc(href) + "\\" target=\\"_blank\\" rel=\\"noopener\\">" + esc(url) + "</a>" : (url ? "<b>" + esc(url) + "</b>" : "")) +
             "<div class='why'><code>" + esc(JSON.stringify(r.entry)) + "</code></div></td>" +
             "<td><button data-act='del-seed' data-id='" + esc(r.id) + "'>Delete</button></td></tr>";
         }).join("");

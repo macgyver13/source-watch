@@ -1,6 +1,6 @@
 import { ADMIN_HTML } from "./admin-ui.js";
 import * as db from "./db.js";
-import { applyItemPatch, applyNamedPatch, applyOverlay, githubRepoFromUrl, matchingExclusion, resolveProjectDisplayNames, seedEntryKeys, seedLocatorTaken, slugify, sourceIdForItem } from "./overlay.js";
+import { applyItemPatch, applyNamedPatch, applyOverlay, excludedSourceRules, githubRepoFromUrl, isHttpUrl, matchingExclusion, resolveProjectDisplayNames, seedEntryKeys, seedLocatorTaken, slugify, sourceIdForItem } from "./overlay.js";
 
 
 
@@ -211,6 +211,9 @@ async function serveWeeks(request, env, path) {
     if (!known.has(slug) && !known.has(padded)) {
       return new Response("Not found", { status: 404, headers: { "Cache-Control": PUBLIC_CACHE } });
     }
+    if (slug !== padded && known.has(padded)) {
+      return Response.redirect(new URL("/weeks/" + padded + "/", request.url).toString(), 301);
+    }
     const assetReq = new Request(new URL("/weeks/live/", request.url), request);
     const res = await env.ASSETS.fetch(assetReq);
     const headers = new Headers(res.headers);
@@ -310,7 +313,7 @@ function inclusionWhy(row) {
   return bits.join(" · ");
 }
 
-function annotateItem(item, overrides, exclusions, displayNames) {
+function annotateItem(item, overrides, exclusions, displayNames, sourceRules) {
   const patch = overrides.item[item.id] || null;
   const effective = applyItemPatch({ ...item }, patch);
   const projectId = slugify(item.project);
@@ -323,24 +326,28 @@ function annotateItem(item, overrides, exclusions, displayNames) {
     project: [item.project, displayProject],
     sourceType: effective.source_type,
   });
+  const sourceRule = sourceRules && sourceRules.get(sourceIdForItem(item));
   const hidden = Boolean(patch && patch.hidden);
   const projectHidden = Boolean(projectPatch && projectPatch.hidden);
   const sourceHidden = Boolean(sourcePatch && sourcePatch.hidden);
   const excluded = Boolean(rule);
+  const sourceExcluded = Boolean(sourceRule);
   const whyHidden = [];
   if (hidden) whyHidden.push("hidden override");
   if (projectHidden) whyHidden.push("project hidden");
   if (sourceHidden) whyHidden.push("source hidden");
   if (rule) whyHidden.push(`excluded ${rule.kind} ${rule.value}`);
+  if (sourceRule) whyHidden.push(`excluded via source ${sourceRule.kind} ${sourceRule.value}`);
   return {
     ...item,
     project: displayProject,
     patch,
     hidden,
     excluded,
+    source_excluded: sourceExcluded,
     project_hidden: projectHidden,
     source_hidden: sourceHidden,
-    suppressed: hidden || excluded || projectHidden || sourceHidden,
+    suppressed: hidden || excluded || projectHidden || sourceHidden || sourceExcluded,
     exclusion: rule ? { kind: rule.kind, value: rule.value, note: rule.note || "" } : null,
     why: whyHidden.length ? whyHidden.join(" · ") : inclusionWhy({ ...item, patch }),
   };
@@ -384,7 +391,7 @@ function annotateNamed(row, kind, overrides, exclusions, displayNames) {
 
 function applyVisibility(rows, visibility) {
   if (visibility === "all") return rows;
-  if (visibility === "excluded") return rows.filter((row) => row.excluded);
+  if (visibility === "excluded") return rows.filter((row) => row.excluded || row.source_excluded);
   if (visibility === "hidden") return rows.filter((row) => row.suppressed);
   return rows.filter((row) => !row.suppressed);
 }
@@ -410,7 +417,21 @@ async function adminItems(env, url) {
   const overrides = await db.loadOverrides(env);
   const exclusions = await db.loadExclusions(env);
   const displayNames = resolveProjectDisplayNames(raw.projects, overrides.project);
-  let rows = raw.items.map((item) => annotateItem(item, overrides, exclusions, displayNames));
+  const projectNewName = new Map();
+  for (const proj of raw.projects) {
+    const display = displayNames.get(proj.id);
+    if (display && display !== proj.name) {
+      projectNewName.set(proj.id, display);
+      projectNewName.set(slugify(proj.name), display);
+    }
+  }
+  const sourceRules = excludedSourceRules({
+    sources: raw.sources,
+    sourcePatches: overrides.source,
+    projectNewName,
+    exclusions,
+  });
+  let rows = raw.items.map((item) => annotateItem(item, overrides, exclusions, displayNames, sourceRules));
 
   rows = applyQuery(rows, q, ["title", "summary", "source_url", "id", "project"]);
   if (status) {
@@ -589,6 +610,21 @@ async function handleCollector(request, env, path) {
     if (ingest.committed_at) return json({ error: "already_committed" }, 409);
     const rows = Array.isArray(body.rows) ? body.rows : [];
     if (rows.length > 500) return json({ error: "chunk_too_large" }, 400);
+    if (kind === "items") {
+      for (const row of rows) {
+        if (!row || !row.id) continue;
+        if (!isHttpUrl(row.source_url)) return json({ error: "invalid_url", id: row.id }, 400);
+        for (const ev of Array.isArray(row.evidence) ? row.evidence : []) {
+          if (ev && ev.url && !isHttpUrl(ev.url)) return json({ error: "invalid_url", id: row.id }, 400);
+        }
+      }
+    }
+    if (kind === "sources") {
+      for (const row of rows) {
+        if (!row || !row.id) continue;
+        if (!isHttpUrl(row.url)) return json({ error: "invalid_url", id: row.id }, 400);
+      }
+    }
     const result = await db.insertRawRows(env, ingestId, kind, rows);
     if (result.closed) return json({ error: "already_committed" }, 409);
     return json({ written: result.written });
@@ -635,6 +671,9 @@ async function handleAdmin(request, env, path, url) {
     if (method === "PUT") {
       const body = await readJson(request);
       if (!body || typeof body !== "object") return json({ error: "invalid_json" }, 400);
+      if (kind === "item" && Object.prototype.hasOwnProperty.call(body, "project")) {
+        return json({ error: "unsupported_patch_field", field: "project" }, 400);
+      }
       const patch = await putOverride(env, kind, id, body);
       if (patch instanceof Response) return patch;
       return json({ kind, id, patch });
@@ -764,6 +803,9 @@ async function handleAdmin(request, env, path, url) {
       if (kind === "github_repositories") {
         if (!/^[^/\s]+\/[^/\s]+$/.test(repo)) repo = githubRepoFromUrl(url);
         if (repo) entry = { ...entry, repo, url: `https://github.com/${repo}` };
+      }
+      if (entry.url != null && String(entry.url).trim() !== "" && !isHttpUrl(entry.url)) {
+        return json({ error: "invalid_seed_url" }, 400);
       }
       const hasLocator =
         kind === "docs_pages" ? Boolean(url)
