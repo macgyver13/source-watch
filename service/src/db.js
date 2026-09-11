@@ -465,13 +465,24 @@ export async function commitIngest(env, ingestId) {
     ).bind(ingestId),
     env.DB.prepare(
       `UPDATE ingests SET committed_at = ?
-       WHERE ingest_id = ? AND (SELECT value FROM settings WHERE key = 'live_ingest_id') = ?`,
+       WHERE ingest_id = ? AND committed_at IS NULL
+         AND (SELECT value FROM settings WHERE key = 'live_ingest_id') = ?`,
     ).bind(at, ingestId, ingestId),
   ]);
-  if (!results[1]?.meta?.changes) return { error: "stale_ingest" };
-  await setSetting(env, "last_ingest_at", at);
+  if (!results[1]?.meta?.changes) {
+    const liveId = await getSetting(env, "live_ingest_id");
+    const latest = await getIngest(env, ingestId);
+    if (latest?.committed_at && liveId === ingestId) {
+      const counts = await renderUntilPublished(env);
+      return { ingest_id: ingestId, ...counts };
+    }
+    return { error: "stale_ingest" };
+  }
+  await bestEffort(env, "last_ingest_at_failed", () => setSetting(env, "last_ingest_at", at));
   // stale *uncommitted* ingests only: the previous live generation stays until publication succeeds.
-  await env.DB.batch(staleUncommittedCleanup(env, staleBefore, ingestId));
+  await bestEffort(env, "stale_uncommitted_cleanup_failed", () =>
+    env.DB.batch(staleUncommittedCleanup(env, staleBefore, ingestId)),
+  );
 
   let counts;
   try {

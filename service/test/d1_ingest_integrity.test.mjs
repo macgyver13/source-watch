@@ -192,3 +192,38 @@ test("D1 ingest integrity: closed chunks, stale commit, replace generation", asy
     assert.equal(r.json?.raw, 2);
   });
 });
+
+test("D1 ingest integrity: concurrent commits of one ingest stay live", async () => {
+  await withWorker(async (worker) => {
+    const at = "2026-09-11T12:00:00Z";
+    const rows = catalog(at, "seed:integrity-cas", "Integrity CAS");
+    const ingestId = await beginIngest(worker, at, "Integrity CAS");
+    await chunkCatalog(worker, ingestId, rows);
+    const [a, b] = await Promise.all([commit(worker, ingestId), commit(worker, ingestId)]);
+    const statuses = [a.status, b.status].sort();
+    assert.ok(statuses.every((status) => status === 200), `${a.status} ${a.text} / ${b.status} ${b.text}`);
+    assert.equal(a.json?.published, true);
+    assert.equal(b.json?.published, true);
+
+    let r = await req(worker, "/feed.json");
+    assert.equal(r.status, 200, r.text);
+    assert.deepEqual(
+      (r.json?.items || []).map((row) => row.id),
+      ["seed:integrity-cas"],
+    );
+
+    r = await req(worker, "/api/admin/state", { token: ADMIN });
+    assert.equal(r.status, 200, r.text);
+    assert.equal(r.json?.raw, 1);
+
+    r = await commit(worker, ingestId);
+    assert.equal(r.status, 200, r.text);
+    assert.equal(r.json?.published, true);
+
+    r = await req(worker, "/feed.json");
+    assert.deepEqual(
+      (r.json?.items || []).map((row) => row.id),
+      ["seed:integrity-cas"],
+    );
+  });
+});
