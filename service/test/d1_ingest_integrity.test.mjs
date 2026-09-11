@@ -22,7 +22,7 @@ async function withWorker(fn) {
   }
 }
 
-async function req(worker, path, { method = "GET", token, body } = {}) {
+async function req(worker, path, { method = "GET", token, body, redirect = "follow" } = {}) {
   const headers = { Accept: "application/json" };
   if (token) headers.Authorization = `Bearer ${token}`;
   if (body !== undefined) headers["Content-Type"] = "application/json";
@@ -30,6 +30,7 @@ async function req(worker, path, { method = "GET", token, body } = {}) {
     method,
     headers,
     body: body !== undefined ? JSON.stringify(body) : undefined,
+    redirect,
   });
   const text = await res.text();
   let json = null;
@@ -362,6 +363,42 @@ test("D1 admin: case-equivalent exclusion is 409 and reversible", async () => {
   });
 });
 
+test("D1 admin: items suppressed through their source appear as excluded", async () => {
+  await withWorker(async (worker) => {
+    const marker = "Source Cascade Marker";
+    let r = await req(worker, "/api/admin/exclusions", { token: ADMIN });
+    for (const row of r.json?.exclusions || []) {
+      if (row.kind === "term" && row.value === marker) {
+        const del = await req(worker, `/api/admin/exclusions/${row.id}`, { method: "DELETE", token: ADMIN });
+        assert.equal(del.status, 200, del.text);
+      }
+    }
+
+    const at = "2026-09-11T12:00:00Z";
+    const rows = catalog(at, "seed:source-cascade", "Ordinary Item");
+    rows.source.id = "source-cascade";
+    rows.source.name = marker;
+    rows.project.sources = [rows.source.id];
+    const ingestId = await beginIngest(worker, at, "Source Cascade Watch");
+    await chunkCatalog(worker, ingestId, rows);
+    r = await commit(worker, ingestId);
+    assert.equal(r.status, 200, r.text);
+
+    r = await req(worker, "/api/admin/exclusions", {
+      method: "POST",
+      token: ADMIN,
+      body: { kind: "term", value: marker },
+    });
+    assert.equal(r.status, 200, r.text);
+
+    r = await req(worker, "/api/admin/items?visibility=excluded", { token: ADMIN });
+    const item = (r.json?.items || []).find((row) => row.id === rows.item.id);
+    assert.ok(item, r.text);
+    assert.equal(item.excluded, false);
+    assert.equal(item.source_excluded, true);
+  });
+});
+
 test("D1 admin: seed locator uniqueness is atomic", async () => {
   await withWorker(async (worker) => {
     let r = await req(worker, "/api/admin/seed-additions", { token: ADMIN });
@@ -444,5 +481,44 @@ test("D1 admin: concurrent override writes do not merge", async () => {
     assert.ok(item, "cas item missing from admin list");
     const title = item.patch?.title;
     assert.ok(title === "CAS Alpha" || title === "CAS Beta", JSON.stringify(item.patch));
+  });
+});
+
+test("D1 ingest rejects javascript: URLs and canonicalizes week slugs", async () => {
+  await withWorker(async (worker) => {
+    const at = "2026-09-11T12:00:00Z";
+    const rows = catalog(at, "seed:week-one", "Week One");
+    rows.item.discovered_at = "2026-01-01T00:00:00Z";
+    rows.item.event_time = "2026-01-01T00:00:00Z";
+    const ingestId = await beginIngest(worker, at, "Week Watch");
+    await chunkCatalog(worker, ingestId, rows);
+    let r = await commit(worker, ingestId);
+    assert.equal(r.status, 200, r.text);
+
+    r = await req(worker, "/feed.json");
+    assert.equal(r.status, 200, r.text);
+    const before = (r.json?.items || []).map((row) => row.id).sort();
+
+    const bad = await beginIngest(worker, "2026-09-11T12:00:00Z", "Bad Watch");
+    r = await req(worker, "/api/ingest/chunk", {
+      method: "POST",
+      token: INGEST,
+      body: {
+        ingest_id: bad,
+        kind: "items",
+        rows: [{ id: "x", source_url: "javascript:alert(1)" }],
+      },
+    });
+    assert.equal(r.status, 400, r.text);
+    assert.equal(r.json?.error, "invalid_url");
+
+    r = await req(worker, "/feed.json");
+    assert.equal(r.status, 200, r.text);
+    assert.deepEqual((r.json?.items || []).map((row) => row.id).sort(), before);
+
+    r = await req(worker, "/weeks/2026-W1/", { redirect: "manual" });
+    assert.equal(r.status, 301, r.text);
+    const location = r.headers.get("Location") || r.headers.get("location") || "";
+    assert.ok(location.endsWith("/weeks/2026-W01/"), location);
   });
 });

@@ -37,6 +37,12 @@
     });
   }
 
+  function safeHref(u) {
+    var s = String(u == null ? "" : u).trim();
+    if (s.charAt(0) === "#" || s.charAt(0) === "/") return s;
+    return /^https?:\/\//i.test(s) ? s : "";
+  }
+
   function parseDate(iso) {
     if (!iso) return null;
     var d = new Date(iso);
@@ -309,7 +315,7 @@
       html +=
         '<article class="item">' +
           '<div class="item-top">' +
-            "<h3><a href=\"" + esc(item.source_url) + "\">" + esc(displayTitle(item)) + "</a></h3>" +
+            "<h3><a href=\"" + esc(safeHref(item.source_url)) + "\">" + esc(displayTitle(item)) + "</a></h3>" +
           "</div>" +
           "<p>" + esc(displaySummary(item)) + "</p>" +
           '<div class="item-meta"><span class="proj">' + esc(item.project || "") + '</span><span class="time" title="' + esc(formatStamp(itemDate(item))) + '">' + esc(humanDate(itemDate(item))) + "</span></div>" +
@@ -332,7 +338,7 @@
     list.forEach(function (item) {
       html +=
         '<article class="item">' +
-          "<h3><a href=\"" + esc(item.source_url) + "\">" + esc(displayTitle(item)) + "</a></h3>" +
+          "<h3><a href=\"" + esc(safeHref(item.source_url)) + "\">" + esc(displayTitle(item)) + "</a></h3>" +
           "<p>" + esc(displaySummary(item)) + "</p>" +
           '<div class="item-meta"><span class="proj">' + esc(item.project || "") + '</span><span class="time" title="' + esc(formatStamp(itemDate(item))) + '">' + esc(humanDate(itemDate(item))) + "</span></div>" +
         "</article>";
@@ -341,6 +347,7 @@
   }
 
   function renderWeek(allItems, weekSlug) {
+    var canonicalSlug = (parseWeekSlug(weekSlug) || {}).slug || weekSlug;
     if (document.querySelectorAll(".rail a[data-week]").length === 0 || !document.querySelector(".rail a[data-week*='-W']")) {
 
       var slugs = [];
@@ -360,7 +367,7 @@
         rail.innerHTML = slugs.map(function (slug) {
           var p = parseWeekSlug(slug);
           var num = p ? String(p.week) : slug;
-          var on = slug === weekSlug ? ' class="on"' : "";
+          var on = slug === canonicalSlug ? ' class="on"' : "";
           return '<a href="/weeks/' + slug + '/" data-week="' + slug + '"' + on + '><span class="wk">W' + num + ' <span class="n"></span></span><span class="sub"></span></a>';
         }).join("");
       }
@@ -388,6 +395,7 @@
         var railSlug = a.getAttribute("data-week");
         var p = parseWeekSlug(railSlug);
         if (!p) return;
+        a.classList.toggle("on", p.slug === canonicalSlug);
         var n = itemsForWeek(allItems, railSlug).length;
         var sub = a.querySelector(".sub");
         if (sub) sub.textContent = formatWeekRange(p.year, p.week);
@@ -416,7 +424,7 @@
         return (
           '<div class="row">' +
             "<div>" +
-              '<a class="title" href="' + esc(item.source_url) + '">' + esc(displayTitle(item)) + "</a>" +
+              '<a class="title" href="' + esc(safeHref(item.source_url)) + '">' + esc(displayTitle(item)) + "</a>" +
               '<div class="sum">' + esc(displaySummary(item)) + "</div>" +
             "</div>" +
             '<span class="time">' + esc(humanDate(weekItemDate(item))) + "</span>" +
@@ -544,13 +552,13 @@
           var ob = b.source_type === "github_pull_request" ? 0 : 1;
           return oa - ob || String(sourceLinkLabel(a)).localeCompare(sourceLinkLabel(b));
         }).slice(0, 8).map(function (i) {
-          return '<a class="card-src" href="' + esc(i.source_url) + '" title="' + esc(displayTitle(i)) + '">' +
+          return '<a class="card-src" href="' + esc(safeHref(i.source_url)) + '" title="' + esc(displayTitle(i)) + '">' +
             '<i class="dot ' + sourceKind(i) + '"></i>' + esc(sourceLinkLabel(i)) + "</a>";
         }).join("");
         return (
           '<article class="card">' +
             '<div class="card-top">' +
-              "<h3><a href=\"" + esc(projectHref(p, items)) + "\">" + esc(name) + "</a></h3>" +
+              "<h3><a href=\"" + esc(safeHref(projectHref(p, items))) + "\">" + esc(name) + "</a></h3>" +
             "</div>" +
             '<p class="what">' + esc(projectSummary(p, items)) + "</p>" +
             (links ? '<div class="card-sources">' + links + "</div>" : "") +
@@ -617,7 +625,7 @@
         return (
           '<div class="source-row">' +
             '<span class="kind"><i class="dot ' + kind + '"></i>' + esc(kind) + "</span>" +
-            '<a class="name" href="' + esc(s.url) + '">' + esc(s.name) + "</a>" +
+            '<a class="name" href="' + esc(safeHref(s.url)) + '">' + esc(s.name) + "</a>" +
             '<span class="proj">' + esc(s.project || "") + "</span>" +
           "</div>"
         );

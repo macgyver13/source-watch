@@ -133,6 +133,33 @@ export function matchingExclusion(row, exclusions, fields = {}) {
   return null;
 }
 
+export function isHttpUrl(value) {
+  try {
+    const u = new URL(String(value || ""));
+    return u.protocol === "http:" || u.protocol === "https:";
+  } catch {
+    return false;
+  }
+}
+
+export function excludedSourceRules({ sources, sourcePatches, projectNewName, exclusions }) {
+  const patches = asMap(sourcePatches);
+  const names = projectNewName instanceof Map ? projectNewName : new Map();
+  const out = new Map();
+  for (const raw of sources || []) {
+    const source = applyNamedPatch({ ...raw }, patches.get(raw.id), "name");
+    const renamed = names.get(slugify(source.project));
+    const rule = matchingExclusion(source, exclusions, {
+      haystack: `${source.name || ""} ${source.url || ""}`,
+      url: source.url,
+      project: [source.project, renamed],
+      sourceType: source.source_type,
+    });
+    if (rule) out.set(raw.id, rule);
+  }
+  return out;
+}
+
 export function matchesExclusion(row, exclusions, fields = {}) {
   return matchingExclusion(row, exclusions, fields) != null;
 }
@@ -160,7 +187,6 @@ export function applyItemPatch(item, patch) {
     out.event_time = patch.discovered_at;
   }
   if (patch.activity_at != null) out.activity_at = patch.activity_at;
-  if (patch.project != null) out.project = patch.project;
   if (patch.tags_remove || patch.tags_add) out.tags = applyTags(out.tags, patch);
   return out;
 }
@@ -244,6 +270,12 @@ export function applyOverlay({ items, projects, sources, overrides, exclusions }
     }
   }
 
+  const sourceRules = excludedSourceRules({
+    sources: rawSources,
+    sourcePatches,
+    projectNewName,
+    exclusions,
+  });
 
   const surviving = [];
   for (const raw of rawItems) {
@@ -256,6 +288,7 @@ export function applyOverlay({ items, projects, sources, overrides, exclusions }
     const sid = sourceIdForItem(item);
     const sourcePatch = sourcePatches.get(sid);
     if (sourcePatch && sourcePatch.hidden === true) continue;
+    if (sourceRules.get(sid)) continue;
     const renamed = projectNewName.get(originalProjectId) || projectNewName.get(slugify(item.project));
     const haystack = `${item.title || ""} ${item.summary || ""} ${item.source_url || ""} ${(item.tags || []).join(" ")}`;
     if (
@@ -287,19 +320,9 @@ export function applyOverlay({ items, projects, sources, overrides, exclusions }
     if (!survivingSourceIds.has(raw.id)) continue;
     const patch = sourcePatches.get(raw.id);
     if (patch && patch.hidden === true) continue;
+    if (sourceRules.get(raw.id)) continue;
     const source = applyNamedPatch({ ...raw }, patch, "name");
     const renamed = projectNewName.get(slugify(source.project));
-    const haystack = `${source.name || ""} ${source.url || ""}`;
-    if (
-      matchesExclusion(source, exclusions, {
-        haystack,
-        url: source.url,
-        project: [source.project, renamed],
-        sourceType: source.source_type,
-      })
-    ) {
-      continue;
-    }
     if (renamed) source.project = renamed;
     outSources.push(source);
   }
