@@ -581,14 +581,20 @@ async function handleCollector(request, env, path) {
     if (ingest.committed_at) return json({ error: "already_committed" }, 409);
     const rows = Array.isArray(body.rows) ? body.rows : [];
     if (rows.length > 500) return json({ error: "chunk_too_large" }, 400);
-    const written = await db.insertRawRows(env, ingestId, kind, rows);
-    return json({ written });
+    const result = await db.insertRawRows(env, ingestId, kind, rows);
+    if (result.closed) return json({ error: "already_committed" }, 409);
+    return json({ written: result.written });
   }
   if (method === "POST" && path === "/api/ingest/commit") {
     const body = await readJson(request);
     if (!body || typeof body !== "object") return json({ error: "invalid_json" }, 400);
     const ingestId = String(body.ingest_id || "");
-    const result = await db.commitIngest(env, ingestId);
+    let result;
+    try {
+      result = await db.commitIngest(env, ingestId);
+    } catch (err) {
+      return json({ error: "commit_failed", detail: String(err && err.message || err).slice(0, 200) }, 503);
+    }
     if (!result) return json({ error: "unknown_ingest" }, 409);
     if (result.error === "already_committed" || result.error === "stale_ingest") {
       return json({ error: result.error }, 409);

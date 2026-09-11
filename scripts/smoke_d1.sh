@@ -20,4 +20,4 @@ if [[ ! -d node_modules/wrangler ]]; then
 fi
 
 npx wrangler d1 migrations apply source-watch --local --config wrangler.smoke.jsonc
-node --test service/test/d1_ingest_smoke.test.mjs
+node --test --test-concurrency=1 service/test/d1_ingest_smoke.test.mjs service/test/d1_ingest_integrity.test.mjs

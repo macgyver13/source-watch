@@ -3,8 +3,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "node --test service/test/overlay.test.mjs service/test/admin_ui.test.mjs",
-    "test:smoke": "node --test service/test/d1_ingest_smoke.test.mjs",
+    "test": "node --test service/test/overlay.test.mjs service/test/admin_ui.test.mjs service/test/db_render.test.mjs",
+    "test:smoke": "node --test --test-concurrency=1 service/test/d1_ingest_smoke.test.mjs service/test/d1_ingest_integrity.test.mjs",
     "smoke:d1": "bash scripts/smoke_d1.sh",
     "dev": "wrangler dev --test-scheduled"
   },
