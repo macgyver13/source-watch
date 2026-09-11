@@ -548,7 +548,7 @@ export const ADMIN_HTML = `<!doctype html>
       try { entry = JSON.parse(this.entry.value); } catch (err) { alert("entry must be JSON"); return; }
       api("/api/admin/seed-additions", { method: "POST", body: { kind: this.kind.value, entry: entry } }).then(function (res) {
         if (res._status >= 400) {
-          alert(res.error === "duplicate_seed_id" ? "seed id already exists" : (res.error || "seed rejected"));
+          alert(res.error === "duplicate_seed_id" ? "seed id already exists" : res.error === "duplicate_seed_locator" ? "seed url/repo/name already exists" : (res.error || "seed rejected"));
           return;
         }
         $("seed-form").reset();

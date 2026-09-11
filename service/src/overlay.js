@@ -27,6 +27,54 @@ export function githubRepoFromUrl(url) {
   }
 }
 
+export function seedEntryKeys(kind, entry) {
+  const keys = new Set();
+  if (!entry || typeof entry !== "object") return keys;
+  const url = String(entry.url || "").trim().replace(/\/+$/, "").toLowerCase();
+  if (url) keys.add(`url:${url}`);
+  const repo = String(entry.repo || "").trim().toLowerCase();
+  if (repo) {
+    keys.add(`repo:${repo}`);
+    keys.add(`url:https://github.com/${repo}`);
+  }
+  const name = String(entry.name || "").trim().toLowerCase();
+  if (kind === "crates" && name) {
+    keys.add(`name:${name}`);
+    keys.add(`url:https://crates.io/crates/${name}`);
+  }
+  return keys;
+}
+
+const SEED_SOURCE_TYPE = {
+  docs_pages: "docs_page",
+  github_repositories: "github_repository",
+  github_pull_requests: "github_pull_request",
+  crates: "package_crate",
+};
+
+export function seedLocatorTaken(kind, entry, seedAdditions, sources = []) {
+  const incoming = seedEntryKeys(kind, entry);
+  if (!incoming.size) return false;
+  const overlaps = (other) => {
+    for (const key of other) if (incoming.has(key)) return true;
+    return false;
+  };
+  for (const row of seedAdditions || []) {
+    if (String(row.kind || "") !== kind) continue;
+    if (overlaps(seedEntryKeys(kind, row.entry || {}))) return true;
+  }
+  const type = SEED_SOURCE_TYPE[kind];
+  for (const source of sources || []) {
+    if (!source || source.confidence !== "seeded_source") continue;
+    if (type && source.source_type !== type) continue;
+    const probe = { url: source.url, name: source.name };
+    if (kind === "github_repositories") probe.repo = githubRepoFromUrl(source.url);
+    if (overlaps(seedEntryKeys(kind, probe))) return true;
+  }
+  return false;
+}
+
+
 export function urlPrefixMatches(link, value) {
   const prefix = String(value || "").replace(/\/+$/, "").toLowerCase();
   const href = String(link || "").toLowerCase();

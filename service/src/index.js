@@ -1,6 +1,6 @@
 import { ADMIN_HTML } from "./admin-ui.js";
 import * as db from "./db.js";
-import { applyItemPatch, applyNamedPatch, applyOverlay, githubRepoFromUrl, matchingExclusion, resolveProjectDisplayNames, slugify, sourceIdForItem } from "./overlay.js";
+import { applyItemPatch, applyNamedPatch, applyOverlay, githubRepoFromUrl, matchingExclusion, resolveProjectDisplayNames, seedLocatorTaken, slugify, sourceIdForItem } from "./overlay.js";
 
 
 
@@ -593,7 +593,9 @@ async function handleCollector(request, env, path) {
     if (result.error === "already_committed" || result.error === "stale_ingest") {
       return json({ error: result.error }, 409);
     }
-
+    if (result.published === false) {
+      return json({ error: "render_not_published", ingest_id: result.ingest_id }, 503);
+    }
     return json(result);
   }
 
@@ -763,6 +765,10 @@ async function handleAdmin(request, env, path, url) {
       if (catalogIds.has(seedId) || catalogIds.has(`seed:${seedId}`)) {
         return json({ error: "duplicate_seed_id" }, 409);
       }
+      if (seedLocatorTaken(kind, entry, existingSeeds, raw.sources)) {
+        return json({ error: "duplicate_seed_locator" }, 409);
+      }
+
 
 
       await env.DB.prepare("INSERT INTO seed_additions (kind, entry, created_at) VALUES (?, ?, ?)").bind(

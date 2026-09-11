@@ -6,6 +6,7 @@ import {
   isoWeekSlug,
   renderJsonl,
   renderRss,
+  seedLocatorTaken,
   weekIndex,
 } from "../src/overlay.js";
 
@@ -271,6 +272,46 @@ test("githubRepoFromUrl accepts only owner/repo paths", () => {
   assert.equal(githubRepoFromUrl("https://github.com/acme/lib/issues/1"), "");
   assert.equal(githubRepoFromUrl("https://notgithub.com/acme/lib"), "");
 });
+
+test("seedLocatorTaken matches repo or crate locators under a different id", () => {
+  const additions = [
+    { kind: "github_repositories", entry: { id: "keep", repo: "acme/keep" } },
+    { kind: "crates", entry: { id: "old-crate", name: "foo-bar" } },
+  ];
+  assert.equal(seedLocatorTaken("github_repositories", {
+    id: "other-id",
+    url: "https://github.com/acme/keep",
+  }, additions), true);
+  assert.equal(seedLocatorTaken("crates", { id: "new-crate", name: "foo-bar" }, additions), true);
+  assert.equal(seedLocatorTaken("crates", { id: "fresh", name: "baz" }, additions), false);
+  assert.equal(seedLocatorTaken("docs_pages", {
+    id: "docs",
+    url: "https://github.com/acme/keep",
+  }, additions), false);
+});
+
+test("seedLocatorTaken matches seeded catalog locators", () => {
+  const sources = [{
+    id: "keep",
+    url: "https://github.com/acme/keep",
+    source_type: "github_repository",
+    confidence: "seeded_source",
+  }, {
+    id: "live",
+    url: "https://github.com/acme/live",
+    source_type: "github_repository",
+    confidence: "live_hit",
+  }];
+  assert.equal(seedLocatorTaken("github_repositories", {
+    id: "other",
+    repo: "acme/keep",
+  }, [], sources), true);
+  assert.equal(seedLocatorTaken("github_repositories", {
+    id: "live-ok",
+    repo: "acme/live",
+  }, [], sources), false);
+});
+
 
 test("url_prefix exclusion does not match a longer pull number", () => {
   const keep = {
