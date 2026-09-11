@@ -4,9 +4,15 @@
   "type": "module",
   "scripts": {
     "test": "node --test service/test/overlay.test.mjs",
+    "test:smoke": "node --test service/test/d1_ingest_smoke.test.mjs",
+    "smoke:d1": "bash scripts/smoke_d1.sh",
     "dev": "wrangler dev --test-scheduled"
   },
   "devDependencies": {
     "wrangler": "^4.45.0"
+  },
+  "allowScripts": {
+    "esbuild@0.28.1": true,
+    "workerd@1.20260908.1": true
   }
 }
