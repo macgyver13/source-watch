@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { unstable_dev } from "wrangler";
+import { ROW_BATCH } from "../src/db.js";
 
 const INGEST = "devingest";
 const ADMIN = "devadmin";
@@ -225,5 +226,86 @@ test("D1 ingest integrity: concurrent commits of one ingest stay live", async ()
       (r.json?.items || []).map((row) => row.id),
       ["seed:integrity-cas"],
     );
+  });
+});
+
+test("D1 ingest integrity: an older equal-stamp ingest cannot replace a newer one", async () => {
+  await withWorker(async (worker) => {
+    const at = "2026-09-11T12:00:00Z";
+    const olderRows = catalog(at, "seed:equal-stamp-old", "Equal Stamp Old");
+    const newerRows = catalog(at, "seed:equal-stamp-new", "Equal Stamp New");
+    const olderId = await beginIngest(worker, at, "Equal Stamp Old");
+    await chunkCatalog(worker, olderId, olderRows);
+    const newerId = await beginIngest(worker, at, "Equal Stamp New");
+    await chunkCatalog(worker, newerId, newerRows);
+
+    let r = await commit(worker, newerId);
+    assert.equal(r.status, 200, r.text);
+    assert.equal(r.json?.published, true);
+
+    r = await commit(worker, olderId);
+    assert.equal(r.status, 409, r.text);
+    assert.equal(r.json?.error, "stale_ingest");
+
+    r = await req(worker, "/feed.json");
+    assert.equal(r.status, 200, r.text);
+    assert.deepEqual(
+      (r.json?.items || []).map((row) => row.id),
+      ["seed:equal-stamp-new"],
+    );
+  });
+});
+
+test("D1 ingest integrity: multi-slice chunk is all-or-nothing with commit", async () => {
+  await withWorker(async (worker) => {
+    const at = "2026-09-11T12:00:00Z";
+    const count = ROW_BATCH + 5;
+    const items = [];
+    const projects = [];
+    const sources = [];
+    for (let i = 0; i < count; i++) {
+      const rows = catalog(at, `seed:integrity-batch-${i}`, `Batch ${i}`);
+      items.push(rows.item);
+      projects.push(rows.project);
+      sources.push(rows.source);
+    }
+    const ingestId = await beginIngest(worker, at, "Integrity Batch");
+    let r = await req(worker, "/api/ingest/chunk", {
+      method: "POST",
+      token: INGEST,
+      body: { ingest_id: ingestId, kind: "items", rows: items },
+    });
+    assert.equal(r.status, 200, r.text);
+    assert.ok(r.json?.written >= count, r.text);
+    r = await req(worker, "/api/ingest/chunk", {
+      method: "POST",
+      token: INGEST,
+      body: { ingest_id: ingestId, kind: "projects", rows: projects },
+    });
+    assert.equal(r.status, 200, r.text);
+    r = await req(worker, "/api/ingest/chunk", {
+      method: "POST",
+      token: INGEST,
+      body: { ingest_id: ingestId, kind: "sources", rows: sources },
+    });
+    assert.equal(r.status, 200, r.text);
+    r = await commit(worker, ingestId);
+    assert.equal(r.status, 200, r.text);
+    assert.equal(r.json?.items, count);
+
+    r = await req(worker, "/feed.json");
+    assert.equal(r.status, 200, r.text);
+    assert.equal((r.json?.items || []).length, count);
+
+    r = await req(worker, "/api/ingest/chunk", {
+      method: "POST",
+      token: INGEST,
+      body: { ingest_id: ingestId, kind: "items", rows: items },
+    });
+    assert.equal(r.status, 409, r.text);
+    assert.equal(r.json?.error, "already_committed");
+
+    r = await req(worker, "/feed.json");
+    assert.equal((r.json?.items || []).length, count);
   });
 });

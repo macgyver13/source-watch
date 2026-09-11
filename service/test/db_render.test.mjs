@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { CHUNK, writeRendered } from "../src/db.js";
+import { CHUNK, insertRawRows, writeRendered } from "../src/db.js";
 
 const UNPAIRED = /[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?<![\uD800-\uDBFF])[\uDC00-\uDFFF]/;
 
@@ -54,4 +54,29 @@ test("writeRendered backs up when a chunk would end on a high surrogate", async 
   }
   assert.equal(bodies.join(""), text);
   assert.notEqual(bodies[0].length, CHUNK, "chunk must not end on a high surrogate");
+});
+
+test("insertRawRows checks ingest closure when a chunk has no valid rows", async () => {
+  let statement = null;
+  const env = {
+    DB: {
+      prepare(sql) {
+        assert.match(sql, /committed_at IS NULL/);
+        return {
+          bind(ingestId) {
+            statement = { ingestId };
+            return statement;
+          },
+        };
+      },
+      async batch(statements) {
+        assert.deepEqual(statements, [statement]);
+        return [{ meta: { changes: 0 } }];
+      },
+    },
+  };
+
+  const result = await insertRawRows(env, "closed-ingest", "items", [{ title: "missing id" }]);
+  assert.equal(statement.ingestId, "closed-ingest");
+  assert.deepEqual(result, { written: 0, closed: true });
 });

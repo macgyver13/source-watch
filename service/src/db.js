@@ -307,18 +307,32 @@ export async function insertRawRows(env, ingestId, kind, rows) {
   const table = RAW_TABLES[kind];
   if (!table) throw new Error(`unknown kind ${kind}`);
   const valid = (rows || []).filter((row) => row && row.id);
-  let written = 0;
+  if (!valid.length) {
+    const results = await env.DB.batch([
+      env.DB.prepare(
+        "UPDATE ingests SET started_at = started_at WHERE ingest_id = ? AND committed_at IS NULL",
+      ).bind(ingestId),
+    ]);
+    return { written: 0, closed: !results?.[0]?.meta?.changes };
+  }
+  const stmts = [];
   for (let i = 0; i < valid.length; i += ROW_BATCH) {
     const slice = valid.slice(i, i + ROW_BATCH);
     const values = slice.map(() => "(?,?,?)").join(",");
     const binds = [];
     for (const row of slice) binds.push(ingestId, String(row.id), JSON.stringify(row));
-    const res = await env.DB.prepare(
-      `INSERT OR REPLACE INTO ${table} (ingest_id, id, json)
-       SELECT column1, column2, column3 FROM (VALUES ${values})
-       WHERE EXISTS (SELECT 1 FROM ingests WHERE ingest_id = ? AND committed_at IS NULL)`,
-    ).bind(...binds, ingestId).run();
-    if (!res?.meta?.changes) return { written, closed: true };
+    stmts.push(
+      env.DB.prepare(
+        `INSERT OR REPLACE INTO ${table} (ingest_id, id, json)
+         SELECT column1, column2, column3 FROM (VALUES ${values})
+         WHERE EXISTS (SELECT 1 FROM ingests WHERE ingest_id = ? AND committed_at IS NULL)`,
+      ).bind(...binds, ingestId),
+    );
+  }
+  const results = await env.DB.batch(stmts);
+  let written = 0;
+  for (const res of results || []) {
+    if (!res?.meta?.changes) return { written: 0, closed: true };
     written += res.meta.changes;
   }
   return { written, closed: false };
@@ -408,6 +422,7 @@ export async function renderUntilPublished(env, attempts = 3) {
 
 
 const LIVE_STAMP = "(SELECT COALESCE(generated_at, started_at) FROM ingests WHERE ingest_id = ";
+const LIVE_ROWID = "(SELECT rowid FROM ingests WHERE ingest_id = ";
 
 function staleUncommittedCleanup(env, staleBefore, ingestId) {
   const staleUncommitted =
@@ -463,7 +478,13 @@ export async function commitIngest(env, ingestId) {
       `INSERT INTO settings (key, value) VALUES ('live_ingest_id', ?)
        ON CONFLICT(key) DO UPDATE SET value = excluded.value
        WHERE COALESCE(${LIVE_STAMP}settings.value), '')
-          <= COALESCE(${LIVE_STAMP}excluded.value), '')`,
+           < COALESCE(${LIVE_STAMP}excluded.value), '')
+          OR (
+            COALESCE(${LIVE_STAMP}settings.value), '')
+              = COALESCE(${LIVE_STAMP}excluded.value), '')
+            AND ${LIVE_ROWID}settings.value)
+              <= ${LIVE_ROWID}excluded.value)
+          )`,
     ).bind(ingestId),
     env.DB.prepare(
       `UPDATE ingests SET committed_at = ?
@@ -481,7 +502,6 @@ export async function commitIngest(env, ingestId) {
     return { error: "stale_ingest" };
   }
   const displacedLiveId = results[0]?.results?.[0]?.value || null;
-  await bestEffort(env, "last_ingest_at_failed", () => setSetting(env, "last_ingest_at", at));
   // stale *uncommitted* ingests only: the previous live generation stays until publication succeeds.
   await bestEffort(env, "stale_uncommitted_cleanup_failed", () =>
     env.DB.batch(staleUncommittedCleanup(env, staleBefore, ingestId)),
@@ -498,7 +518,15 @@ export async function commitIngest(env, ingestId) {
     await bestEffort(env, "commit_rollback_failed", () => rollbackCommit(env, ingestId, displacedLiveId));
     return { ingest_id: ingestId, ...counts };
   }
+  await bestEffort(env, "last_ingest_at_failed", () =>
+    env.DB.prepare(
+      `INSERT INTO settings (key, value)
+       SELECT 'last_ingest_at', ?
+       WHERE (SELECT value FROM settings WHERE key = 'live_ingest_id') = ?
+       ON CONFLICT(key) DO UPDATE SET value = excluded.value
+       WHERE (SELECT value FROM settings WHERE key = 'live_ingest_id') = ?`,
+    ).bind(at, ingestId, ingestId).run(),
+  );
   await bestEffort(env, "commit_cleanup_failed", () => env.DB.batch(previousGenerationCleanup(env, ingestId)));
   return { ingest_id: ingestId, ...counts };
 }
-
