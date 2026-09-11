@@ -65,6 +65,27 @@ class ServingConfigTests(unittest.TestCase):
         self.assertEqual(serving["mode"], "service")
         self.assertEqual(serving["service_url"], "https://watch.example.workers.dev/")
 
+    def test_http_non_loopback_exits(self) -> None:
+        with self.assertRaises(SystemExit) as raised:
+            build_seed_feed.normalize_serving({
+                "mode": "service",
+                "service_url": "http://watch.example.com/",
+            })
+        self.assertIn("https", str(raised.exception))
+
+    def test_http_loopback_and_https_accepted(self) -> None:
+        local = build_seed_feed.normalize_serving({
+            "mode": "service",
+            "service_url": "http://localhost:8787/",
+        })
+        self.assertEqual(local["mode"], "service")
+        remote = build_seed_feed.normalize_serving({
+            "mode": "Service ",
+            "service_url": "https://x/",
+        })
+        self.assertEqual(remote["mode"], "service")
+        self.assertEqual(remote["service_url"], "https://x/")
+
 
 class ServiceConfigMergeTests(unittest.TestCase):
     def test_apply_service_config_appends_terms_and_overrides_floor(self) -> None:
@@ -473,6 +494,202 @@ class SeedGitHubSoftFailTests(unittest.TestCase):
         self.assertIn("live collector HTTP failed", str(raised.exception))
         self.assertIn("GitHub repository search failed", str(raised.exception))
         client.ingest.assert_not_called()
+
+
+
+class FakeHttpBody:
+    def __init__(self, payload) -> None:
+        self._body = json.dumps(payload).encode("utf-8")
+
+    def read(self):
+        return self._body
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *args):
+        return False
+
+
+def _service_main_ctx(watch, cfg, urlopen=None, extra_patches=None):
+    client = mock.Mock()
+    client.collector_config.return_value = {}
+    client.collector_state.return_value = ({}, {}, {})
+    patches = [
+        mock.patch.object(build_seed_feed, "load_watch", return_value=watch),
+        mock.patch.object(build_seed_feed, "parse_yaml", return_value=cfg),
+        mock.patch.object(build_seed_feed, "require_ingest_token", return_value="tok"),
+        mock.patch.object(build_seed_feed, "ServiceClient", return_value=client),
+        mock.patch.object(build_seed_feed, "skip_live_collectors", return_value=False),
+        mock.patch.object(build_seed_feed, "github_get_json", return_value=None),
+        mock.patch.object(build_seed_feed, "search_github_pull_requests", return_value=[]),
+        mock.patch.object(build_seed_feed, "search_delving_topics", return_value=[]),
+        mock.patch.object(build_seed_feed, "list_delving_category", return_value=[]),
+    ]
+    if urlopen is not None:
+        patches.append(mock.patch.object(build_seed_feed, "urlopen", urlopen))
+    for patch in extra_patches or []:
+        patches.append(patch)
+    return client, patches
+
+
+class PartialCollectorResponseTests(unittest.TestCase):
+    def tearDown(self) -> None:
+        build_seed_feed.COLLECTOR_FAILURES.clear()
+
+    def test_incomplete_results_notes_failure(self) -> None:
+        build_seed_feed.COLLECTOR_FAILURES.clear()
+        with mock.patch.object(build_seed_feed, "urlopen", lambda *a, **k: FakeHttpBody({"incomplete_results": True, "items": []})):
+            self.assertEqual(build_seed_feed.search_github_repositories("atlas"), [])
+            self.assertEqual(build_seed_feed.search_github_pull_requests("atlas"), [])
+        self.assertTrue(any("incomplete" in msg for msg in build_seed_feed.COLLECTOR_FAILURES))
+
+    def test_invalid_items_array_notes_failure(self) -> None:
+        build_seed_feed.COLLECTOR_FAILURES.clear()
+        with mock.patch.object(build_seed_feed, "urlopen", lambda *a, **k: FakeHttpBody({"items": "nope"})):
+            self.assertEqual(build_seed_feed.search_github_repositories("atlas"), [])
+        self.assertTrue(any("invalid items" in msg for msg in build_seed_feed.COLLECTOR_FAILURES))
+
+    def test_repository_missing_required_field_notes_failure(self) -> None:
+        build_seed_feed.COLLECTOR_FAILURES.clear()
+        with mock.patch.object(
+            build_seed_feed,
+            "urlopen",
+            lambda *a, **k: FakeHttpBody({"items": [{}]}),
+        ):
+            self.assertEqual(build_seed_feed.search_github_repositories("atlas"), [])
+        self.assertTrue(any("without full_name or html_url" in msg for msg in build_seed_feed.COLLECTOR_FAILURES))
+
+    def test_non_object_delving_response_notes_failure(self) -> None:
+        build_seed_feed.COLLECTOR_FAILURES.clear()
+        with mock.patch.object(build_seed_feed, "urlopen", lambda *a, **k: FakeHttpBody([])):
+            self.assertEqual(build_seed_feed.search_delving_topics("frost"), [])
+        self.assertTrue(any("expected object" in msg for msg in build_seed_feed.COLLECTOR_FAILURES))
+
+    def test_delving_missing_topics_notes_failure(self) -> None:
+        build_seed_feed.COLLECTOR_FAILURES.clear()
+        with mock.patch.object(build_seed_feed, "delving_get_json", return_value={"posts": []}):
+            self.assertEqual(build_seed_feed.search_delving_topics("frost"), [])
+        self.assertTrue(any("no topics array" in msg for msg in build_seed_feed.COLLECTOR_FAILURES))
+
+    def test_delving_topic_missing_required_field_notes_failure(self) -> None:
+        build_seed_feed.COLLECTOR_FAILURES.clear()
+        with mock.patch.object(
+            build_seed_feed,
+            "delving_get_json",
+            return_value={"topics": [{"id": 1}], "posts": []},
+        ):
+            self.assertEqual(build_seed_feed.search_delving_topics("frost"), [])
+        self.assertTrue(any("without id or title" in msg for msg in build_seed_feed.COLLECTOR_FAILURES))
+
+    def test_delving_category_invalid_topic_notes_failure(self) -> None:
+        build_seed_feed.COLLECTOR_FAILURES.clear()
+        with mock.patch.object(
+            build_seed_feed,
+            "delving_get_json",
+            return_value={"topic_list": {"topics": [{"title": "Missing id"}]}},
+        ):
+            self.assertEqual(build_seed_feed.list_delving_category("protocol"), [])
+        self.assertTrue(any("invalid topic" in msg for msg in build_seed_feed.COLLECTOR_FAILURES))
+
+    def test_incomplete_results_aborts_service_ingest(self) -> None:
+        watch = build_seed_feed.normalize_watch({
+            "name": "Example Watch",
+            "serving": {"mode": "service", "service_url": "http://localhost:8787/"},
+        })
+        cfg = {
+            "seeded_sources": {},
+            "live_collectors": {
+                "github_repository_searches": [{"id": "repo-discovery", "query": "atlas"}],
+            },
+        }
+        client, patches = _service_main_ctx(
+            watch,
+            cfg,
+            extra_patches=[
+                mock.patch.object(
+                    build_seed_feed,
+                    "search_github_repositories",
+                    side_effect=lambda query, max_results=10: (
+                        build_seed_feed.note_collector_failure(f"GitHub repository search incomplete for query {query!r}")
+                        or []
+                    ),
+                ),
+            ],
+        )
+        old_argv = sys.argv
+        with tempfile.TemporaryDirectory() as tmp:
+            out = Path(tmp)
+            _empty_artifacts(out)
+            old_out = build_seed_feed.OUT
+            build_seed_feed.OUT = out
+            try:
+                sys.argv = ["build_seed_feed.py"]
+                with patches[0], patches[1], patches[2], patches[3], patches[4], patches[5], patches[6], patches[7], patches[8], patches[9]:
+                    with self.assertRaises(SystemExit) as raised:
+                        build_seed_feed.main()
+            finally:
+                build_seed_feed.OUT = old_out
+                sys.argv = old_argv
+        self.assertIn("live collector HTTP failed", str(raised.exception))
+        self.assertIn("incomplete", str(raised.exception))
+        client.ingest.assert_not_called()
+
+
+class SeedCatalogUniquenessTests(unittest.TestCase):
+    def test_duplicate_ids_across_kinds_exit(self) -> None:
+        cfg = {
+            "seeded_sources": {
+                "github_repositories": [
+                    {"id": "acme-lib", "repo": "acme/keep"},
+                    {"id": "other", "repo": "acme/other"},
+                ],
+                "crates": [{"id": "acme-lib", "name": "acme-lib"}],
+            }
+        }
+        with self.assertRaises(SystemExit) as raised:
+            build_seed_feed.validate_seed_catalog(cfg)
+        msg = str(raised.exception)
+        self.assertIn("acme-lib", msg)
+        self.assertIn("github_repositories[0]", msg)
+        self.assertIn("crates[0]", msg)
+
+
+class ServiceClientRedirectTests(unittest.TestCase):
+    def test_redirect_is_refused_without_forwarding_token(self) -> None:
+        sys.path.insert(0, str(ROOT / "scripts"))
+        import service_client
+
+        seen = []
+
+        class Handler:
+            pass
+
+        from http.server import BaseHTTPRequestHandler, HTTPServer
+        import threading
+
+        class RedirectOnce(BaseHTTPRequestHandler):
+            def do_GET(self):
+                seen.append(self.headers.get("Authorization"))
+                self.send_response(302)
+                self.send_header("Location", "http://127.0.0.1:9/steal")
+                self.end_headers()
+
+            def log_message(self, *_args):
+                return
+
+        server = HTTPServer(("127.0.0.1", 0), RedirectOnce)
+        thread = threading.Thread(target=server.handle_request, daemon=True)
+        thread.start()
+        port = server.server_address[1]
+        client = service_client.ServiceClient(f"http://127.0.0.1:{port}/", "secret-token")
+        with self.assertRaises(service_client.ServiceError) as raised:
+            client.collector_config()
+        thread.join(timeout=2)
+        server.server_close()
+        self.assertIn("refusing redirect", str(raised.exception))
+        self.assertNotIn("secret-token", str(raised.exception))
+        self.assertEqual(seen, ["Bearer secret-token"])
 
 
 if __name__ == "__main__":

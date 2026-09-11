@@ -5,12 +5,21 @@ from __future__ import annotations
 import json
 import os
 from urllib.error import HTTPError, URLError
-from urllib.request import Request, urlopen
+from urllib.request import HTTPRedirectHandler, Request, build_opener, urlopen
 
 
 class ServiceError(RuntimeError):
     """Non-2xx or unparseable response from the Source Watch service."""
 
+
+
+class _RejectRedirects(HTTPRedirectHandler):
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        raise ServiceError(f"refusing redirect {code} -> {newurl} (bearer token would be forwarded)")
+
+
+def no_redirect_opener():
+    return build_opener(_RejectRedirects()).open
 
 def require_ingest_token() -> str:
     token = os.environ.get("SOURCE_WATCH_INGEST_TOKEN", "").strip()
@@ -29,7 +38,7 @@ class ServiceClient:
             url += "/"
         self.base_url = url
         self.token = token
-        self.opener = opener or urlopen
+        self.opener = opener or no_redirect_opener()
 
     def _open(self, request):
         try:
