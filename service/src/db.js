@@ -59,14 +59,14 @@ export async function writeRendered(env, name, body, contentType) {
   if (text.length === 0) {
     stmts.push(env.DB.prepare("INSERT INTO rendered (name, seq, body) VALUES (?, ?, ?)").bind(name, 0, ""));
   } else {
-    for (let i = 0, seq = 0; i < text.length; i += CHUNK, seq++) {
-      stmts.push(
-        env.DB.prepare("INSERT INTO rendered (name, seq, body) VALUES (?, ?, ?)").bind(
-          name,
-          seq,
-          text.slice(i, i + CHUNK),
-        ),
-      );
+    for (let i = 0, seq = 0; i < text.length; seq++) {
+      let end = Math.min(i + CHUNK, text.length);
+      if (end < text.length) {
+        const code = text.charCodeAt(end - 1);
+        if (code >= 0xd800 && code <= 0xdbff) end -= 1; // never split a surrogate pair
+      }
+      stmts.push(env.DB.prepare("INSERT INTO rendered (name, seq, body) VALUES (?, ?, ?)").bind(name, seq, text.slice(i, end)));
+      i = end;
     }
   }
   stmts.push(
@@ -134,7 +134,7 @@ export async function publishLiveRenderTag(env, tag, seq) {
   ).bind(payload).run();
 
   if (!result?.meta?.changes) return false;
-  if (prev && prev !== tag) await setSetting(env, "prev_render_tag", prev);
+  if (prev && prev !== tag) await bestEffort(env, "publish_bookkeeping_failed", () => setSetting(env, "prev_render_tag", prev));
   return true;
 }
 
@@ -213,6 +213,18 @@ export async function audit(env, action, target, detail) {
     target ?? null,
     detail ?? null,
   ).run();
+}
+
+async function bestEffort(env, action, fn) {
+  try {
+    await fn();
+  } catch (err) {
+    try {
+      await audit(env, action, null, String(err && err.message || err).slice(0, 200));
+    } catch {
+      /* ignore */
+    }
+  }
 }
 
 export async function getIngest(env, ingestId) {
@@ -295,18 +307,35 @@ export async function insertRawRows(env, ingestId, kind, rows) {
   const table = RAW_TABLES[kind];
   if (!table) throw new Error(`unknown kind ${kind}`);
   const valid = (rows || []).filter((row) => row && row.id);
+  if (!valid.length) {
+    const results = await env.DB.batch([
+      env.DB.prepare(
+        "UPDATE ingests SET started_at = started_at WHERE ingest_id = ? AND committed_at IS NULL",
+      ).bind(ingestId),
+    ]);
+    return { written: 0, closed: !results?.[0]?.meta?.changes };
+  }
+  const stmts = [];
   for (let i = 0; i < valid.length; i += ROW_BATCH) {
     const slice = valid.slice(i, i + ROW_BATCH);
-    const placeholders = slice.map(() => "(?,?,?)").join(",");
+    const values = slice.map(() => "(?,?,?)").join(",");
     const binds = [];
-    for (const row of slice) {
-      binds.push(ingestId, String(row.id), JSON.stringify(row));
-    }
-    await env.DB.prepare(`INSERT OR REPLACE INTO ${table} (ingest_id, id, json) VALUES ${placeholders}`)
-      .bind(...binds)
-      .run();
+    for (const row of slice) binds.push(ingestId, String(row.id), JSON.stringify(row));
+    stmts.push(
+      env.DB.prepare(
+        `INSERT OR REPLACE INTO ${table} (ingest_id, id, json)
+         SELECT column1, column2, column3 FROM (VALUES ${values})
+         WHERE EXISTS (SELECT 1 FROM ingests WHERE ingest_id = ? AND committed_at IS NULL)`,
+      ).bind(...binds, ingestId),
+    );
   }
-  return valid.length;
+  const results = await env.DB.batch(stmts);
+  let written = 0;
+  for (const res of results || []) {
+    if (!res?.meta?.changes) return { written: 0, closed: true };
+    written += res.meta.changes;
+  }
+  return { written, closed: false };
 }
 
 export async function renderAll(env, attempt = 0) {
@@ -378,7 +407,7 @@ export async function renderAll(env, attempt = 0) {
     await dropRenderedTag(env, tag);
     return counts;
   }
-  await purgeStaleRendered(env, tag);
+  await bestEffort(env, "purge_stale_rendered_failed", () => purgeStaleRendered(env, tag));
   return counts;
 }
 
@@ -392,48 +421,112 @@ export async function renderUntilPublished(env, attempts = 3) {
 }
 
 
-export async function commitIngest(env, ingestId) {
-  const row = await getIngest(env, ingestId);
-  if (!row) return null;
-  const liveId = await getSetting(env, "live_ingest_id");
-  if (row.committed_at) {
-    if (liveId === ingestId) {
-      const counts = await renderUntilPublished(env);
-      return { ingest_id: ingestId, ...counts };
-    }
-    return { error: "already_committed" };
-  }
-  if (liveId && liveId !== ingestId) {
-    const live = await getIngest(env, liveId);
-    const liveStamp = String(live?.generated_at || live?.started_at || "");
-    const mine = String(row.generated_at || row.started_at || "");
-    if (live?.committed_at && liveStamp && mine && liveStamp > mine) {
-      return { error: "stale_ingest" };
-    }
-  }
-  const at = nowIso();
+const LIVE_STAMP = "(SELECT COALESCE(generated_at, started_at) FROM ingests WHERE ingest_id = ";
+const LIVE_ROWID = "(SELECT rowid FROM ingests WHERE ingest_id = ";
 
-  const staleBefore = new Date(Date.now() - 60 * 60 * 1000).toISOString().replace(/\.\d{3}Z$/, "Z");
+function staleUncommittedCleanup(env, staleBefore, ingestId) {
   const staleUncommitted =
     "SELECT ingest_id FROM ingests WHERE committed_at IS NULL AND started_at < ? AND ingest_id != ?";
-  const otherCommitted =
-    "SELECT ingest_id FROM ingests WHERE committed_at IS NOT NULL AND ingest_id != ?";
-  await env.DB.batch([
-    env.DB.prepare("UPDATE ingests SET committed_at = ? WHERE ingest_id = ?").bind(at, ingestId),
-    env.DB.prepare("INSERT OR REPLACE INTO settings (key, value) VALUES ('live_ingest_id', ?)").bind(ingestId),
-    env.DB.prepare("INSERT OR REPLACE INTO settings (key, value) VALUES ('last_ingest_at', ?)").bind(at),
-    env.DB.prepare(`DELETE FROM raw_items WHERE ingest_id IN (${otherCommitted})`).bind(ingestId),
-    env.DB.prepare(`DELETE FROM raw_projects WHERE ingest_id IN (${otherCommitted})`).bind(ingestId),
-    env.DB.prepare(`DELETE FROM raw_sources WHERE ingest_id IN (${otherCommitted})`).bind(ingestId),
+  return [
     env.DB.prepare(`DELETE FROM raw_items WHERE ingest_id IN (${staleUncommitted})`).bind(staleBefore, ingestId),
     env.DB.prepare(`DELETE FROM raw_projects WHERE ingest_id IN (${staleUncommitted})`).bind(staleBefore, ingestId),
     env.DB.prepare(`DELETE FROM raw_sources WHERE ingest_id IN (${staleUncommitted})`).bind(staleBefore, ingestId),
     env.DB.prepare(
       "DELETE FROM ingests WHERE committed_at IS NULL AND started_at < ? AND ingest_id != ?",
     ).bind(staleBefore, ingestId),
-  ]);
-  const counts = await renderUntilPublished(env);
-
-  return { ingest_id: ingestId, ...counts };
+  ];
 }
 
+function previousGenerationCleanup(env, ingestId) {
+  const otherCommitted =
+    "SELECT ingest_id FROM ingests WHERE committed_at IS NOT NULL AND ingest_id != ?";
+  const liveGuard = "(SELECT value FROM settings WHERE key = 'live_ingest_id') = ?";
+  return [
+    env.DB.prepare(`DELETE FROM raw_items WHERE ingest_id IN (${otherCommitted}) AND ${liveGuard}`).bind(ingestId, ingestId),
+    env.DB.prepare(`DELETE FROM raw_projects WHERE ingest_id IN (${otherCommitted}) AND ${liveGuard}`).bind(ingestId, ingestId),
+    env.DB.prepare(`DELETE FROM raw_sources WHERE ingest_id IN (${otherCommitted}) AND ${liveGuard}`).bind(ingestId, ingestId),
+  ];
+}
+
+async function rollbackCommit(env, ingestId, prevLiveId) {
+  const stmts = [
+    env.DB.prepare("UPDATE ingests SET committed_at = NULL WHERE ingest_id = ? AND (SELECT value FROM settings WHERE key = 'live_ingest_id') = ?").bind(ingestId, ingestId),
+    prevLiveId
+      ? env.DB.prepare("UPDATE settings SET value = ? WHERE key = 'live_ingest_id' AND value = ?").bind(prevLiveId, ingestId)
+      : env.DB.prepare("DELETE FROM settings WHERE key = 'live_ingest_id' AND value = ?").bind(ingestId),
+  ];
+  await env.DB.batch(stmts);
+}
+
+export async function commitIngest(env, ingestId) {
+  const row = await getIngest(env, ingestId);
+  if (!row) return null;
+  const liveNow = await getSetting(env, "live_ingest_id");
+  if (row.committed_at) {
+    if (liveNow === ingestId) {
+      const counts = await renderUntilPublished(env);
+      return { ingest_id: ingestId, ...counts };
+    }
+    return { error: "already_committed" };
+  }
+  const at = nowIso();
+  const staleBefore = new Date(Date.now() - 60 * 60 * 1000).toISOString().replace(/\.\d{3}Z$/, "Z");
+  const results = await env.DB.batch([
+    // Same transaction as the pointer CAS so rollback restores whoever we actually displaced.
+    env.DB.prepare("SELECT value FROM settings WHERE key = 'live_ingest_id'"),
+    env.DB.prepare(
+      `INSERT INTO settings (key, value) VALUES ('live_ingest_id', ?)
+       ON CONFLICT(key) DO UPDATE SET value = excluded.value
+       WHERE COALESCE(${LIVE_STAMP}settings.value), '')
+           < COALESCE(${LIVE_STAMP}excluded.value), '')
+          OR (
+            COALESCE(${LIVE_STAMP}settings.value), '')
+              = COALESCE(${LIVE_STAMP}excluded.value), '')
+            AND ${LIVE_ROWID}settings.value)
+              <= ${LIVE_ROWID}excluded.value)
+          )`,
+    ).bind(ingestId),
+    env.DB.prepare(
+      `UPDATE ingests SET committed_at = ?
+       WHERE ingest_id = ? AND committed_at IS NULL
+         AND (SELECT value FROM settings WHERE key = 'live_ingest_id') = ?`,
+    ).bind(at, ingestId, ingestId),
+  ]);
+  if (!results[2]?.meta?.changes) {
+    const liveId = await getSetting(env, "live_ingest_id");
+    const latest = await getIngest(env, ingestId);
+    if (latest?.committed_at && liveId === ingestId) {
+      const counts = await renderUntilPublished(env);
+      return { ingest_id: ingestId, ...counts };
+    }
+    return { error: "stale_ingest" };
+  }
+  const displacedLiveId = results[0]?.results?.[0]?.value || null;
+  // stale *uncommitted* ingests only: the previous live generation stays until publication succeeds.
+  await bestEffort(env, "stale_uncommitted_cleanup_failed", () =>
+    env.DB.batch(staleUncommittedCleanup(env, staleBefore, ingestId)),
+  );
+
+  let counts;
+  try {
+    counts = await renderUntilPublished(env);
+  } catch (err) {
+    await bestEffort(env, "commit_rollback_failed", () => rollbackCommit(env, ingestId, displacedLiveId));
+    throw err;
+  }
+  if (counts.published === false) {
+    await bestEffort(env, "commit_rollback_failed", () => rollbackCommit(env, ingestId, displacedLiveId));
+    return { ingest_id: ingestId, ...counts };
+  }
+  await bestEffort(env, "last_ingest_at_failed", () =>
+    env.DB.prepare(
+      `INSERT INTO settings (key, value)
+       SELECT 'last_ingest_at', ?
+       WHERE (SELECT value FROM settings WHERE key = 'live_ingest_id') = ?
+       ON CONFLICT(key) DO UPDATE SET value = excluded.value
+       WHERE (SELECT value FROM settings WHERE key = 'live_ingest_id') = ?`,
+    ).bind(at, ingestId, ingestId).run(),
+  );
+  await bestEffort(env, "commit_cleanup_failed", () => env.DB.batch(previousGenerationCleanup(env, ingestId)));
+  return { ingest_id: ingestId, ...counts };
+}
