@@ -7,6 +7,8 @@ import json
 import sys
 import tempfile
 import unittest
+from io import BytesIO
+from urllib.error import HTTPError
 from pathlib import Path
 from types import ModuleType
 
@@ -327,6 +329,150 @@ class ServiceMainGateTests(unittest.TestCase):
             client_cls.assert_not_called()
         finally:
             sys.argv = old_argv
+
+
+def _http_error(url: str, code: int, msg: str) -> HTTPError:
+    err = HTTPError(url, code, msg, hdrs=None, fp=BytesIO())
+    err.close()
+    return err
+
+class SeedGitHubSoftFailTests(unittest.TestCase):
+    def tearDown(self) -> None:
+        build_seed_feed.COLLECTOR_FAILURES.clear()
+
+    def test_github_get_json_404_does_not_note_collector_failure(self) -> None:
+        err = _http_error("https://api.github.com/repos/missing/gone", 404, "Not Found")
+        with mock.patch.object(build_seed_feed, "urlopen", side_effect=err):
+            payload = build_seed_feed.github_get_json("/repos/missing/gone")
+        self.assertIsNone(payload)
+        self.assertEqual(build_seed_feed.COLLECTOR_FAILURES, [])
+
+    def test_github_get_json_timeout_does_not_note_collector_failure(self) -> None:
+        with mock.patch.object(build_seed_feed, "urlopen", side_effect=TimeoutError("timed out")):
+            payload = build_seed_feed.github_get_json("/repos/acme/keep")
+        self.assertIsNone(payload)
+        self.assertEqual(build_seed_feed.COLLECTOR_FAILURES, [])
+
+    def test_github_repo_search_failure_notes_collector_failure(self) -> None:
+        err = _http_error("https://api.github.com/search/repositories", 502, "Bad Gateway")
+        with mock.patch.object(build_seed_feed, "urlopen", side_effect=err):
+            self.assertEqual(build_seed_feed.search_github_repositories("atlas"), [])
+        self.assertEqual(len(build_seed_feed.COLLECTOR_FAILURES), 1)
+        self.assertIn("GitHub repository search failed", build_seed_feed.COLLECTOR_FAILURES[0])
+
+    def test_github_pr_search_failure_notes_collector_failure(self) -> None:
+        err = _http_error("https://api.github.com/search/issues", 502, "Bad Gateway")
+        with mock.patch.object(build_seed_feed, "urlopen", side_effect=err):
+            self.assertEqual(build_seed_feed.search_github_pull_requests("atlas is:pr"), [])
+        self.assertEqual(len(build_seed_feed.COLLECTOR_FAILURES), 1)
+        self.assertIn("GitHub pull request search failed", build_seed_feed.COLLECTOR_FAILURES[0])
+
+    def test_delving_get_json_failure_notes_collector_failure(self) -> None:
+        err = _http_error("https://delvingbitcoin.org/search.json", 502, "Bad Gateway")
+        with mock.patch.object(build_seed_feed, "urlopen", side_effect=err):
+            self.assertIsNone(build_seed_feed.delving_get_json("https://delvingbitcoin.org/search.json"))
+        self.assertEqual(len(build_seed_feed.COLLECTOR_FAILURES), 1)
+        self.assertIn("Delving GET", build_seed_feed.COLLECTOR_FAILURES[0])
+
+    def test_seed_github_404_does_not_abort_service_ingest(self) -> None:
+        watch = build_seed_feed.normalize_watch({
+            "name": "Example Watch",
+            "serving": {"mode": "service", "service_url": "http://localhost:8787/"},
+        })
+        cfg = {
+            "seeded_sources": {
+                "github_repositories": [{
+                    "id": "gone-repo",
+                    "repo": "missing/gone",
+                    "discovered_at": "2025-08-26T17:54:03Z",
+                    "activity_at": "2026-05-29T18:55:54Z",
+                }]
+            },
+            "live_collectors": {
+                "github_repository_searches": [{"id": "repo-discovery", "query": "atlas"}],
+            },
+        }
+        client = mock.Mock()
+        client.collector_config.return_value = {}
+        client.collector_state.return_value = ({}, {}, {})
+        client.ingest.return_value = {"ingest_id": "ing_1"}
+        err = _http_error("https://api.github.com/repos/missing/gone", 404, "Not Found")
+        old_argv = sys.argv
+        with tempfile.TemporaryDirectory() as tmp:
+            out = Path(tmp)
+            _empty_artifacts(out)
+            old_out = build_seed_feed.OUT
+            build_seed_feed.OUT = out
+            try:
+                sys.argv = ["build_seed_feed.py"]
+                with mock.patch.object(build_seed_feed, "load_watch", return_value=watch), \
+                        mock.patch.object(build_seed_feed, "parse_yaml", return_value=cfg), \
+                        mock.patch.object(build_seed_feed, "require_ingest_token", return_value="tok"), \
+                        mock.patch.object(build_seed_feed, "ServiceClient", return_value=client), \
+                        mock.patch.object(build_seed_feed, "skip_live_collectors", return_value=False), \
+                        mock.patch.object(build_seed_feed, "urlopen", side_effect=err), \
+                        mock.patch.object(build_seed_feed, "search_github_repositories", return_value=[]), \
+                        mock.patch.object(build_seed_feed, "search_github_pull_requests", return_value=[]), \
+                        mock.patch.object(build_seed_feed, "search_delving_topics", return_value=[]), \
+                        mock.patch.object(build_seed_feed, "list_delving_category", return_value=[]):
+                    rc = build_seed_feed.main()
+            finally:
+                build_seed_feed.OUT = old_out
+                sys.argv = old_argv
+        self.assertEqual(rc, 0)
+        client.ingest.assert_called_once()
+        payload = client.ingest.call_args.args[0]
+        self.assertEqual(payload["items"][0]["id"], "seed:gone-repo")
+        self.assertEqual(payload["items"][0]["discovered_at"], "2025-08-26T17:54:03Z")
+        self.assertEqual(payload["items"][0]["activity_at"], "2026-05-29T18:55:54Z")
+
+    def test_live_search_failure_aborts_service_ingest(self) -> None:
+        watch = build_seed_feed.normalize_watch({
+            "name": "Example Watch",
+            "serving": {"mode": "service", "service_url": "http://localhost:8787/"},
+        })
+        cfg = {
+            "seeded_sources": {},
+            "live_collectors": {
+                "github_repository_searches": [{"id": "repo-discovery", "query": "atlas"}],
+            },
+        }
+        client = mock.Mock()
+        client.collector_config.return_value = {}
+        client.collector_state.return_value = ({}, {}, {})
+
+        def fail_search(query, max_results=10):
+            build_seed_feed.note_collector_failure(
+                f"GitHub repository search failed for query {query!r}: boom"
+            )
+            return []
+
+        old_argv = sys.argv
+        with tempfile.TemporaryDirectory() as tmp:
+            out = Path(tmp)
+            _empty_artifacts(out)
+            old_out = build_seed_feed.OUT
+            build_seed_feed.OUT = out
+            try:
+                sys.argv = ["build_seed_feed.py"]
+                with mock.patch.object(build_seed_feed, "load_watch", return_value=watch), \
+                        mock.patch.object(build_seed_feed, "parse_yaml", return_value=cfg), \
+                        mock.patch.object(build_seed_feed, "require_ingest_token", return_value="tok"), \
+                        mock.patch.object(build_seed_feed, "ServiceClient", return_value=client), \
+                        mock.patch.object(build_seed_feed, "skip_live_collectors", return_value=False), \
+                        mock.patch.object(build_seed_feed, "github_get_json", return_value=None), \
+                        mock.patch.object(build_seed_feed, "search_github_repositories", side_effect=fail_search), \
+                        mock.patch.object(build_seed_feed, "search_github_pull_requests", return_value=[]), \
+                        mock.patch.object(build_seed_feed, "search_delving_topics", return_value=[]), \
+                        mock.patch.object(build_seed_feed, "list_delving_category", return_value=[]):
+                    with self.assertRaises(SystemExit) as raised:
+                        build_seed_feed.main()
+            finally:
+                build_seed_feed.OUT = old_out
+                sys.argv = old_argv
+        self.assertIn("live collector HTTP failed", str(raised.exception))
+        self.assertIn("GitHub repository search failed", str(raised.exception))
+        client.ingest.assert_not_called()
 
 
 if __name__ == "__main__":

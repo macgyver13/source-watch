@@ -429,12 +429,17 @@ def search_github_pull_requests(query: str, max_results: int = 10) -> list[dict]
 
 
 def github_get_json(path: str) -> dict | None:
+    """Soft GET for seed enrichment. Failures return None without aborting ingest.
+
+    Live search and Delving helpers call note_collector_failure themselves.
+    """
     request = Request(f"{GITHUB_API}{path}", headers=github_headers())
     try:
         with urlopen(request, timeout=30) as response:
             payload = json.loads(response.read().decode("utf-8"))
     except Exception as exc:
-        note_collector_failure(f"GitHub GET {path} failed: {exc}")
+        # Seed enrichment only: keep build_seeded_item fallback; do not fill COLLECTOR_FAILURES.
+        print(f"warning: GitHub GET {path} failed (seed enrichment soft-fail): {exc}", file=sys.stderr)
         return None
     return payload if isinstance(payload, dict) else None
 
