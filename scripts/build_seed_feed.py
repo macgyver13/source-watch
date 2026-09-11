@@ -13,6 +13,8 @@ config/source-seeds.yaml.
 from __future__ import annotations
 
 import argparse
+import copy
+
 import json
 import os
 import re
@@ -20,8 +22,15 @@ import sys
 from datetime import datetime, timezone
 from email.utils import format_datetime, parsedate_to_datetime
 from pathlib import Path
-from urllib.parse import urlencode
+from urllib.parse import urlencode, urlparse
+
 from urllib.request import Request, urlopen
+
+_SCRIPTS = Path(__file__).resolve().parent
+if str(_SCRIPTS) not in sys.path:
+    sys.path.insert(0, str(_SCRIPTS))
+from service_client import ServiceClient, require_ingest_token
+
 
 ROOT = Path(__file__).resolve().parents[1]
 WATCH_CONFIG = ROOT / "config" / "watch.yaml"
@@ -52,7 +61,22 @@ EMPTY_WATCH = {
     "relevance": {"always_match": [], "required_any": [], "context_any": []},
     "topics": [],
     "discovered_after": "",
+    "serving": {"mode": "static", "service_url": ""},
 }
+
+
+def normalize_serving(raw) -> dict:
+    cfg = raw if isinstance(raw, dict) else {}
+    mode = str(cfg.get("mode") or "static").strip().lower()
+    if mode not in ("static", "service"):
+        raise SystemExit(f"serving.mode must be 'static' or 'service', got {mode!r}")
+    url = str(cfg.get("service_url") or "").strip()
+    if url and not url.endswith("/"):
+        url += "/"
+    if mode == "service" and not url:
+        raise SystemExit("serving.mode: service requires serving.service_url")
+    return {"mode": mode, "service_url": url}
+
 
 
 def utc_now_iso() -> str:
@@ -105,6 +129,7 @@ def normalize_watch(data: dict | None) -> dict:
         "relevance": normalize_relevance(data.get("relevance")),
         "topics": list(data.get("topics") or []),
         "discovered_after": optional_iso(data.get("discovered_after")) or "",
+        "serving": normalize_serving(data.get("serving")),
     }
     if not watch["base_url"].endswith("/"):
         watch["base_url"] += "/"
@@ -120,10 +145,117 @@ def watch_from_cfg(cfg: dict) -> dict:
         payload["base_url"] = cfg["base_url"]
     if cfg.get("description") or cfg.get("scope_note"):
         payload["description"] = cfg.get("description") or cfg.get("scope_note")
-    for key in ("default_tag", "preferred_chips", "hidden_tags", "relevance", "topics", "discovered_after"):
+    for key in ("default_tag", "preferred_chips", "hidden_tags", "relevance", "topics", "discovered_after", "serving"):
         if key in cfg:
             payload[key] = cfg[key]
     return normalize_watch(payload)
+
+
+def apply_service_config(watch: dict, remote: dict) -> dict:
+    """Merge collector include terms and discovered_after from the service."""
+    out = copy.deepcopy(watch)
+    relevance = out.setdefault("relevance", {})
+    buckets = ("always_match", "required_any", "context_any")
+    for term_entry in remote.get("include_terms") or []:
+        if not isinstance(term_entry, dict):
+            continue
+        bucket = str(term_entry.get("bucket") or "").strip()
+        term = str(term_entry.get("term") or "").strip()
+        if bucket not in buckets or not term:
+            continue
+        existing = relevance.setdefault(bucket, [])
+        if any(str(t).lower() == term.lower() for t in existing):
+            continue
+        existing.append(term)
+    settings = remote.get("settings") if isinstance(remote.get("settings"), dict) else {}
+    if "discovered_after" in settings:
+        raw = settings.get("discovered_after")
+        if raw is None:
+            pass
+        elif not str(raw).strip():
+            out["discovered_after"] = ""
+        else:
+            discovered = optional_iso(raw)
+            if discovered:
+                out["discovered_after"] = discovered
+
+    return out
+
+
+def seed_entry_keys(kind: str, entry: dict) -> set[tuple[str, str]]:
+    keys: set[tuple[str, str]] = set()
+    eid = str(entry.get("id") or "").strip().lower()
+    if eid:
+        keys.add(("id", eid))
+    url = str(entry.get("url") or "").strip().rstrip("/").lower()
+    if url:
+        keys.add(("url", url))
+    repo = str(entry.get("repo") or "").strip().lower()
+    if repo:
+        keys.add(("repo", repo))
+        keys.add(("url", f"https://github.com/{repo}"))
+    name = str(entry.get("name") or "").strip().lower()
+    if kind == "crates" and name:
+        keys.add(("name", name))
+        keys.add(("url", f"https://crates.io/crates/{name}"))
+    return keys
+
+
+def merge_seed_additions(cfg: dict, additions: list[dict]) -> dict:
+    """Append service seed additions unless id, url, repo, or crate name already exists.
+
+    IDs are unique across every seeded_sources bucket. Locators stay kind-specific.
+    """
+    out = copy.deepcopy(cfg)
+    seeded = out.setdefault("seeded_sources", {})
+    if not isinstance(seeded, dict):
+        seeded = {}
+        out["seeded_sources"] = seeded
+
+    def existing_ids() -> set[str]:
+        ids: set[str] = set()
+        for other in seeded.values():
+            if not isinstance(other, list):
+                continue
+            for existing in other:
+                if not isinstance(existing, dict):
+                    continue
+                eid = str(existing.get("id") or "").strip().lower()
+                if eid:
+                    ids.add(eid)
+        return ids
+
+    known_ids = existing_ids()
+    for addition in additions or []:
+        if not isinstance(addition, dict):
+            continue
+        kind = str(addition.get("kind") or "").strip()
+        entry = addition.get("entry")
+        if not kind or not isinstance(entry, dict):
+            continue
+        incoming_id = str(entry.get("id") or "").strip().lower()
+        if incoming_id and incoming_id in known_ids:
+            continue
+        bucket = seeded.setdefault(kind, [])
+        if not isinstance(bucket, list):
+            continue
+
+        incoming = seed_entry_keys(kind, entry)
+        exists = False
+        for existing in bucket:
+            if not isinstance(existing, dict):
+                continue
+            if incoming & seed_entry_keys(kind, existing):
+                exists = True
+                break
+        if not exists:
+            bucket.append(entry)
+            if incoming_id:
+                known_ids.add(incoming_id)
+    return out
+
+
+
 
 
 def load_watch(path: Path | None = None) -> dict:
@@ -222,6 +354,14 @@ def github_headers() -> dict[str, str]:
     return headers
 
 
+COLLECTOR_FAILURES: list[str] = []
+
+
+def note_collector_failure(msg: str) -> None:
+    COLLECTOR_FAILURES.append(msg)
+    print(f"warning: {msg}", file=sys.stderr)
+
+
 def search_github_repositories(query: str, max_results: int = 10) -> list[dict]:
     params = urlencode({"q": query, "per_page": max(1, min(int(max_results), 25)), "sort": "updated", "order": "desc"})
     request = Request(f"{GITHUB_SEARCH_API}?{params}", headers=github_headers())
@@ -229,7 +369,7 @@ def search_github_repositories(query: str, max_results: int = 10) -> list[dict]:
         with urlopen(request, timeout=30) as response:
             payload = json.loads(response.read().decode("utf-8"))
     except Exception as exc:
-        print(f"warning: GitHub repository search failed for query {query!r}: {exc}", file=sys.stderr)
+        note_collector_failure(f"GitHub repository search failed for query {query!r}: {exc}")
         return []
     return payload.get("items", [])
 
@@ -278,8 +418,9 @@ def search_github_pull_requests(query: str, max_results: int = 10) -> list[dict]
         with urlopen(request, timeout=30) as response:
             payload = json.loads(response.read().decode("utf-8"))
     except Exception as exc:
-        print(f"warning: GitHub pull request search failed for query {query!r}: {exc}", file=sys.stderr)
+        note_collector_failure(f"GitHub pull request search failed for query {query!r}: {exc}")
         return []
+
     items = payload.get("items", []) if isinstance(payload, dict) else []
     return [hit for hit in items if isinstance(hit, dict) and github_pr_url(hit)]
 
@@ -293,9 +434,10 @@ def github_get_json(path: str) -> dict | None:
         with urlopen(request, timeout=30) as response:
             payload = json.loads(response.read().decode("utf-8"))
     except Exception as exc:
-        print(f"warning: GitHub GET {path} failed: {exc}", file=sys.stderr)
+        note_collector_failure(f"GitHub GET {path} failed: {exc}")
         return None
     return payload if isinstance(payload, dict) else None
+
 
 def delving_headers() -> dict[str, str]:
     return {
@@ -310,9 +452,10 @@ def delving_get_json(url: str) -> dict | None:
         with urlopen(request, timeout=30) as response:
             payload = json.loads(response.read().decode("utf-8"))
     except Exception as exc:
-        print(f"warning: Delving GET {url} failed: {exc}", file=sys.stderr)
+        note_collector_failure(f"Delving GET {url} failed: {exc}")
         return None
     return payload if isinstance(payload, dict) else None
+
 
 
 def discourse_tag_names(tags) -> list[str]:
@@ -358,7 +501,9 @@ def topic_matches_relevance_rules(topic: dict, watch: dict | None = None) -> boo
 def search_delving_topics(query: str, max_results: int = 10) -> list[dict]:
     limit = max(1, min(int(max_results), 25))
     params = urlencode({"q": query})
-    payload = delving_get_json(f"{DELVING_ORIGIN}/search.json?{params}") or {}
+    payload = delving_get_json(f"{DELVING_ORIGIN}/search.json?{params}")
+    if not isinstance(payload, dict):
+        return []
     topics = list(payload.get("topics") or [])
     blurbs: dict[object, str] = {}
     for post in payload.get("posts") or []:
@@ -390,7 +535,9 @@ def list_delving_category(category: str, max_results: int = 30) -> list[dict]:
     if not path:
         return []
     limit = max(1, min(int(max_results), 30))
-    payload = delving_get_json(f"{DELVING_ORIGIN}/c/{path}/l/latest.json") or {}
+    payload = delving_get_json(f"{DELVING_ORIGIN}/c/{path}/l/latest.json")
+    if not isinstance(payload, dict):
+        return []
     topics = (payload.get("topic_list") or {}).get("topics") or []
     return list(topics)[:limit]
 
@@ -431,6 +578,14 @@ def live_seed_github(entry: dict, kind: str, github_json_fetcher) -> tuple[str |
     if kind == "github_repositories":
         repo = str(entry.get("repo") or "").strip()
         if not repo:
+            parsed = urlparse(str(entry.get("url") or ""))
+            host = (parsed.hostname or "").lower()
+            if host in ("github.com", "www.github.com"):
+                parts = [p for p in (parsed.path or "").split("/") if p]
+                if len(parts) == 2:
+                    repo = parts[0] + "/" + parts[1].removesuffix(".git")
+
+        if not repo:
             return None, None
         payload = github_json_fetcher(f"/repos/{repo}") or {}
         created = optional_iso(payload.get("created_at"))
@@ -438,6 +593,7 @@ def live_seed_github(entry: dict, kind: str, github_json_fetcher) -> tuple[str |
             payload.get("pushed_at") or payload.get("updated_at")
         )
         return created, activity
+
     if kind == "github_pull_requests":
         match = PR_URL_RE.match(str(entry.get("url") or ""))
         if not match:
@@ -480,6 +636,66 @@ def mentions_source_watch(*parts: object) -> bool:
     """True when any part contains the engine repo name (origin or a fork)."""
     token = SOURCE_WATCH_TOKEN
     return any(token in str(part or "").lower() for part in parts)
+
+
+def url_prefix_matches(link: str, value: str) -> bool:
+    prefix = str(value or "").rstrip("/").lower()
+    href = str(link or "").lower()
+    if not prefix:
+        return False
+    if href == prefix:
+        return True
+    return href.startswith(prefix + "/") or href.startswith(prefix + "?") or href.startswith(prefix + "#")
+
+
+def repo_rule_matches(link: str, value: str) -> bool:
+
+    raw = str(link or "").strip()
+    if not raw:
+        return False
+    parsed = urlparse(raw if "://" in raw else f"https://{raw}")
+    host = (parsed.hostname or "").lower()
+    if host not in ("github.com", "www.github.com"):
+        return False
+    path = (parsed.path or "").lstrip("/").lower()
+    needle = str(value or "").strip().lower()
+    if not needle:
+        return False
+    return path == needle or path.startswith(f"{needle}/")
+
+
+
+def excluded_by_service(
+    exclusions,
+    *,
+    haystack: str,
+    url: str,
+    project: str,
+    source_type: str,
+) -> bool:
+    """Admin exclusion list from the service. Applied to live-collector hits only."""
+    text = str(haystack or "").lower()
+    link = str(url or "").lower()
+    proj = str(project or "").lower()
+    stype = str(source_type or "").lower()
+    for rule in exclusions or []:
+        kind = str(rule.get("kind") or "").strip().lower()
+        value = str(rule.get("value") or "").strip().lower()
+        if not value:
+            continue
+        if kind == "term" and value in text:
+            return True
+        if kind == "url_prefix" and url_prefix_matches(link, value):
+            return True
+        if kind == "repo" and repo_rule_matches(link, value):
+            return True
+        if kind == "project" and (proj == value or slugify(proj) == slugify(value)):
+            return True
+        if kind == "source_type" and stype == value:
+            return True
+    return False
+
+
 
 
 def repo_is_source_watch(repo: dict) -> bool:
@@ -970,6 +1186,20 @@ def load_existing_artifacts() -> tuple[dict[str, dict], dict[str, dict], dict[st
     return existing_items, existing_projects, existing_sources
 
 
+def existing_state_loader(remote_state, local_loader=None):
+    """Use live service rows, or local artifacts when D1 has never been ingested."""
+    load_local = local_loader or load_existing_artifacts
+
+    def load():
+        items, projects, sources = remote_state()
+        if items or projects or sources:
+            return items, projects, sources
+        return load_local()
+
+    return load
+
+
+
 def discovery_time(old: dict, observed_at: str) -> str:
     """Return the stable first-seen timestamp for a previously known record."""
     return (
@@ -1012,6 +1242,9 @@ def build_items(
     delving_search_fetcher=None,
     delving_category_fetcher=None,
     github_pr_fetcher=None,
+    *,
+    exclusions: list[dict] | None = None,
+    existing_loader=None,
 ) -> tuple[list[dict], dict, dict]:
     if watch is None:
         resolved = watch_from_cfg(cfg)
@@ -1020,7 +1253,11 @@ def build_items(
     if skip_searches is None:
         skip_searches = skip_live_collectors()
     observed_at = utc_now_iso()
-    existing_items, existing_projects, existing_sources = load_existing_artifacts()
+    if existing_loader is not None:
+        existing_items, existing_projects, existing_sources = existing_loader()
+    else:
+        existing_items, existing_projects, existing_sources = load_existing_artifacts()
+
     sources: dict[str, dict] = {}
     projects: dict[str, dict] = {}
     items: list[dict] = []
@@ -1065,6 +1302,15 @@ def build_items(
                 continue
             if repo_is_source_watch(repo):
                 continue
+            if excluded_by_service(
+                exclusions,
+                haystack=f"{repo.get('full_name','')} {repo.get('description','')} {' '.join(repo.get('topics') or [])}",
+                url=repo["html_url"],
+                project=collector.get("project") or repo["full_name"],
+                source_type="github_repository",
+            ):
+                continue
+
             if not repo_matches_relevance_rules(repo, resolved):
                 continue
             if discovery_too_old(repo.get("created_at"), resolved):
@@ -1112,13 +1358,22 @@ def build_items(
                 continue
             if pr_is_source_watch(hit):
                 continue
+            match = PR_URL_RE.match(url)
+            repo_full = f"{match.group(1)}/{match.group(2)}" if match else ""
+            project_name = collector.get("project") or repo_projects.get(repo_full.lower()) or repo_full
+            if excluded_by_service(
+                exclusions,
+                haystack=pr_haystack(hit),
+                url=url,
+                project=project_name,
+                source_type="github_pull_request",
+            ):
+                continue
             if not pr_matches_relevance_rules(hit, resolved):
                 continue
             if discovery_too_old(hit.get("created_at"), resolved):
                 continue
-            match = PR_URL_RE.match(url)
-            repo_full = f"{match.group(1)}/{match.group(2)}" if match else ""
-            project_name = collector.get("project") or repo_projects.get(repo_full.lower()) or repo_full
+
             seen_prs.add(pr_key)
             item, source, project = build_github_pr_item(
                 collector,
@@ -1158,6 +1413,15 @@ def build_items(
             return
         if topic_is_source_watch(topic):
             return
+        if excluded_by_service(
+            exclusions,
+            haystack=haystack,
+            url=url,
+            project=collector.get("project") or topic["title"],
+            source_type="delving_topic",
+        ):
+            return
+
         if not topic_matches_relevance_rules(topic, resolved):
             return
         if discovery_too_old(topic.get("created_at"), resolved):
@@ -1285,15 +1549,41 @@ def main() -> int:
         action="store_true",
         help="Skip live HTTP (GitHub repo/PR searches, timestamps, and Delving collectors).",
     )
+    parser.add_argument(
+        "--allow-partial-ingest",
+        action="store_true",
+        help="allow a service-mode ingest that skipped live collectors",
+    )
     args = parser.parse_args()
+    COLLECTOR_FAILURES.clear()
     seed_only = args.seed_only or skip_live_collectors()
+
     watch = load_watch()
     cfg = parse_yaml(CONFIG)
+    serving = watch["serving"]
+    service = None
+    exclusions = None
+    existing_loader = None
+    if serving["mode"] == "service":
+        if seed_only and not args.allow_partial_ingest:
+            raise SystemExit(
+                "--seed-only in service mode would publish a feed without live candidates; "
+                "pass --allow-partial-ingest to confirm"
+            )
+        service = ServiceClient(serving["service_url"], require_ingest_token())
+        remote = service.collector_config()
+        exclusions = remote.get("exclusions") or []
+        watch = apply_service_config(watch, remote)
+        cfg = merge_seed_additions(cfg, remote.get("seed_additions") or [])
+        existing_loader = existing_state_loader(service.collector_state)
+
     items, projects, sources = build_items(
         cfg,
         watch=watch,
         github_json_fetcher=None if seed_only else github_get_json,
         skip_searches=seed_only,
+        exclusions=exclusions,
+        existing_loader=existing_loader,
     )
     items = sorted(items, key=lambda x: x.get("discovered_at", ""), reverse=True)
     description = watch.get("description") or cfg.get("scope_note") or "Public-source activity feed."
@@ -1307,6 +1597,30 @@ def main() -> int:
     projects_list = sorted(projects.values(), key=lambda x: x.get("latest_discovered_at") or x.get("discovered_at", ""), reverse=True)
     sources_list = sorted(sources.values(), key=lambda x: x["name"].lower())
     client_watch = watch_client_payload(watch)
+    mode = "seed-only" if seed_only else "live collector refresh"
+    if service is not None:
+        if COLLECTOR_FAILURES:
+            raise SystemExit(
+                "live collector HTTP failed; refusing to ingest a partial feed:\n"
+                + "\n".join(COLLECTOR_FAILURES)
+            )
+        ingest_watch = dict(client_watch)
+        ingest_watch["base_url"] = watch.get("base_url") or ""
+
+
+        result = service.ingest({
+            "generated_at": feed["generated_at"],
+            "watch": ingest_watch,
+            "feed_title": feed["title"],
+            "feed_description": feed["description"],
+            "items": items,
+            "projects": projects_list,
+            "sources": sources_list,
+        })
+
+        print(f"ingested {len(items)} items into {serving['service_url']} "
+              f"(ingest {result['ingest_id']}, {mode})")
+        return 0
     for base in (OUT, STATIC):
         write_json(base / "feed.json", feed)
         write_json(base / "projects.json", {"schema_version": "source-watch.projects.v0", "projects": projects_list})
@@ -1314,9 +1628,9 @@ def main() -> int:
         (base / "items.jsonl").write_text("".join(json.dumps(i, sort_keys=True) + "\n" for i in items))
         write_rss(base / "feed.xml", items, watch)
         write_json(base / "watch.json", client_watch)
-    mode = "seed-only" if seed_only else "live collector refresh"
     print(f"wrote {len(items)} feed items, {len(projects_list)} projects, {len(sources_list)} sources ({mode})")
     return 0
+
 
 
 

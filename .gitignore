@@ -6,3 +6,6 @@ __pycache__/
 *.pyc
 .env
 .wrangler/
+node_modules/
+.dev.vars
+

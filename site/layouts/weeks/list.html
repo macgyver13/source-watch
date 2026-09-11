@@ -19,8 +19,10 @@
 {{- $weekSlug := strings.TrimSuffix "/" (path.Base .RelPermalink) -}}
 <div class="wrap">
   <div class="hero week-hero">
-    {{ partial "crumb.html" (dict "section" "Weeks" "extra" $weekSlug) }}
-    <h1>{{ $title }}</h1>
+    <div class="crumb" id="week-crumb">{{ site.Title }} / Weeks{{ with $weekSlug }}{{ if ne . "live" }} / {{ . }}{{ end }}{{ end }}</div>
+
+    <h1 id="week-title">{{ $title }}</h1>
+
     <div class="week-range" id="week-range"></div>
     <p class="lede" id="week-lede"></p>
   </div>
@@ -30,12 +32,15 @@
       {{- with site.GetPage "/weeks" -}}
         {{- range (sort .Sections "RelPermalink" "desc") -}}
           {{- $wk := strings.TrimSuffix "/" (path.Base .RelPermalink) -}}
+          {{- if ne $wk "live" -}}
           {{- $num := replaceRE `(?i)^\d{4}-w0?` "" $wk -}}
       <a href="{{ .RelPermalink }}" data-week="{{ $wk }}"{{ if eq .RelPermalink $cur }} class="on"{{ end }}>
         <span class="wk">W{{ $num }} <span class="n"></span></span>
         <span class="sub"></span>
       </a>
+          {{- end -}}
         {{- end -}}
+
       {{- end -}}
     </nav>
     <div id="week-groups">

@@ -1,0 +1,12 @@
+{
+  "name": "source-watch",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test service/test/overlay.test.mjs",
+    "dev": "wrangler dev --test-scheduled"
+  },
+  "devDependencies": {
+    "wrangler": "^4.45.0"
+  }
+}

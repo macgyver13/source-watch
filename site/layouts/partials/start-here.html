@@ -5,6 +5,8 @@
     {{- $latestWeek = .RelPermalink -}}
   {{- end -}}
 {{- end -}}
+{{- if eq site.Params.serving_mode "service" }}{{ $latestWeek = "/weeks/" }}{{ end -}}
+
 <section class="start" aria-label="Start here">
   <div class="start-label">Start here</div>
   <div class="start-grid">

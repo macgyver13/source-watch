@@ -1,0 +1,342 @@
+import assert from "node:assert/strict";
+import test from "node:test";
+import {
+  applyOverlay,
+  githubRepoFromUrl,
+  isoWeekSlug,
+  renderJsonl,
+  renderRss,
+  seedLocatorTaken,
+  weekIndex,
+} from "../src/overlay.js";
+
+
+const projectA = {
+  id: "alpha",
+  name: "Alpha",
+  sources: ["a"],
+  discovered_at: "2025-12-01T00:00:00Z",
+  activity_at: "2025-12-02T00:00:00Z",
+  latest_discovered_at: "2025-12-01T00:00:00Z",
+};
+const projectB = {
+  id: "beta",
+  name: "Beta",
+  sources: ["b"],
+  discovered_at: "2025-11-01T00:00:00Z",
+  activity_at: "2025-11-02T00:00:00Z",
+  latest_discovered_at: "2025-11-01T00:00:00Z",
+};
+const itemA = {
+  id: "seed:a",
+  title: "Alpha docs",
+  summary: "Quiet summary",
+  source_url: "https://example.com/a",
+  source_type: "docs_page",
+  project: "Alpha",
+  tags: ["docs"],
+  discovered_at: "2025-12-01T00:00:00Z",
+  event_time: "2025-12-01T00:00:00Z",
+  activity_at: "2025-12-02T00:00:00Z",
+};
+const itemB = {
+  id: "seed:b",
+  title: "Beta docs",
+  summary: "Contains Noise in the middle",
+  source_url: "https://example.com/b",
+  source_type: "docs_page",
+  project: "Beta",
+  tags: ["docs"],
+  discovered_at: "2025-11-01T00:00:00Z",
+  event_time: "2025-11-01T00:00:00Z",
+  activity_at: "2025-11-02T00:00:00Z",
+};
+const sourceA = { id: "a", name: "Alpha docs", url: "https://example.com/a", source_type: "docs_page", project: "Alpha" };
+const sourceB = { id: "b", name: "Beta docs", url: "https://example.com/b", source_type: "docs_page", project: "Beta" };
+
+test("hiding seed:a drops item, source, and sole project", () => {
+  const out = applyOverlay({
+    items: [itemA, itemB],
+    projects: [projectA, projectB],
+    sources: [sourceA, sourceB],
+    overrides: { item: { "seed:a": { hidden: true } } },
+    exclusions: [],
+  });
+  assert.deepEqual(out.items.map((i) => i.id), ["seed:b"]);
+  assert.deepEqual(out.sources.map((s) => s.id), ["b"]);
+  assert.deepEqual(out.projects.map((p) => p.id), ["beta"]);
+});
+
+test("term exclusion is case-insensitive on summary", () => {
+  const out = applyOverlay({
+    items: [itemA, itemB],
+    projects: [projectA, projectB],
+    sources: [sourceA, sourceB],
+    overrides: {},
+    exclusions: [{ kind: "term", value: "noise" }],
+  });
+  assert.deepEqual(out.items.map((i) => i.id), ["seed:a"]);
+  assert.equal(out.items[0].summary.includes("Noise"), false);
+});
+
+test("discovered_at patch reorders feed and moves ISO week", () => {
+  const out = applyOverlay({
+    items: [itemA, itemB],
+    projects: [projectA, projectB],
+    sources: [sourceA, sourceB],
+    overrides: { item: { "seed:b": { discovered_at: "2026-01-05T00:00:00Z" } } },
+    exclusions: [],
+  });
+  assert.equal(out.items[0].id, "seed:b");
+  assert.equal(out.items[0].discovered_at, "2026-01-05T00:00:00Z");
+  assert.equal(out.items[0].event_time, "2026-01-05T00:00:00Z");
+  const weeks = weekIndex(out.items);
+  assert.equal(weeks.find((w) => w.slug === isoWeekSlug("2026-01-05T00:00:00Z"))?.slug, "2026-W02");
+});
+
+test("renderJsonl matches item count and sorts keys", () => {
+  const items = [itemA, itemB];
+  const body = renderJsonl(items);
+  const lines = body.split("\n");
+  assert.equal(lines.length, items.length);
+  for (const line of lines) {
+    const obj = JSON.parse(line);
+    assert.deepEqual(Object.keys(obj), Object.keys(obj).sort());
+  }
+});
+
+test("renderJsonl preserves nested evidence fields", () => {
+  const item = {
+    ...itemA,
+    evidence: [{ url: "https://example.com/a", retrieved_at: "2026-01-01T00:00:00Z", query: "atlas" }],
+  };
+  const parsed = JSON.parse(renderJsonl([item]));
+  assert.equal(parsed.evidence[0].url, "https://example.com/a");
+  assert.equal(parsed.evidence[0].query, "atlas");
+});
+
+
+test("renderRss starts with xml declaration and escapes ampersand", () => {
+  const xml = renderRss([{ ...itemA, title: "Foo & Bar" }], { name: "Watch", base_url: "https://example.com/", description: "d" });
+  assert.ok(xml.startsWith('<?xml version="1.0" encoding="UTF-8"?>'));
+  assert.ok(xml.includes("Foo &amp; Bar"));
+  assert.equal(xml.includes("Foo & Bar"), false);
+});
+
+test("weekIndex uses ISO week-year on 2026-01-01", () => {
+  const weeks = weekIndex([{ discovered_at: "2026-01-01T00:00:00Z" }]);
+  assert.deepEqual(weeks, [{ slug: "2026-W01", count: 1 }]);
+  assert.equal(isoWeekSlug("2026-01-01T00:00:00Z"), "2026-W01");
+});
+
+test("hiding a source drops its items from the feed", () => {
+  const out = applyOverlay({
+    items: [itemA, itemB],
+    projects: [projectA, projectB],
+    sources: [sourceA, sourceB],
+    overrides: { source: { a: { hidden: true } } },
+    exclusions: [],
+  });
+  assert.deepEqual(out.items.map((i) => i.id), ["seed:b"]);
+  assert.deepEqual(out.sources.map((s) => s.id), ["b"]);
+  assert.deepEqual(out.projects.map((p) => p.id), ["beta"]);
+});
+
+test("project title patch renames member items and sources", () => {
+  const out = applyOverlay({
+    items: [itemA, itemB],
+    projects: [projectA, projectB],
+    sources: [sourceA, sourceB],
+    overrides: { project: { alpha: { title: "Alpha Renamed" } } },
+    exclusions: [],
+  });
+  const alphaItem = out.items.find((i) => i.id === "seed:a");
+  const alphaSource = out.sources.find((s) => s.id === "a");
+  const alphaProject = out.projects.find((p) => p.id === "alpha");
+  assert.equal(alphaItem.project, "Alpha Renamed");
+  assert.equal(alphaSource.project, "Alpha Renamed");
+  assert.equal(alphaProject.name, "Alpha Renamed");
+});
+
+test("colliding project rename keeps original names and item membership", () => {
+  const out = applyOverlay({
+    items: [itemA, itemB],
+    projects: [projectA, projectB],
+    sources: [sourceA, sourceB],
+    overrides: { project: { alpha: { title: "Beta" } } },
+    exclusions: [],
+  });
+  const alpha = out.projects.find((p) => p.id === "alpha");
+  const beta = out.projects.find((p) => p.id === "beta");
+  assert.equal(alpha.name, "Alpha");
+  assert.equal(beta.name, "Beta");
+  assert.equal(out.items.find((i) => i.id === "seed:a").project, "Alpha");
+  assert.equal(out.items.find((i) => i.id === "seed:b").project, "Beta");
+});
+
+test("chained colliding renames revert every involved project", () => {
+  const projectC = {
+    id: "gamma",
+    name: "Gamma",
+    sources: [],
+    discovered_at: "2025-10-01T00:00:00Z",
+    activity_at: "2025-10-02T00:00:00Z",
+    latest_discovered_at: "2025-10-01T00:00:00Z",
+  };
+  const itemC = { ...itemB, id: "seed:c", project: "Gamma", source_url: "https://example.com/c" };
+  const out = applyOverlay({
+    items: [itemA, itemB, itemC],
+    projects: [projectA, projectB, projectC],
+    sources: [sourceA, sourceB],
+    overrides: { project: { alpha: { title: "Beta" }, beta: { title: "Gamma" } } },
+    exclusions: [],
+  });
+  assert.equal(out.projects.find((p) => p.id === "alpha").name, "Alpha");
+  assert.equal(out.projects.find((p) => p.id === "beta").name, "Beta");
+  assert.equal(out.projects.find((p) => p.id === "gamma").name, "Gamma");
+});
+
+
+
+test("project exclusion matches renamed display name", () => {
+  const out = applyOverlay({
+    items: [itemA, itemB],
+    projects: [projectA, projectB],
+    sources: [sourceA, sourceB],
+    overrides: { project: { alpha: { title: "Alpha Renamed" } } },
+    exclusions: [{ kind: "project", value: "Alpha Renamed" }],
+  });
+  assert.deepEqual(out.items.map((i) => i.id), ["seed:b"]);
+  assert.equal(out.projects.length, 1);
+  assert.equal(out.projects[0].id, "beta");
+});
+
+test("project exclusion still matches original name after rename", () => {
+  const out = applyOverlay({
+    items: [itemA, itemB],
+    projects: [projectA, projectB],
+    sources: [sourceA, sourceB],
+    overrides: { project: { alpha: { title: "Alpha Renamed" } } },
+    exclusions: [{ kind: "project", value: "Alpha" }],
+  });
+  assert.deepEqual(out.items.map((i) => i.id), ["seed:b"]);
+});
+
+
+test("repo exclusion does not match a longer repository name", () => {
+  const keep = {
+    ...itemA,
+    id: "gh:acme-foobar",
+    source_url: "https://github.com/acme/foobar",
+    summary: "keep",
+  };
+  const drop = {
+    ...itemB,
+    id: "gh:acme-foo",
+    source_url: "https://github.com/acme/foo",
+    summary: "drop",
+  };
+  const out = applyOverlay({
+    items: [keep, drop],
+    projects: [projectA, projectB],
+    sources: [
+      { ...sourceA, id: "gh:acme-foobar", url: keep.source_url },
+      { ...sourceB, id: "gh:acme-foo", url: drop.source_url },
+    ],
+    overrides: {},
+    exclusions: [{ kind: "repo", value: "acme/foo" }],
+  });
+  assert.deepEqual(out.items.map((i) => i.id), ["gh:acme-foobar"]);
+});
+
+test("repo exclusion ignores github.com in a non-github hostname path", () => {
+  const bait = {
+    ...itemA,
+    id: "bait",
+    source_url: "https://evil.example/github.com/acme/foo",
+  };
+  const out = applyOverlay({
+    items: [bait, itemB],
+    projects: [projectA, projectB],
+    sources: [{ ...sourceA, id: "bait", url: bait.source_url }, sourceB],
+    overrides: {},
+    exclusions: [{ kind: "repo", value: "acme/foo" }],
+  });
+  assert.ok(out.items.some((i) => i.id === "bait"));
+});
+
+test("githubRepoFromUrl accepts only owner/repo paths", () => {
+  assert.equal(githubRepoFromUrl("https://github.com/acme/lib"), "acme/lib");
+  assert.equal(githubRepoFromUrl("https://github.com/acme/lib.git"), "acme/lib");
+  assert.equal(githubRepoFromUrl("https://github.com/acme/lib/pull/12"), "");
+  assert.equal(githubRepoFromUrl("https://github.com/acme/lib/issues/1"), "");
+  assert.equal(githubRepoFromUrl("https://notgithub.com/acme/lib"), "");
+});
+
+test("seedLocatorTaken matches repo or crate locators under a different id", () => {
+  const additions = [
+    { kind: "github_repositories", entry: { id: "keep", repo: "acme/keep" } },
+    { kind: "crates", entry: { id: "old-crate", name: "foo-bar" } },
+  ];
+  assert.equal(seedLocatorTaken("github_repositories", {
+    id: "other-id",
+    url: "https://github.com/acme/keep",
+  }, additions), true);
+  assert.equal(seedLocatorTaken("crates", { id: "new-crate", name: "foo-bar" }, additions), true);
+  assert.equal(seedLocatorTaken("crates", { id: "fresh", name: "baz" }, additions), false);
+  assert.equal(seedLocatorTaken("docs_pages", {
+    id: "docs",
+    url: "https://github.com/acme/keep",
+  }, additions), false);
+});
+
+test("seedLocatorTaken matches seeded catalog locators", () => {
+  const sources = [{
+    id: "keep",
+    url: "https://github.com/acme/keep",
+    source_type: "github_repository",
+    confidence: "seeded_source",
+  }, {
+    id: "live",
+    url: "https://github.com/acme/live",
+    source_type: "github_repository",
+    confidence: "live_hit",
+  }];
+  assert.equal(seedLocatorTaken("github_repositories", {
+    id: "other",
+    repo: "acme/keep",
+  }, [], sources), true);
+  assert.equal(seedLocatorTaken("github_repositories", {
+    id: "live-ok",
+    repo: "acme/live",
+  }, [], sources), false);
+});
+
+
+test("url_prefix exclusion does not match a longer pull number", () => {
+  const keep = {
+    ...itemA,
+    id: "pr-120",
+    source_url: "https://github.com/acme/lib/pull/120",
+  };
+  const drop = {
+    ...itemB,
+    id: "pr-12",
+    source_url: "https://github.com/acme/lib/pull/12",
+  };
+  const out = applyOverlay({
+    items: [keep, drop],
+    projects: [projectA, projectB],
+    sources: [
+      { ...sourceA, id: "pr-120", url: keep.source_url },
+      { ...sourceB, id: "pr-12", url: drop.source_url },
+    ],
+    overrides: {},
+    exclusions: [{ kind: "url_prefix", value: "https://github.com/acme/lib/pull/12" }],
+  });
+  assert.deepEqual(out.items.map((i) => i.id), ["pr-120"]);
+});
+
+
+
+

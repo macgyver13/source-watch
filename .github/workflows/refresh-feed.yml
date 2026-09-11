@@ -1,0 +1,38 @@
+name: Refresh feed
+
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: refresh-feed
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install pyyaml
+      - id: mode
+        run: |
+          python3 - <<'PY' >> "$GITHUB_OUTPUT"
+          from pathlib import Path
+          import yaml
+          data = yaml.safe_load(Path("config/watch.yaml").read_text()) or {}
+          serving = data.get("serving") if isinstance(data.get("serving"), dict) else {}
+          mode = str(serving.get("mode") or "static").strip().lower()
+          print(f"service={'true' if mode == 'service' else 'false'}")
+          PY
+      - if: steps.mode.outputs.service == 'true'
+        run: python3 scripts/build_seed_feed.py
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SOURCE_WATCH_INGEST_TOKEN: ${{ secrets.SOURCE_WATCH_INGEST_TOKEN }}
+      - if: steps.mode.outputs.service != 'true'
+        run: echo "serving.mode is not service; skipping ingest"
