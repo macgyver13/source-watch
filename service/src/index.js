@@ -1,6 +1,6 @@
 import { ADMIN_HTML } from "./admin-ui.js";
 import * as db from "./db.js";
-import { applyItemPatch, applyNamedPatch, applyOverlay, githubRepoFromUrl, matchingExclusion, resolveProjectDisplayNames, seedLocatorTaken, slugify, sourceIdForItem } from "./overlay.js";
+import { applyItemPatch, applyNamedPatch, applyOverlay, githubRepoFromUrl, matchingExclusion, resolveProjectDisplayNames, seedEntryKeys, seedLocatorTaken, slugify, sourceIdForItem } from "./overlay.js";
 
 
 
@@ -489,7 +489,7 @@ async function ensureRendered(env) {
 
 
 async function putOverride(env, kind, id, patch) {
-  const existingRow = await env.DB.prepare("SELECT patch FROM overrides WHERE kind = ? AND target_id = ?")
+  const existingRow = await env.DB.prepare("SELECT patch, updated_at, revision FROM overrides WHERE kind = ? AND target_id = ?")
     .bind(kind, id)
     .first();
   let current = {};
@@ -507,22 +507,30 @@ async function putOverride(env, kind, id, patch) {
   }
 
   const written = JSON.stringify(next);
-  await env.DB.prepare(
-    "INSERT OR REPLACE INTO overrides (kind, target_id, patch, updated_at) VALUES (?, ?, ?, ?)",
-  )
-    .bind(kind, id, written, db.nowIso())
-    .run();
+  const writeRevision = crypto.randomUUID();
+  const writeRes = existingRow
+    ? await env.DB.prepare(
+        "UPDATE overrides SET patch = ?, updated_at = ?, revision = ? WHERE kind = ? AND target_id = ? AND revision = ?",
+      )
+        .bind(written, db.nowIso(), writeRevision, kind, id, existingRow.revision)
+        .run()
+    : await env.DB.prepare(
+        "INSERT INTO overrides (kind, target_id, patch, updated_at, revision) VALUES (?, ?, ?, ?, ?) ON CONFLICT(kind, target_id) DO NOTHING",
+      )
+        .bind(kind, id, written, db.nowIso(), writeRevision)
+        .run();
+  if (!writeRes?.meta?.changes) return json({ error: "override_conflict" }, 409);
   const fail = await ensureRendered(env);
   if (fail) {
     if (!existingRow) {
-      await env.DB.prepare("DELETE FROM overrides WHERE kind = ? AND target_id = ? AND patch = ?")
-        .bind(kind, id, written)
+      await env.DB.prepare("DELETE FROM overrides WHERE kind = ? AND target_id = ? AND revision = ?")
+        .bind(kind, id, writeRevision)
         .run();
     } else {
       await env.DB.prepare(
-        "UPDATE overrides SET patch = ?, updated_at = ? WHERE kind = ? AND target_id = ? AND patch = ?",
+        "UPDATE overrides SET patch = ?, updated_at = ?, revision = ? WHERE kind = ? AND target_id = ? AND revision = ?",
       )
-        .bind(existingRow.patch, db.nowIso(), kind, id, written)
+        .bind(existingRow.patch, existingRow.updated_at, crypto.randomUUID(), kind, id, writeRevision)
         .run();
     }
     return fail;
@@ -632,24 +640,24 @@ async function handleAdmin(request, env, path, url) {
       return json({ kind, id, patch });
     }
     if (method === "DELETE") {
-      const existing = await env.DB.prepare("SELECT patch, updated_at FROM overrides WHERE kind = ? AND target_id = ?")
+      const existing = await env.DB.prepare("SELECT patch, updated_at, revision FROM overrides WHERE kind = ? AND target_id = ?")
         .bind(kind, id)
         .first();
       const ref = await rowRef(env, kind, id);
-      await env.DB.prepare("DELETE FROM overrides WHERE kind = ? AND target_id = ?").bind(kind, id).run();
+      const deleted = existing
+        ? await env.DB.prepare("DELETE FROM overrides WHERE kind = ? AND target_id = ? AND revision = ?")
+            .bind(kind, id, existing.revision)
+            .run()
+        : { meta: { changes: 0 } };
+      if (existing && !deleted?.meta?.changes) return json({ error: "override_conflict" }, 409);
       const fail = await ensureRendered(env);
       if (fail) {
         if (existing) {
-          const current = await env.DB.prepare(
-            "SELECT target_id FROM overrides WHERE kind = ? AND target_id = ?",
-          ).bind(kind, id).first();
-          if (!current) {
-            await env.DB.prepare(
-              "INSERT INTO overrides (kind, target_id, patch, updated_at) VALUES (?, ?, ?, ?)",
-            )
-              .bind(kind, id, existing.patch, existing.updated_at || db.nowIso())
-              .run();
-          }
+          await env.DB.prepare(
+            "INSERT INTO overrides (kind, target_id, patch, updated_at, revision) VALUES (?, ?, ?, ?, ?) ON CONFLICT(kind, target_id) DO NOTHING",
+          )
+            .bind(kind, id, existing.patch, existing.updated_at || db.nowIso(), crypto.randomUUID())
+            .run();
         }
         return fail;
       }
@@ -666,15 +674,19 @@ async function handleAdmin(request, env, path, url) {
       const kind = String(body?.kind || "").trim();
       const value = String(body?.value || "").trim();
       if (!EXCLUSION_KINDS.has(kind) || !value) return json({ error: "invalid_exclusion" }, 400);
+      const exclusionRevision = crypto.randomUUID();
       const inserted = await env.DB.prepare(
-        "INSERT OR IGNORE INTO exclusions (kind, value, note, created_at) VALUES (?, ?, ?, ?)",
+        "INSERT OR IGNORE INTO exclusions (kind, value, note, created_at, revision) VALUES (?, ?, ?, ?, ?)",
       )
-        .bind(kind, value, body?.note ? String(body.note) : null, db.nowIso())
+        .bind(kind, value, body?.note ? String(body.note) : null, db.nowIso(), exclusionRevision)
         .run();
+      if (!inserted?.meta?.changes) return json({ error: "duplicate_exclusion" }, 409);
       const fail = await ensureRendered(env);
       if (fail) {
         if (inserted?.meta?.changes) {
-          await env.DB.prepare("DELETE FROM exclusions WHERE kind = ? AND value = ?").bind(kind, value).run();
+          await env.DB.prepare("DELETE FROM exclusions WHERE revision = ?")
+            .bind(exclusionRevision)
+            .run();
         }
         return fail;
       }
@@ -688,16 +700,21 @@ async function handleAdmin(request, env, path, url) {
   if (exclusionDel && method === "DELETE") {
     const exclusionId = Number(exclusionDel[1]);
     const existing = await env.DB.prepare(
-      "SELECT id, kind, value, note, created_at FROM exclusions WHERE id = ?",
+      "SELECT id, kind, value, note, created_at, revision FROM exclusions WHERE id = ?",
     ).bind(exclusionId).first();
-    await env.DB.prepare("DELETE FROM exclusions WHERE id = ?").bind(exclusionId).run();
+    const deleted = existing
+      ? await env.DB.prepare("DELETE FROM exclusions WHERE id = ? AND revision = ?")
+          .bind(exclusionId, existing.revision)
+          .run()
+      : { meta: { changes: 0 } };
+    if (existing && !deleted?.meta?.changes) return json({ error: "exclusion_conflict" }, 409);
     const fail = await ensureRendered(env);
     if (fail) {
       if (existing) {
         await env.DB.prepare(
-          "INSERT OR REPLACE INTO exclusions (id, kind, value, note, created_at) VALUES (?, ?, ?, ?, ?)",
+          "INSERT INTO exclusions (id, kind, value, note, created_at, revision) VALUES (?, ?, ?, ?, ?, ?) ON CONFLICT DO NOTHING",
         )
-          .bind(existing.id, existing.kind, existing.value, existing.note, existing.created_at)
+          .bind(existing.id, existing.kind, existing.value, existing.note, existing.created_at, crypto.randomUUID())
           .run();
       }
       return fail;
@@ -715,11 +732,12 @@ async function handleAdmin(request, env, path, url) {
       const bucket = String(body?.bucket || "").trim();
       const term = String(body?.term || "").trim();
       if (!INCLUDE_BUCKETS.has(bucket) || !term) return json({ error: "invalid_term" }, 400);
-      await env.DB.prepare(
+      const res = await env.DB.prepare(
         "INSERT OR IGNORE INTO include_terms (bucket, term, note, created_at) VALUES (?, ?, ?, ?)",
       )
         .bind(bucket, term, body?.note ? String(body.note) : null, db.nowIso())
         .run();
+      if (!res?.meta?.changes) return json({ error: "duplicate_term" }, 409);
       await db.audit(env, "include_term_add", `${bucket}:${term}`, body?.note || null);
       return json({ ok: true });
     }
@@ -777,18 +795,30 @@ async function handleAdmin(request, env, path, url) {
 
 
 
-      await env.DB.prepare("INSERT INTO seed_additions (kind, entry, created_at) VALUES (?, ?, ?)").bind(
-        kind,
-        JSON.stringify(entry),
-        db.nowIso(),
-      ).run();
+      const entryId = seedId;
+      const locators = [...seedEntryKeys(kind, entry)];
+      try {
+        await env.DB.batch([
+          env.DB.prepare("INSERT INTO seed_additions (kind, entry, created_at, entry_id) VALUES (?, ?, ?, ?)")
+            .bind(kind, JSON.stringify(entry), db.nowIso(), entryId),
+          ...locators.map((locator) =>
+            env.DB.prepare("INSERT INTO seed_locators (kind, locator, entry_id) VALUES (?, ?, ?)").bind(kind, locator, entryId)),
+        ]);
+      } catch (err) {
+        const msg = String(err && err.message || err);
+        return json({ error: msg.includes("seed_locators") ? "duplicate_seed_locator" : "duplicate_seed_id" }, 409);
+      }
       await db.audit(env, "seed_add", kind, JSON.stringify(entry));
       return json({ ok: true });
     }
   }
   const seedDel = path.match(/^\/api\/admin\/seed-additions\/(\d+)$/);
   if (seedDel && method === "DELETE") {
-    await env.DB.prepare("DELETE FROM seed_additions WHERE id = ?").bind(Number(seedDel[1])).run();
+    const seedId = Number(seedDel[1]);
+    await env.DB.batch([
+      env.DB.prepare("DELETE FROM seed_locators WHERE entry_id = (SELECT entry_id FROM seed_additions WHERE id = ?)").bind(seedId),
+      env.DB.prepare("DELETE FROM seed_additions WHERE id = ?").bind(seedId),
+    ]);
     await db.audit(env, "seed_delete", seedDel[1], null);
     return json({ ok: true });
   }

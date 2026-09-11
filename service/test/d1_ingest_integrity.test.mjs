@@ -309,3 +309,125 @@ test("D1 ingest integrity: multi-slice chunk is all-or-nothing with commit", asy
     assert.equal((r.json?.items || []).length, count);
   });
 });
+
+test("D1 admin: case-equivalent exclusion is 409 and reversible", async () => {
+  await withWorker(async (worker) => {
+    const at = "2026-09-11T12:00:00Z";
+    const rows = catalog(at, "seed:noise-doc", "Quiet Doc");
+    rows.item.summary = "contains Noise in the summary";
+    const ingestId = await beginIngest(worker, at, "Noise Watch");
+    await chunkCatalog(worker, ingestId, rows);
+    let r = await commit(worker, ingestId);
+    assert.equal(r.status, 200, r.text);
+
+    r = await req(worker, "/feed.json");
+    assert.ok((r.json?.items || []).some((row) => row.id === "seed:noise-doc"));
+
+    r = await req(worker, "/api/admin/exclusions", {
+      method: "POST",
+      token: ADMIN,
+      body: { kind: "term", value: "Noise" },
+    });
+    assert.equal(r.status, 200, r.text);
+
+    r = await req(worker, "/api/admin/exclusions", {
+      method: "POST",
+      token: ADMIN,
+      body: { kind: "term", value: "noise" },
+    });
+    assert.equal(r.status, 409, r.text);
+    assert.equal(r.json?.error, "duplicate_exclusion");
+
+    r = await req(worker, "/api/admin/exclusions", { token: ADMIN });
+    const matches = (r.json?.exclusions || []).filter(
+      (row) => row.kind === "term" && String(row.value).toLowerCase() === "noise",
+    );
+    assert.equal(matches.length, 1);
+
+    r = await req(worker, "/feed.json");
+    assert.ok(!(r.json?.items || []).some((row) => row.id === "seed:noise-doc"));
+
+    r = await req(worker, `/api/admin/exclusions/${matches[0].id}`, { method: "DELETE", token: ADMIN });
+    assert.equal(r.status, 200, r.text);
+
+    r = await req(worker, "/feed.json");
+    assert.ok((r.json?.items || []).some((row) => row.id === "seed:noise-doc"));
+  });
+});
+
+test("D1 admin: seed locator uniqueness is atomic", async () => {
+  await withWorker(async (worker) => {
+    const first = {
+      kind: "github_repositories",
+      entry: { id: "seed-one", repo: "acme/integrity-widget" },
+    };
+    const second = {
+      kind: "github_repositories",
+      entry: { id: "seed-two", repo: "acme/integrity-widget" },
+    };
+    let r = await req(worker, "/api/admin/seed-additions", {
+      method: "POST",
+      token: ADMIN,
+      body: first,
+    });
+    assert.equal(r.status, 200, r.text);
+
+    r = await req(worker, "/api/admin/seed-additions", {
+      method: "POST",
+      token: ADMIN,
+      body: second,
+    });
+    assert.equal(r.status, 409, r.text);
+    assert.equal(r.json?.error, "duplicate_seed_locator");
+
+    r = await req(worker, "/api/admin/seed-additions", { token: ADMIN });
+    const rows = (r.json?.seed_additions || []).filter(
+      (row) => String(row.entry?.repo || "").toLowerCase() === "acme/integrity-widget",
+    );
+    assert.equal(rows.length, 1);
+
+    r = await req(worker, `/api/admin/seed-additions/${rows[0].id}`, { method: "DELETE", token: ADMIN });
+    assert.equal(r.status, 200, r.text);
+
+    r = await req(worker, "/api/admin/seed-additions", {
+      method: "POST",
+      token: ADMIN,
+      body: second,
+    });
+    assert.equal(r.status, 200, r.text);
+  });
+});
+
+test("D1 admin: concurrent override writes do not merge", async () => {
+  await withWorker(async (worker) => {
+    const at = "2026-09-11T12:00:00Z";
+    const rows = catalog(at, "seed:cas-item", "CAS Item");
+    const ingestId = await beginIngest(worker, at, "CAS Watch");
+    await chunkCatalog(worker, ingestId, rows);
+    let r = await commit(worker, ingestId);
+    assert.equal(r.status, 200, r.text);
+
+    const [a, b] = await Promise.all([
+      req(worker, "/api/admin/overrides/item/seed:cas-item", {
+        method: "PUT",
+        token: ADMIN,
+        body: { title: "CAS Alpha" },
+      }),
+      req(worker, "/api/admin/overrides/item/seed:cas-item", {
+        method: "PUT",
+        token: ADMIN,
+        body: { title: "CAS Beta" },
+      }),
+    ]);
+    assert.ok([a.status, b.status].includes(200), `${a.status} ${a.text} / ${b.status} ${b.text}`);
+    for (const row of [a, b]) {
+      assert.ok(row.status === 200 || (row.status === 409 && row.json?.error === "override_conflict"), row.text);
+    }
+
+    r = await req(worker, "/api/admin/items?visibility=all", { token: ADMIN });
+    const item = (r.json?.items || []).find((row) => row.id === "seed:cas-item");
+    assert.ok(item, "cas item missing from admin list");
+    const title = item.patch?.title;
+    assert.ok(title === "CAS Alpha" || title === "CAS Beta", JSON.stringify(item.patch));
+  });
+});
