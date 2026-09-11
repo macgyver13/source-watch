@@ -1,0 +1,38 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "source-watch-smoke",
+  "main": "service/src/index.js",
+  "compatibility_date": "2026-09-09",
+  "assets": {
+    "directory": "./service/test/fixtures/public",
+    "binding": "ASSETS",
+    "not_found_handling": "404-page",
+    "run_worker_first": [
+      "/api/*",
+      "/admin",
+      "/admin/*",
+      "/feed.json",
+      "/projects.json",
+      "/sources.json",
+      "/watch.json",
+      "/items.jsonl",
+      "/feed.xml",
+      "/weeks",
+      "/weeks/*"
+    ]
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "source-watch",
+      "database_id": "00000000-0000-0000-0000-000000000000"
+    }
+  ],
+  "vars": {
+    "INGEST_TOKEN": "devingest",
+    "ADMIN_TOKEN": "devadmin",
+    "GITHUB_DISPATCH_REPO": "",
+    "GITHUB_DISPATCH_WORKFLOW": "refresh-feed.yml",
+    "GITHUB_DISPATCH_REF": "main"
+  }
+}
