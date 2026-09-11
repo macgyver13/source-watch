@@ -4,7 +4,13 @@ from __future__ import annotations
 
 import argparse
 import shutil
+import sys
 from pathlib import Path
+
+_SCRIPTS = Path(__file__).resolve().parent
+if str(_SCRIPTS) not in sys.path:
+    sys.path.insert(0, str(_SCRIPTS))
+from watch_config import load_serving
 
 ROOT = Path(__file__).resolve().parents[1]
 WATCH = ROOT / "config" / "watch.yaml"
@@ -34,13 +40,7 @@ YAML_BLOCK = """serving:
 
 
 def load_mode() -> str:
-    try:
-        import yaml  # type: ignore
-        data = yaml.safe_load(WATCH.read_text()) or {}
-    except Exception:
-        raise SystemExit(f"PyYAML is required to parse {WATCH}")
-    serving = data.get("serving") if isinstance(data.get("serving"), dict) else {}
-    return str(serving.get("mode") or "static").strip().lower()
+    return load_serving(WATCH, require_service_url=False)["mode"]
 
 
 def collect_targets() -> list[Path]:

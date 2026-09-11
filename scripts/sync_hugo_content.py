@@ -9,14 +9,18 @@ hugo.toml is generated from config/watch.yaml (baseURL, title, description,
 topics). Topic pages are emitted only when watch.topics is non-empty.
 """
 from __future__ import annotations
-
 import json
 import re
 import shutil
+import sys
 from collections import defaultdict
 from datetime import datetime
 from pathlib import Path
 
+_SCRIPTS = Path(__file__).resolve().parent
+if str(_SCRIPTS) not in sys.path:
+    sys.path.insert(0, str(_SCRIPTS))
+from watch_config import load_serving, normalize_serving
 ROOT = Path(__file__).resolve().parents[1]
 SITE = ROOT / "site"
 STATIC = SITE / "static"
@@ -83,7 +87,7 @@ def write_hugo_toml(watch: dict) -> None:
     if not base_url.endswith("/"):
         base_url += "/"
     description = str(watch.get("description") or "").strip()
-    mode = str((watch.get("serving") or {}).get("mode") or "static")
+    mode = normalize_serving(watch.get("serving"), require_service_url=False)["mode"]
     lines = [
         f"baseURL = {toml_str(base_url)}",
         'locale = "en-us"',
@@ -154,10 +158,16 @@ def copy_watch_data(watch: dict) -> None:
 
 def main() -> int:
     watch = load_watch()
+    serving = (
+        load_serving(WATCH_CONFIG, require_service_url=False)
+        if WATCH_CONFIG.exists()
+        else {"mode": "static", "service_url": ""}
+    )
+    watch = {**watch, "serving": serving}
     write_hugo_toml(watch)
     copy_watch_data(watch)
 
-    serving_mode = str((watch.get("serving") or {}).get("mode") or "static").strip().lower()
+    serving_mode = serving["mode"]
 
     write(CONTENT / "_index.md", fm(str(watch.get("name") or "Source Watch")))
     write(CONTENT / "activity" / "_index.md", fm("Activity"))

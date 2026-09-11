@@ -22,12 +22,12 @@ jobs:
       - id: mode
         run: |
           python3 - <<'PY' >> "$GITHUB_OUTPUT"
+          import sys
           from pathlib import Path
-          import yaml
-          data = yaml.safe_load(Path("config/watch.yaml").read_text()) or {}
-          serving = data.get("serving") if isinstance(data.get("serving"), dict) else {}
-          mode = str(serving.get("mode") or "static").strip().lower()
-          print(f"service={'true' if mode == 'service' else 'false'}")
+          sys.path.insert(0, "scripts")
+          from watch_config import load_serving
+          serving = load_serving(Path("config/watch.yaml"))
+          print(f"service={'true' if serving['mode'] == 'service' else 'false'}")
           PY
       - if: steps.mode.outputs.service == 'true'
         run: python3 scripts/build_seed_feed.py

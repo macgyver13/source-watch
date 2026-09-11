@@ -30,6 +30,7 @@ _SCRIPTS = Path(__file__).resolve().parent
 if str(_SCRIPTS) not in sys.path:
     sys.path.insert(0, str(_SCRIPTS))
 from service_client import ServiceClient, require_ingest_token
+from watch_config import load_serving, normalize_serving
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -65,17 +66,7 @@ EMPTY_WATCH = {
 }
 
 
-def normalize_serving(raw) -> dict:
-    cfg = raw if isinstance(raw, dict) else {}
-    mode = str(cfg.get("mode") or "static").strip().lower()
-    if mode not in ("static", "service"):
-        raise SystemExit(f"serving.mode must be 'static' or 'service', got {mode!r}")
-    url = str(cfg.get("service_url") or "").strip()
-    if url and not url.endswith("/"):
-        url += "/"
-    if mode == "service" and not url:
-        raise SystemExit("serving.mode: service requires serving.service_url")
-    return {"mode": mode, "service_url": url}
+
 
 
 
@@ -254,6 +245,42 @@ def merge_seed_additions(cfg: dict, additions: list[dict]) -> dict:
                 known_ids.add(incoming_id)
     return out
 
+def validate_seed_catalog(cfg: dict) -> None:
+    """Reject duplicate seed ids or duplicate per-kind locators before any build."""
+    seeded = cfg.get("seeded_sources") if isinstance(cfg, dict) else None
+    if not isinstance(seeded, dict):
+        return
+    id_locs: dict[str, list[str]] = {}
+    locator_locs: dict[tuple[str, tuple[str, str]], list[str]] = {}
+    for kind, entries in seeded.items():
+        if not isinstance(entries, list):
+            continue
+        for index, entry in enumerate(entries):
+            if not isinstance(entry, dict):
+                continue
+            loc = f"{kind}[{index}]"
+            try:
+                url = source_url_for(entry, kind)
+            except Exception:
+                url = ""
+            eid = str(entry.get("id") or slugify(url)).strip().lower()
+            if eid:
+                id_locs.setdefault(eid, []).append(loc)
+            for key in seed_entry_keys(kind, entry):
+                if key[0] == "id":
+                    continue
+                locator_locs.setdefault((str(kind), key), []).append(loc)
+    errors: list[str] = []
+    for eid, locs in id_locs.items():
+        if len(locs) > 1:
+            errors.append(f"duplicate seed id {eid!r} in " + " and ".join(locs))
+    for (_kind, key), locs in locator_locs.items():
+        if len(locs) > 1:
+            errors.append(f"duplicate seed locator {key} in " + " and ".join(locs))
+    if errors:
+        raise SystemExit("\n".join(errors))
+
+
 
 
 
@@ -371,7 +398,26 @@ def search_github_repositories(query: str, max_results: int = 10) -> list[dict]:
     except Exception as exc:
         note_collector_failure(f"GitHub repository search failed for query {query!r}: {exc}")
         return []
-    return payload.get("items", [])
+    if not isinstance(payload, dict):
+        note_collector_failure(f"GitHub repository search returned {type(payload).__name__} for query {query!r}")
+        return []
+    if payload.get("incomplete_results") is True:
+        note_collector_failure(f"GitHub repository search incomplete for query {query!r}")
+        return []
+    items = payload.get("items")
+    if not isinstance(items, list) or any(not isinstance(el, dict) for el in items):
+        note_collector_failure(f"GitHub repository search returned invalid items for query {query!r}")
+        return []
+    if any(
+        not str(el.get("full_name") or "").strip()
+        or not str(el.get("html_url") or "").strip()
+        for el in items
+    ):
+        note_collector_failure(
+            f"GitHub repository search returned an item without full_name or html_url for query {query!r}"
+        )
+        return []
+    return items
 
 
 def ensure_pr_search_query(query: str) -> str:
@@ -420,12 +466,21 @@ def search_github_pull_requests(query: str, max_results: int = 10) -> list[dict]
     except Exception as exc:
         note_collector_failure(f"GitHub pull request search failed for query {query!r}: {exc}")
         return []
-
-    items = payload.get("items", []) if isinstance(payload, dict) else []
-    return [hit for hit in items if isinstance(hit, dict) and github_pr_url(hit)]
-
-
-
+    if not isinstance(payload, dict):
+        note_collector_failure(f"GitHub pull request search returned {type(payload).__name__} for query {query!r}")
+        return []
+    if payload.get("incomplete_results") is True:
+        note_collector_failure(f"GitHub pull request search incomplete for query {query!r}")
+        return []
+    items = payload.get("items")
+    if not isinstance(items, list) or any(not isinstance(el, dict) for el in items):
+        note_collector_failure(f"GitHub pull request search returned invalid items for query {query!r}")
+        return []
+    for hit in items:
+        if github_pr_url(hit) is None:
+            note_collector_failure(f"GitHub pull request search returned a hit without a PR URL for query {query!r}")
+            return []
+    return items
 
 
 def github_get_json(path: str) -> dict | None:
@@ -459,8 +514,10 @@ def delving_get_json(url: str) -> dict | None:
     except Exception as exc:
         note_collector_failure(f"Delving GET {url} failed: {exc}")
         return None
-    return payload if isinstance(payload, dict) else None
-
+    if not isinstance(payload, dict):
+        note_collector_failure(f"Delving GET {url} returned {type(payload).__name__}, expected object")
+        return None
+    return payload
 
 
 def discourse_tag_names(tags) -> list[str]:
@@ -509,7 +566,16 @@ def search_delving_topics(query: str, max_results: int = 10) -> list[dict]:
     payload = delving_get_json(f"{DELVING_ORIGIN}/search.json?{params}")
     if not isinstance(payload, dict):
         return []
-    topics = list(payload.get("topics") or [])
+    topics = payload.get("topics")
+    if not isinstance(topics, list):
+        note_collector_failure(f"Delving search returned no topics array for query {query!r}")
+        return []
+    if "posts" in payload and not isinstance(payload.get("posts"), list):
+        note_collector_failure(f"Delving search returned no topics array for query {query!r}")
+        return []
+    if any(not isinstance(post, dict) for post in (payload.get("posts") or [])):
+        note_collector_failure(f"Delving search returned an invalid post for query {query!r}")
+        return []
     blurbs: dict[object, str] = {}
     for post in payload.get("posts") or []:
         tid = post.get("topic_id")
@@ -523,6 +589,12 @@ def search_delving_topics(query: str, max_results: int = 10) -> list[dict]:
     out: list[dict] = []
     seen: set[object] = set()
     for topic in topics:
+        if not isinstance(topic, dict):
+            note_collector_failure(f"Delving search returned an invalid topic for query {query!r}")
+            return []
+        if topic.get("id") is None or not str(topic.get("title") or "").strip():
+            note_collector_failure(f"Delving search returned a topic without id or title for query {query!r}")
+            return []
         tid = topic.get("id")
         if tid is None or tid in seen:
             continue
@@ -543,9 +615,20 @@ def list_delving_category(category: str, max_results: int = 30) -> list[dict]:
     payload = delving_get_json(f"{DELVING_ORIGIN}/c/{path}/l/latest.json")
     if not isinstance(payload, dict):
         return []
-    topics = (payload.get("topic_list") or {}).get("topics") or []
+    topic_list = payload.get("topic_list")
+    if not isinstance(topic_list, dict) or not isinstance(topic_list.get("topics"), list):
+        note_collector_failure(f"Delving category listing returned no topics array for {path!r}")
+        return []
+    topics = topic_list["topics"]
+    if any(
+        not isinstance(topic, dict)
+        or topic.get("id") is None
+        or not str(topic.get("title") or "").strip()
+        for topic in topics
+    ):
+        note_collector_failure(f"Delving category listing returned an invalid topic for {path!r}")
+        return []
     return list(topics)[:limit]
-
 
 
 def later_iso(*values: str | None) -> str | None:
@@ -1581,6 +1664,8 @@ def main() -> int:
         watch = apply_service_config(watch, remote)
         cfg = merge_seed_additions(cfg, remote.get("seed_additions") or [])
         existing_loader = existing_state_loader(service.collector_state)
+
+    validate_seed_catalog(cfg)
 
     items, projects, sources = build_items(
         cfg,
