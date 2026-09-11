@@ -446,9 +446,9 @@ async function rollbackCommit(env, ingestId, prevLiveId) {
 export async function commitIngest(env, ingestId) {
   const row = await getIngest(env, ingestId);
   if (!row) return null;
-  const prevLiveId = await getSetting(env, "live_ingest_id");
+  const liveNow = await getSetting(env, "live_ingest_id");
   if (row.committed_at) {
-    if (prevLiveId === ingestId) {
+    if (liveNow === ingestId) {
       const counts = await renderUntilPublished(env);
       return { ingest_id: ingestId, ...counts };
     }
@@ -457,6 +457,8 @@ export async function commitIngest(env, ingestId) {
   const at = nowIso();
   const staleBefore = new Date(Date.now() - 60 * 60 * 1000).toISOString().replace(/\.\d{3}Z$/, "Z");
   const results = await env.DB.batch([
+    // Same transaction as the pointer CAS so rollback restores whoever we actually displaced.
+    env.DB.prepare("SELECT value FROM settings WHERE key = 'live_ingest_id'"),
     env.DB.prepare(
       `INSERT INTO settings (key, value) VALUES ('live_ingest_id', ?)
        ON CONFLICT(key) DO UPDATE SET value = excluded.value
@@ -469,7 +471,7 @@ export async function commitIngest(env, ingestId) {
          AND (SELECT value FROM settings WHERE key = 'live_ingest_id') = ?`,
     ).bind(at, ingestId, ingestId),
   ]);
-  if (!results[1]?.meta?.changes) {
+  if (!results[2]?.meta?.changes) {
     const liveId = await getSetting(env, "live_ingest_id");
     const latest = await getIngest(env, ingestId);
     if (latest?.committed_at && liveId === ingestId) {
@@ -478,6 +480,7 @@ export async function commitIngest(env, ingestId) {
     }
     return { error: "stale_ingest" };
   }
+  const displacedLiveId = results[0]?.results?.[0]?.value || null;
   await bestEffort(env, "last_ingest_at_failed", () => setSetting(env, "last_ingest_at", at));
   // stale *uncommitted* ingests only: the previous live generation stays until publication succeeds.
   await bestEffort(env, "stale_uncommitted_cleanup_failed", () =>
@@ -488,11 +491,11 @@ export async function commitIngest(env, ingestId) {
   try {
     counts = await renderUntilPublished(env);
   } catch (err) {
-    await bestEffort(env, "commit_rollback_failed", () => rollbackCommit(env, ingestId, prevLiveId));
+    await bestEffort(env, "commit_rollback_failed", () => rollbackCommit(env, ingestId, displacedLiveId));
     throw err;
   }
   if (counts.published === false) {
-    await bestEffort(env, "commit_rollback_failed", () => rollbackCommit(env, ingestId, prevLiveId));
+    await bestEffort(env, "commit_rollback_failed", () => rollbackCommit(env, ingestId, displacedLiveId));
     return { ingest_id: ingestId, ...counts };
   }
   await bestEffort(env, "commit_cleanup_failed", () => env.DB.batch(previousGenerationCleanup(env, ingestId)));
