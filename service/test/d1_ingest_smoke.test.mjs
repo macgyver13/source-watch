@@ -137,6 +137,22 @@ test("D1 smoke: migrate-applied worker boots, ingest+render, /feed.json", async 
       ["seed:smoke-docs"],
     );
 
+    r = await req(worker, "/items.jsonl");
+    assert.equal(r.status, 200);
+    assert.ok(r.text && r.text.trim().length > 0, "items.jsonl should be present after ingest");
+    const jsonlRows = r.text
+      .trim()
+      .split("\n")
+      .filter(Boolean)
+      .map((line) => JSON.parse(line));
+    assert.deepEqual(
+      jsonlRows.map((row) => row.id),
+      ["seed:smoke-docs"],
+    );
+
+    r = await req(worker, "/api/admin/state");
+    assert.equal(r.status, 401);
+
     r = await req(worker, "/api/admin/state", { token: ADMIN });
     assert.equal(r.status, 200);
     assert.equal(r.json?.raw, 1);

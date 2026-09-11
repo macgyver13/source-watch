@@ -186,16 +186,34 @@ export const ADMIN_HTML = `<!doctype html>
       var d = new Date(iso);
       if (isNaN(d.getTime())) return "";
       return d.getFullYear() + "-" + pad2(d.getMonth() + 1) + "-" + pad2(d.getDate()) +
-        "T" + pad2(d.getHours()) + ":" + pad2(d.getMinutes());
+        "T" + pad2(d.getHours()) + ":" + pad2(d.getMinutes()) + ":" + pad2(d.getSeconds());
     }
     function fromLocal(v) {
       if (!v) return null;
-      var m = String(v).match(/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})(?::(\d{2}))?/);
+      var m = String(v).match(/^([0-9]{4})-([0-9]{2})-([0-9]{2})T([0-9]{2}):([0-9]{2})(?::([0-9]{2}))?/);
       if (!m) return null;
       var d = new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]), Number(m[4]), Number(m[5]), Number(m[6] || 0));
       if (isNaN(d.getTime())) return null;
-      return d.toISOString().replace(/\.\d{3}Z$/, "Z");
+      return d.toISOString().replace(/[.][0-9]{3}Z$/, "Z");
     }
+    function collectEditPatch(fields) {
+      var patch = {};
+      fields.forEach(function (f) {
+        var key = f.key;
+        var orig = f.orig || "";
+        var val = f.val;
+        if (key === "discovered_at" || key === "activity_at") {
+          var next = fromLocal(val);
+          if (next === fromLocal(orig)) return;
+          patch[key] = next;
+          return;
+        }
+        if (val === orig) return;
+        patch[key] = val;
+      });
+      return patch;
+    }
+
 
 
     function repoFromUrl(url) {
@@ -314,8 +332,8 @@ export const ADMIN_HTML = `<!doctype html>
             "<div class='edit' data-edit='" + esc(item.id) + "'>" +
               "<input data-f='title' data-orig='" + esc(titleVal) + "' value='" + esc(titleVal) + "' placeholder='title'>" +
               "<input data-f='summary' data-orig='" + esc(summaryVal) + "' value='" + esc(summaryVal) + "' placeholder='summary'>" +
-              "<input data-f='discovered_at' type='datetime-local' data-orig='" + esc(discVal) + "' value='" + esc(discVal) + "'>" +
-              "<input data-f='activity_at' type='datetime-local' data-orig='" + esc(actVal) + "' value='" + esc(actVal) + "'>" +
+              "<input data-f='discovered_at' type='datetime-local' step='1' data-orig='" + esc(discVal) + "' value='" + esc(discVal) + "'>" +
+              "<input data-f='activity_at' type='datetime-local' step='1' data-orig='" + esc(actVal) + "' value='" + esc(actVal) + "'>" +
               "<button data-act='save-edit' data-id='" + esc(item.id) + "'>Save</button>" +
             "</div></td>" +
             "<td>" + esc(item.project) + "<div class='muted'>" + esc(item.source_type) + "</div></td>" +
@@ -493,14 +511,15 @@ export const ADMIN_HTML = `<!doctype html>
       } else if (act === "save-edit") {
         var box = document.querySelector(".edit[data-edit=\\"" + id.replace(/"/g, "") + "\\"]");
         if (!box) return;
-        var patch = {};
+        var fields = [];
         box.querySelectorAll("[data-f]").forEach(function (input) {
-          var key = input.getAttribute("data-f");
-          var orig = input.getAttribute("data-orig") || "";
-          var val = input.value;
-          if (val === orig) return;
-          patch[key] = (key === "discovered_at" || key === "activity_at") ? fromLocal(val) : val;
+          fields.push({
+            key: input.getAttribute("data-f"),
+            orig: input.getAttribute("data-orig") || "",
+            val: input.value
+          });
         });
+        var patch = collectEditPatch(fields);
         if (!Object.keys(patch).length) return;
 
         api("/api/admin/overrides/item/" + encodeURIComponent(id), { method: "PUT", body: patch }).then(afterMutation);
