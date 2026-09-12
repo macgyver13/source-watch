@@ -568,7 +568,9 @@ class PartialCollectorResponseTests(unittest.TestCase):
 
     def test_delving_missing_topics_notes_failure(self) -> None:
         build_seed_feed.COLLECTOR_FAILURES.clear()
-        with mock.patch.object(build_seed_feed, "delving_get_json", return_value={"posts": []}):
+        with mock.patch.object(
+            build_seed_feed, "delving_get_json", return_value={"posts": [{"id": 1, "topic_id": 1}]}
+        ):
             self.assertEqual(build_seed_feed.search_delving_topics("frost"), [])
         self.assertTrue(any("no topics array" in msg for msg in build_seed_feed.COLLECTOR_FAILURES))
 

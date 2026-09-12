@@ -341,6 +341,122 @@ class DelvingLiveCollectorTests(unittest.TestCase):
             build_seed_feed.delving_get_json = old
         self.assertEqual([t["id"] for t in topics], [876, 2203])
 
+    def test_zero_hit_search_is_empty_not_failure(self) -> None:
+        build_seed_feed.COLLECTOR_FAILURES.clear()
+        payload = {
+            "grouped_search_result": {"error": None, "post_ids": []},
+            "categories": [],
+            "groups": [],
+            "tags": [],
+            "users": [],
+        }
+        old = build_seed_feed.delving_get_json
+
+        def fake_get(url: str) -> dict:
+            self.assertIn("/search.json?", url)
+            return payload
+
+        build_seed_feed.delving_get_json = fake_get
+        try:
+            topics = build_seed_feed.search_delving_topics("chilldkg")
+        finally:
+            build_seed_feed.delving_get_json = old
+        self.assertEqual(topics, [])
+        self.assertEqual(build_seed_feed.COLLECTOR_FAILURES, [])
+
+    def test_zero_hit_search_with_empty_posts_is_empty_not_failure(self) -> None:
+        build_seed_feed.COLLECTOR_FAILURES.clear()
+        payload = {
+            "grouped_search_result": {"error": None, "post_ids": []},
+            "categories": [],
+            "groups": [],
+            "posts": [],
+            "tags": [],
+            "users": [],
+        }
+        old = build_seed_feed.delving_get_json
+
+        def fake_get(url: str) -> dict:
+            self.assertIn("/search.json?", url)
+            return payload
+
+        build_seed_feed.delving_get_json = fake_get
+        try:
+            topics = build_seed_feed.search_delving_topics("chilldkg")
+        finally:
+            build_seed_feed.delving_get_json = old
+        self.assertEqual(topics, [])
+        self.assertEqual(build_seed_feed.COLLECTOR_FAILURES, [])
+
+    def test_grouped_search_error_notes_failure(self) -> None:
+        build_seed_feed.COLLECTOR_FAILURES.clear()
+        payload = {
+            "grouped_search_result": {
+                "error": "Your search term is too short",
+                "post_ids": [],
+            },
+            "categories": [],
+            "groups": [],
+            "tags": [],
+            "users": [],
+        }
+        old = build_seed_feed.delving_get_json
+
+        def fake_get(url: str) -> dict:
+            self.assertIn("/search.json?", url)
+            return payload
+
+        build_seed_feed.delving_get_json = fake_get
+        try:
+            topics = build_seed_feed.search_delving_topics("chilldkg")
+        finally:
+            build_seed_feed.delving_get_json = old
+        self.assertEqual(topics, [])
+        self.assertEqual(len(build_seed_feed.COLLECTOR_FAILURES), 1)
+        self.assertIn("reported an error", build_seed_feed.COLLECTOR_FAILURES[0])
+        self.assertIn("Your search term is too short", build_seed_feed.COLLECTOR_FAILURES[0])
+
+    def test_wrong_type_topics_notes_failure(self) -> None:
+        build_seed_feed.COLLECTOR_FAILURES.clear()
+        payload = {"topics": "nope"}
+        old = build_seed_feed.delving_get_json
+
+        def fake_get(url: str) -> dict:
+            self.assertIn("/search.json?", url)
+            return payload
+
+        build_seed_feed.delving_get_json = fake_get
+        try:
+            topics = build_seed_feed.search_delving_topics("chilldkg")
+        finally:
+            build_seed_feed.delving_get_json = old
+        self.assertEqual(topics, [])
+        self.assertEqual(len(build_seed_feed.COLLECTOR_FAILURES), 1)
+        self.assertIn("no topics array", build_seed_feed.COLLECTOR_FAILURES[0])
+
+    def test_invalid_posts_array_notes_failure(self) -> None:
+        build_seed_feed.COLLECTOR_FAILURES.clear()
+        payload = {
+            "topics": [
+                {"id": 99, "title": "FROST", "slug": "frost", "created_at": "2026-01-01T00:00:00Z"},
+            ],
+            "posts": "nope",
+        }
+        old = build_seed_feed.delving_get_json
+
+        def fake_get(url: str) -> dict:
+            self.assertIn("/search.json?", url)
+            return payload
+
+        build_seed_feed.delving_get_json = fake_get
+        try:
+            topics = build_seed_feed.search_delving_topics("chilldkg")
+        finally:
+            build_seed_feed.delving_get_json = old
+        self.assertEqual(topics, [])
+        self.assertEqual(len(build_seed_feed.COLLECTOR_FAILURES), 1)
+        self.assertIn("invalid posts array", build_seed_feed.COLLECTOR_FAILURES[0])
+
 
 if __name__ == "__main__":
     unittest.main()
