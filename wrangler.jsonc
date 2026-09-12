@@ -32,10 +32,11 @@
       "simple": { "limit": 10, "period": 60 }
     }
   ],
-  "triggers": { "crons": ["17 * * * *"] },
+  "triggers": { "crons": [] },
   "vars": {
     "GITHUB_DISPATCH_REPO": "",
     "GITHUB_DISPATCH_WORKFLOW": "refresh-feed.yml",
-    "GITHUB_DISPATCH_REF": "main"
+    "GITHUB_DISPATCH_REF": "main",
+    "REFRESH_CRON": ""
   }
 }

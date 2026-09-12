@@ -124,7 +124,9 @@ python3 scripts/verify_public_artifacts.py
 
 ### Refresh
 
-The Worker cron (`17 * * * *`) is the scheduler. It POSTs GitHub `workflow_dispatch` for `.github/workflows/refresh-feed.yml`. That workflow runs the collector and ingests; it commits nothing. If `GITHUB_DISPATCH_REPO` or `GITHUB_DISPATCH_TOKEN` is empty, cron writes `refresh_skipped` and `/admin` shows `refresh not configured`.
+Refresh is opt-in. Template `wrangler.jsonc` has `triggers.crons: []`. To schedule, set the **same** expression in `triggers.crons` and `vars.REFRESH_CRON` (example `17 2 * * *` = 02:17 UTC daily). The Worker POSTs GitHub `workflow_dispatch` for `.github/workflows/refresh-feed.yml`. That workflow runs the collector and ingests; it commits nothing. If `GITHUB_DISPATCH_REPO` or `GITHUB_DISPATCH_TOKEN` is empty, cron writes `refresh_skipped` and `/admin` shows `refresh not configured`.
+
+`scheduled()` skips when `controller.cron` does not match `REFRESH_CRON` (`unexpected_cron`) or when the fire is outside that expression's UTC hour/minute window (`outside_cron_window`). That drops Cloudflare leftover cadences after a cron change. Cron changes need `npx wrangler deploy` or `npx wrangler triggers deploy`; version uploads do not replace triggers. If the old cadence continues, delete the trigger then add the new expression. Do not add GitHub `on.schedule` in addition to Worker cron.
 
 ### Admin
 

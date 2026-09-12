@@ -27,7 +27,7 @@ Seeds are pipeline input. In static mode Pages/Hugo only compile `site/` and ser
 
 Agent-oriented stand-up (first deploy, secrets, `/admin`): see `AGENTS.md`.
 
-Static instances refresh the feed locally (or with your own CI). Service instances use `.github/workflows/refresh-feed.yml` via Worker cron or `workflow_dispatch`.
+Static instances refresh the feed locally (or with your own CI). Service instances use `.github/workflows/refresh-feed.yml` via opt-in Worker cron or `workflow_dispatch`.
 
 
 ## Scope
@@ -98,7 +98,7 @@ Numbered first deploy, secret matrix, and operator notes: `AGENTS.md` **Service 
 
 1. `npx wrangler d1 create source-watch` → paste `database_id` into `wrangler.jsonc`.
 2. `npx wrangler d1 migrations apply source-watch --remote`
-3. `npx wrangler secret put ADMIN_TOKEN` and `INGEST_TOKEN` (collector env `SOURCE_WATCH_INGEST_TOKEN` must be the **same value** as `INGEST_TOKEN`). Optional `GITHUB_DISPATCH_TOKEN` plus `vars.GITHUB_DISPATCH_REPO` for hourly refresh.
+3. `npx wrangler secret put ADMIN_TOKEN` and `INGEST_TOKEN` (collector env `SOURCE_WATCH_INGEST_TOKEN` must be the **same value** as `INGEST_TOKEN`). Optional `GITHUB_DISPATCH_TOKEN` plus `vars.GITHUB_DISPATCH_REPO`. Refresh cron is off by default; set the same expression in `triggers.crons` and `vars.REFRESH_CRON` (for example `17 2 * * *` for 02:17 UTC daily).
 4. `python3 scripts/sync_hugo_content.py`. Former static site: `python3 scripts/promote_to_service.py` then sync again.
 5. Build `hugo --source site --minify`, deploy `npx wrangler deploy`, `HUGO_VERSION=0.164.0`.
 6. Set `serving.service_url` and `base_url` to `https://<worker>.<subdomain>.workers.dev/`. Ingest: `SOURCE_WATCH_INGEST_TOKEN=… python3 scripts/build_seed_feed.py`. `--seed-only` requires `--allow-partial-ingest`.
