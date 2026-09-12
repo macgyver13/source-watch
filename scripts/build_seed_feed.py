@@ -566,12 +566,23 @@ def search_delving_topics(query: str, max_results: int = 10) -> list[dict]:
     payload = delving_get_json(f"{DELVING_ORIGIN}/search.json?{params}")
     if not isinstance(payload, dict):
         return []
+    grouped = payload.get("grouped_search_result")
+    grouped_error = grouped.get("error") if isinstance(grouped, dict) else None
+    if grouped_error:
+        note_collector_failure(
+            f"Delving search reported an error for query {query!r}: {grouped_error}"
+        )
+        return []
     topics = payload.get("topics")
+    posts = payload.get("posts") if "posts" in payload else None
+    if topics is None and (posts is None or posts == []):
+        # Zero-hit Discourse search omits topics and either omits posts or returns posts: [].
+        return []
     if not isinstance(topics, list):
         note_collector_failure(f"Delving search returned no topics array for query {query!r}")
         return []
     if "posts" in payload and not isinstance(payload.get("posts"), list):
-        note_collector_failure(f"Delving search returned no topics array for query {query!r}")
+        note_collector_failure(f"Delving search returned an invalid posts array for query {query!r}")
         return []
     if any(not isinstance(post, dict) for post in (payload.get("posts") or [])):
         note_collector_failure(f"Delving search returned an invalid post for query {query!r}")
@@ -616,7 +627,13 @@ def list_delving_category(category: str, max_results: int = 30) -> list[dict]:
     if not isinstance(payload, dict):
         return []
     topic_list = payload.get("topic_list")
-    if not isinstance(topic_list, dict) or not isinstance(topic_list.get("topics"), list):
+    if not isinstance(topic_list, dict):
+        note_collector_failure(f"Delving category listing returned no topic_list for {path!r}")
+        return []
+    if topic_list.get("topics") is None and "more_topics_url" not in topic_list:
+        # Empty category: Discourse may omit the topics array entirely.
+        return []
+    if not isinstance(topic_list.get("topics"), list):
         note_collector_failure(f"Delving category listing returned no topics array for {path!r}")
         return []
     topics = topic_list["topics"]
