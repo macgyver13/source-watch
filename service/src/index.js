@@ -228,6 +228,33 @@ function refreshConfigured(env) {
   return Boolean(env.GITHUB_DISPATCH_REPO && env.GITHUB_DISPATCH_TOKEN);
 }
 
+export function cronWindowAllows(cronExpr, at) {
+  const parts = String(cronExpr || "").trim().split(/\s+/);
+  if (parts.length < 2) return true;
+  const minute = parts[0];
+  const hour = parts[1];
+  const t = at instanceof Date ? at : new Date(at);
+  if (Number.isNaN(t.getTime())) return false;
+  if (hour !== "*" && t.getUTCHours() !== Number(hour)) return false;
+  if (minute !== "*") {
+    const want = Number(minute);
+    if (!Number.isFinite(want)) return false;
+    const delta = Math.abs(t.getUTCMinutes() - want);
+    if (Math.min(delta, 60 - delta) > 15) return false;
+  }
+  return true;
+}
+
+export function scheduledRefreshAllowed(expectedCron, controller) {
+  const expected = String(expectedCron || "").trim();
+  const cron = String(controller?.cron || "");
+  const when = controller?.scheduledTime ?? Date.now();
+  if (expected && cron && cron !== expected) return { ok: false, reason: "unexpected_cron" };
+  if (expected && !cronWindowAllows(expected, when)) return { ok: false, reason: "outside_cron_window" };
+  return { ok: true, reason: null };
+}
+
+
 export async function dispatchRefresh(env) {
   if (!refreshConfigured(env)) return { configured: false };
   const repo = env.GITHUB_DISPATCH_REPO;
@@ -938,6 +965,13 @@ export default {
   },
 
   async scheduled(controller, env) {
+    const expected = String(env.REFRESH_CRON || "").trim();
+    const cron = String(controller?.cron || "");
+    const gate = scheduledRefreshAllowed(expected, controller);
+    if (!gate.ok) {
+      await db.audit(env, "refresh_skipped", cron || expected || null, `${gate.reason} expected=${expected}`);
+      return;
+    }
     const result = await dispatchRefresh(env);
     if (!result.configured) {
       await db.audit(env, "refresh_skipped", null, "refresh_not_configured");
@@ -947,7 +981,7 @@ export default {
       env,
       result.status === 204 ? "refresh_dispatched" : "refresh_failed",
       env.GITHUB_DISPATCH_REPO,
-      String(result.status),
+      `${result.status} cron=${cron || expected}`,
     );
   },
 };
