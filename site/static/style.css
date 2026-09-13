@@ -120,6 +120,7 @@ header nav a.active {
   background: transparent;
   white-space: nowrap;
 }
+button.pill { font: inherit; }
 .pill.type { color: var(--text); background: var(--surface-2); border-color: #333; }
 .pill.seeded { color: var(--muted); }
 .pill.filter {

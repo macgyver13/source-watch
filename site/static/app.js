@@ -326,14 +326,14 @@
 
     if (dateChips) {
       dateChips.innerHTML = DATE_FIELDS.map(function (spec) {
-        return '<span class="pill filter' + (spec.key === state.date ? " on" : "") + '" data-date="' + spec.key + '" role="button" tabindex="0">' + esc(dateLabel(spec.key)) + "</span>";
+        return '<button class="pill filter' + (spec.key === state.date ? " on" : "") + '" data-date="' + spec.key + '" type="button" aria-pressed="' + (spec.key === state.date) + '">' + esc(dateLabel(spec.key)) + "</button>";
       }).join("");
     }
     if (typeChips) {
       typeChips.innerHTML =
-        '<span class="pill filter on" data-kind="all" role="button" tabindex="0">All</span>' +
+        '<button class="pill filter on" data-kind="all" type="button" aria-pressed="true">All</button>' +
         SOURCE_KINDS.map(function (k) {
-          return '<span class="pill filter" data-kind="' + k + '" role="button" tabindex="0">' + k + "</span>";
+          return '<button class="pill filter" data-kind="' + k + '" type="button" aria-pressed="false">' + k + "</button>";
         }).join("");
     }
 
@@ -387,7 +387,9 @@
         if (!pill) return;
         state[key] = pill.getAttribute(attr) || fallback;
         container.querySelectorAll(".pill.filter").forEach(function (el) {
-          el.classList.toggle("on", el === pill);
+          var selected = el === pill;
+          el.classList.toggle("on", selected);
+          el.setAttribute("aria-pressed", String(selected));
         });
         paint();
       });
