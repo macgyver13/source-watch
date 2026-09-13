@@ -315,6 +315,41 @@ class GitHubLiveCollectorTests(unittest.TestCase):
             finally:
                 build_seed_feed.OUT = old_out
 
+    def test_repo_search_hit_emits_upstream_source_stamps(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            out = Path(tmp)
+            old_out = build_seed_feed.OUT
+            build_seed_feed.OUT = out
+            try:
+                _empty_artifacts(out)
+                cfg = _collector_cfg(query="atlas docs", tags=["docs", "candidate"])
+
+                def fake_fetch(_query: str) -> list[dict[str, object]]:
+                    return [
+                        {
+                            "full_name": "example/atlas-spec",
+                            "html_url": "https://github.com/example/atlas-spec",
+                            "description": "Specification and docs for the atlas protocol",
+                            "updated_at": "2026-08-29T12:00:00Z",
+                            "created_at": "2026-08-20T12:00:00Z",
+                            "pushed_at": "2026-08-30T00:00:00Z",
+                            "topics": ["docs", "specification"],
+                        }
+                    ]
+
+                items, _projects, _sources = build_seed_feed.build_items(
+                    cfg,
+                    github_repo_fetcher=fake_fetch,
+                    watch=ATLAS_WATCH,
+                )
+                self.assertEqual(len(items), 1)
+                item = items[0]
+                self.assertEqual(item["source_created_at"], "2026-08-20T12:00:00Z")
+                self.assertEqual(item["source_pushed_at"], "2026-08-30T00:00:00Z")
+                self.assertEqual(item["source_updated_at"], "2026-08-29T12:00:00Z")
+            finally:
+                build_seed_feed.OUT = old_out
+
     def test_github_created_at_is_the_discovery_date(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             out = Path(tmp)
@@ -431,6 +466,34 @@ class GitHubLiveCollectorTests(unittest.TestCase):
                 self.assertEqual(item["id"], "gh-pr-search:pr-discovery:seedsigner-seedsigner-949")
                 self.assertEqual(sources[item["id"]]["source_type"], "github_pull_request")
                 self.assertIn("seedsigner-seedsigner", projects)
+            finally:
+                build_seed_feed.OUT = old_out
+
+    def test_pr_search_hit_emits_merged_stamp(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            out = Path(tmp)
+            old_out = build_seed_feed.OUT
+            build_seed_feed.OUT = out
+            try:
+                _empty_artifacts(out)
+                hit = {
+                    **SEEDSIGNER_PR,
+                    "pull_request": {
+                        "html_url": "https://github.com/SeedSigner/seedsigner/pull/949",
+                        "merged_at": "2026-08-25T00:00:00Z",
+                    },
+                }
+                items, _projects, _sources = build_seed_feed.build_items(
+                    _pr_collector_cfg(),
+                    github_pr_fetcher=lambda _q: [hit],
+                    watch=SP_WATCH,
+                )
+                self.assertEqual(len(items), 1)
+                item = items[0]
+                self.assertEqual(item["source_merged_at"], "2026-08-25T00:00:00Z")
+                self.assertEqual(item["source_created_at"], "2026-07-13T19:18:57Z")
+                self.assertEqual(item["source_updated_at"], "2026-08-24T13:26:56Z")
+                self.assertIn("merged", item["tags"])
             finally:
                 build_seed_feed.OUT = old_out
 

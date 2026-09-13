@@ -328,6 +328,103 @@ class DiscoveryDateTests(unittest.TestCase):
             finally:
                 build_seed_feed.OUT = old_out
 
+    def test_seeded_repo_emits_upstream_source_stamps(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            out = Path(tmp)
+            old_out = build_seed_feed.OUT
+            build_seed_feed.OUT = out
+            try:
+                (out / "feed.json").write_text(json.dumps({"items": []}))
+                (out / "projects.json").write_text(json.dumps({"projects": []}))
+                (out / "sources.json").write_text(json.dumps({"sources": []}))
+
+                def fake_github(path: str):
+                    return {
+                        "created_at": "2024-01-02T00:00:00Z",
+                        "pushed_at": "2026-08-30T02:45:54Z",
+                        "updated_at": "2026-08-29T00:00:00Z",
+                    }
+
+                cfg = {"seeded_sources": {"github_repositories": [{
+                    "id": "example-lib",
+                    "repo": "example/lib",
+                    "project": "Example",
+                    "tags": [],
+                }]}}
+                items, _projects, _sources = build_seed_feed.build_items(
+                    cfg, github_json_fetcher=fake_github, skip_searches=True,
+                )
+                self.assertEqual(items[0]["source_created_at"], "2024-01-02T00:00:00Z")
+                self.assertEqual(items[0]["source_pushed_at"], "2026-08-30T02:45:54Z")
+                self.assertEqual(items[0]["source_updated_at"], "2026-08-29T00:00:00Z")
+                self.assertNotIn("source_merged_at", items[0])
+            finally:
+                build_seed_feed.OUT = old_out
+
+    def test_live_activity_false_omits_movement_stamps(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            out = Path(tmp)
+            old_out = build_seed_feed.OUT
+            build_seed_feed.OUT = out
+            try:
+                (out / "feed.json").write_text(json.dumps({"items": []}))
+                (out / "projects.json").write_text(json.dumps({"projects": []}))
+                (out / "sources.json").write_text(json.dumps({"sources": []}))
+
+                def fake_github(path: str):
+                    return {
+                        "created_at": "2024-01-02T00:00:00Z",
+                        "pushed_at": "2026-08-30T02:45:54Z",
+                        "updated_at": "2026-08-29T00:00:00Z",
+                    }
+
+                cfg = {"seeded_sources": {"github_repositories": [{
+                    "id": "example-lib",
+                    "repo": "example/lib",
+                    "project": "Example",
+                    "tags": [],
+                    "activity_at": "2026-05-29T18:55:54Z",
+                    "live_activity": False,
+                }]}}
+                items, _projects, _sources = build_seed_feed.build_items(
+                    cfg, github_json_fetcher=fake_github, skip_searches=True,
+                )
+                self.assertEqual(items[0]["source_created_at"], "2024-01-02T00:00:00Z")
+                self.assertNotIn("source_pushed_at", items[0])
+                self.assertNotIn("source_updated_at", items[0])
+                self.assertNotIn("source_merged_at", items[0])
+                self.assertEqual(items[0]["activity_at"], "2026-05-29T18:55:54Z")
+            finally:
+                build_seed_feed.OUT = old_out
+
+    def test_seed_only_rebuild_keeps_prior_source_stamps(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            out = Path(tmp)
+            old_out = build_seed_feed.OUT
+            build_seed_feed.OUT = out
+            try:
+                (out / "feed.json").write_text(json.dumps({
+                    "items": [{
+                        "id": "seed:example-lib",
+                        "source_pushed_at": "2026-08-30T02:45:54Z",
+                    }]
+                }))
+                (out / "projects.json").write_text(json.dumps({"projects": []}))
+                (out / "sources.json").write_text(json.dumps({"sources": []}))
+
+                cfg = {"seeded_sources": {"github_repositories": [{
+                    "id": "example-lib",
+                    "repo": "example/lib",
+                    "project": "Example",
+                    "tags": [],
+                }]}}
+                items, _projects, _sources = build_seed_feed.build_items(
+                    cfg, github_json_fetcher=None, skip_searches=True,
+                )
+                self.assertEqual(items[0]["source_pushed_at"], "2026-08-30T02:45:54Z")
+            finally:
+                build_seed_feed.OUT = old_out
+
     def test_live_repo_pushed_at_updates_activity(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             out = Path(tmp)

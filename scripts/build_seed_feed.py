@@ -653,6 +653,34 @@ def later_iso(*values: str | None) -> str | None:
     return max(stamps) if stamps else None
 
 
+SOURCE_STAMP_KEYS = (
+    "source_created_at",
+    "source_pushed_at",
+    "source_merged_at",
+    "source_updated_at",
+)
+
+
+def source_stamps(
+    fresh: dict[str, str | None],
+    old_item: dict,
+    drop: tuple[str, ...] = (),
+) -> dict[str, str]:
+    """Upstream API timestamps copied verbatim onto a feed item.
+
+    Keys missing from this crawl fall back to the previous item so seed-only
+    rebuilds keep the last known stamps. Keys in `drop` are omitted entirely.
+    """
+    out: dict[str, str] = {}
+    for key in SOURCE_STAMP_KEYS:
+        if key in drop:
+            continue
+        value = optional_iso(fresh.get(key)) or optional_iso(old_item.get(key))
+        if value:
+            out[key] = value
+    return out
+
+
 def iso_sort_key(value: str | None) -> datetime | None:
     dt = parse_iso(value)
     if dt is None:
@@ -671,14 +699,15 @@ def discovery_too_old(created_at: str | None, watch: dict | None) -> bool:
 
 
 
-def live_seed_github(entry: dict, kind: str, github_json_fetcher) -> tuple[str | None, str | None]:
+def live_seed_github(entry: dict, kind: str, github_json_fetcher) -> tuple[str | None, str | None, dict[str, str | None]]:
     """Return (created_at, activity_at) from GitHub for a seeded repo or PR.
 
     created_at becomes discovered_at when present. activity_at is omitted
     when live_activity is false (noisy monorepos); created_at is still used.
+    The third element carries raw upstream stamps for the item's source_* fields.
     """
     if github_json_fetcher is None:
-        return None, None
+        return None, None, {}
     skip_activity = entry.get("live_activity") is False
     if kind == "github_repositories":
         repo = str(entry.get("repo") or "").strip()
@@ -691,28 +720,35 @@ def live_seed_github(entry: dict, kind: str, github_json_fetcher) -> tuple[str |
                     repo = parts[0] + "/" + parts[1].removesuffix(".git")
 
         if not repo:
-            return None, None
+            return None, None, {}
         payload = github_json_fetcher(f"/repos/{repo}") or {}
         created = optional_iso(payload.get("created_at"))
-        activity = None if skip_activity else optional_iso(
-            payload.get("pushed_at") or payload.get("updated_at")
-        )
-        return created, activity
+        pushed = optional_iso(payload.get("pushed_at"))
+        updated = optional_iso(payload.get("updated_at"))
+        activity = None if skip_activity else (pushed or updated)
+        return created, activity, {
+            "source_created_at": created,
+            "source_pushed_at": pushed,
+            "source_updated_at": updated,
+        }
 
     if kind == "github_pull_requests":
         match = PR_URL_RE.match(str(entry.get("url") or ""))
         if not match:
-            return None, None
+            return None, None, {}
         owner, name, number = match.group(1), match.group(2), match.group(3)
         payload = github_json_fetcher(f"/repos/{owner}/{name}/pulls/{number}") or {}
         created = optional_iso(payload.get("created_at"))
-        activity = None if skip_activity else later_iso(
-            optional_iso(payload.get("merged_at")),
-            optional_iso(payload.get("updated_at")),
-            optional_iso(payload.get("closed_at")),
-        )
-        return created, activity
-    return None, None
+        merged = optional_iso(payload.get("merged_at"))
+        updated = optional_iso(payload.get("updated_at"))
+        closed = optional_iso(payload.get("closed_at"))
+        activity = None if skip_activity else later_iso(merged, updated, closed)
+        return created, activity, {
+            "source_created_at": created,
+            "source_merged_at": merged,
+            "source_updated_at": updated,
+        }
+    return None, None, {}
 
 
 
@@ -931,7 +967,7 @@ def build_seeded_item(
     old_item = existing_items.get(item_id, {})
     seed_discovered = optional_iso(entry.get("discovered_at"))
     seed_activity = optional_iso(entry.get("activity_at"))
-    live_created, live_activity = live_seed_github(entry, kind, github_json_fetcher)
+    live_created, live_activity, live_stamps = live_seed_github(entry, kind, github_json_fetcher)
     if discovery_too_old(live_created, watch):
         live_created = None
     discovered_at = live_created or seed_discovered or discovery_time(old_item, observed_at)
@@ -940,6 +976,11 @@ def build_seeded_item(
         "event_time": discovered_at,
         "discovered_at": discovered_at,
     })
+    stamp_drop = () if entry.get("live_activity") is not False else (
+        "source_pushed_at",
+        "source_merged_at",
+        "source_updated_at",
+    )
     item = {
         "id": item_id,
         "title": title_for(entry, kind),
@@ -953,6 +994,7 @@ def build_seeded_item(
         "discovered_at": discovered_at,
         "event_time": discovered_at,
         "activity_at": activity_at,
+        **source_stamps(live_stamps, old_item, stamp_drop),
         "observed_at": observed_at,
         "last_seen_at": observed_at,
         "confidence": "seeded_source",
@@ -1042,6 +1084,11 @@ def build_github_repo_item(
         "discovered_at": discovered_at,
         "event_time": discovered_at,
         "activity_at": activity_at,
+        **source_stamps({
+            "source_created_at": repo.get("created_at"),
+            "source_pushed_at": repo.get("pushed_at"),
+            "source_updated_at": repo.get("updated_at"),
+        }, old_item),
         "observed_at": observed_at,
         "last_seen_at": observed_at,
         "confidence": "github_search",
@@ -1137,6 +1184,11 @@ def build_github_pr_item(
         "discovered_at": discovered_at,
         "event_time": discovered_at,
         "activity_at": activity_at,
+        **source_stamps({
+            "source_created_at": hit.get("created_at"),
+            "source_merged_at": pr_meta.get("merged_at"),
+            "source_updated_at": hit.get("updated_at"),
+        }, old_item),
         "observed_at": observed_at,
         "last_seen_at": observed_at,
         "confidence": "github_pr_search",
@@ -1228,6 +1280,10 @@ def build_delving_topic_item(
         "discovered_at": discovered_at,
         "event_time": discovered_at,
         "activity_at": activity_at,
+        **source_stamps({
+            "source_created_at": topic.get("created_at"),
+            "source_updated_at": topic.get("last_posted_at") or topic.get("bumped_at"),
+        }, old_item),
         "observed_at": observed_at,
         "last_seen_at": observed_at,
         "confidence": confidence,
@@ -1319,9 +1375,7 @@ def discovery_time(old: dict, observed_at: str) -> str:
 def item_activity_at(item: dict) -> str:
     """Best single timeline date for activity-oriented views."""
     return (
-        item.get("source_updated_at")
-        or item.get("source_published_at")
-        or item.get("activity_at")
+        item.get("activity_at")
         or item.get("event_time")
         or item.get("discovered_at")
         or item.get("observed_at")

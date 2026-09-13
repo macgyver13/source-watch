@@ -516,9 +516,13 @@ test("D1 ingest rejects javascript: URLs and canonicalizes week slugs", async ()
     assert.equal(r.status, 200, r.text);
     assert.deepEqual((r.json?.items || []).map((row) => row.id).sort(), before);
 
+    r = await req(worker, "/weeks/", { redirect: "manual" });
+    assert.equal(r.status, 302, r.text);
+    assert.equal(r.headers.get("Location") || r.headers.get("location"), "/weeks/2026-W01/");
+
     r = await req(worker, "/weeks/2026-W1/", { redirect: "manual" });
     assert.equal(r.status, 301, r.text);
     const location = r.headers.get("Location") || r.headers.get("location") || "";
-    assert.ok(location.endsWith("/weeks/2026-W01/"), location);
+    assert.equal(location, "/weeks/2026-W01/");
   });
 });

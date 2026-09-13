@@ -44,6 +44,13 @@ function unauthorized() {
   });
 }
 
+function redirect(location, status = 302) {
+  return new Response(null, {
+    status,
+    headers: { Location: location, "Cache-Control": PUBLIC_CACHE },
+  });
+}
+
 function timingSafeEqual(a, b) {
   const left = String(a ?? "");
   const right = String(b ?? "");
@@ -193,7 +200,7 @@ async function serveWeeks(request, env, path) {
     if (!Array.isArray(weeks) || !weeks.length) {
       return env.ASSETS.fetch(request);
     }
-    return Response.redirect(new URL(`/weeks/${weeks[0].slug}/`, request.url).toString(), 302);
+    return redirect(`/weeks/${weeks[0].slug}/`);
   }
   const weekMatch = path.match(/^\/weeks\/(\d{4}-W\d{1,2})\/?$/);
   if (weekMatch) {
@@ -212,7 +219,7 @@ async function serveWeeks(request, env, path) {
       return new Response("Not found", { status: 404, headers: { "Cache-Control": PUBLIC_CACHE } });
     }
     if (slug !== padded && known.has(padded)) {
-      return Response.redirect(new URL("/weeks/" + padded + "/", request.url).toString(), 301);
+      return redirect("/weeks/" + padded + "/", 301);
     }
     const assetReq = new Request(new URL("/weeks/live/", request.url), request);
     const res = await env.ASSETS.fetch(assetReq);

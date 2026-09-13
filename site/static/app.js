@@ -8,6 +8,14 @@
     package_crate: "crate",
     delving_topic: "topic"
   };
+  var SOURCE_KINDS = ["repo", "pr", "docs", "crate", "topic"];
+  var DATE_FIELDS = [
+    { key: "activity_at", field: null },
+    { key: "updated_at", field: "source_updated_at" },
+    { key: "merged_at", field: "source_merged_at" },
+    { key: "pushed_at", field: "source_pushed_at" },
+    { key: "created_at", field: "source_created_at" }
+  ];
   var TAG_ALIAS = {};
   var GENERATED_SUMMARY = /^seeded monitored source for /i;
   var GENERATED_QUERY = /^github repository matched .+ live collector query:/i;
@@ -145,7 +153,7 @@
   }
 
   function itemDate(item) {
-    return item.activity_at || item.source_updated_at || item.source_published_at || item.discovered_at || item.event_time || item.observed_at;
+    return item.activity_at || item.discovered_at || item.event_time || item.observed_at;
   }
 
   function weekItemDate(item) {
@@ -298,38 +306,102 @@
     });
   }
 
+  function fieldValue(item, spec) {
+    return (spec.field ? item[spec.field] : itemDate(item)) || "";
+  }
+
+  function dateLabel(key) {
+    return String(key || "").replace(/_at$/, "");
+  }
+
   function renderFeed(items) {
     var root = document.getElementById("activity-feed");
     if (!root) return;
+    var dateChips = document.getElementById("activity-date-chips");
+    var typeChips = document.getElementById("activity-type-chips");
+    var countEl = document.getElementById("activity-count");
     var topic = topicQuery();
-    var list = topic ? items.filter(function (item) { return itemMatchesTopic(item, topic); }) : items;
-    var html = '<div class="feed-label">Latest activity</div>';
-    if (!list.length) {
-      root.innerHTML = html + '<p class="muted">No activity yet.</p>';
-      return;
-    }
-    sortActivity(list).forEach(function (item) {
-      var tags = topicTags(item, 3).map(function (t) {
-        return '<span class="tag">' + esc(t) + "</span>";
+    var pool = topic ? items.filter(function (item) { return itemMatchesTopic(item, topic); }) : items;
+    var state = { date: "activity_at", kind: "all" };
+
+    if (dateChips) {
+      dateChips.innerHTML = DATE_FIELDS.map(function (spec) {
+        return '<span class="pill filter' + (spec.key === state.date ? " on" : "") + '" data-date="' + spec.key + '" role="button" tabindex="0">' + esc(dateLabel(spec.key)) + "</span>";
       }).join("");
-      html +=
-        '<article class="item">' +
-          '<div class="item-top">' +
-            "<h3><a href=\"" + esc(safeHref(item.source_url)) + "\">" + esc(displayTitle(item)) + "</a></h3>" +
-          "</div>" +
-          "<p>" + esc(displaySummary(item)) + "</p>" +
-          '<div class="item-meta"><span class="proj">' + esc(item.project || "") + '</span><span class="time" title="' + esc(formatStamp(itemDate(item))) + '">' + esc(humanDate(itemDate(item))) + "</span></div>" +
-          (tags ? '<div class="tags">' + tags + "</div>" : "") +
-        "</article>";
-    });
-    root.innerHTML = html;
+    }
+    if (typeChips) {
+      typeChips.innerHTML =
+        '<span class="pill filter on" data-kind="all" role="button" tabindex="0">All</span>' +
+        SOURCE_KINDS.map(function (k) {
+          return '<span class="pill filter" data-kind="' + k + '" role="button" tabindex="0">' + k + "</span>";
+        }).join("");
+    }
+
+    function activeSpec() {
+      for (var i = 0; i < DATE_FIELDS.length; i++) {
+        if (DATE_FIELDS[i].key === state.date) return DATE_FIELDS[i];
+      }
+      return DATE_FIELDS[0];
+    }
+
+    function paint() {
+      var spec = activeSpec();
+      var list = pool.filter(function (item) {
+        if (state.kind !== "all" && sourceKind(item) !== state.kind) return false;
+        return !!fieldValue(item, spec);
+      }).sort(function (a, b) {
+        var da = fieldValue(a, spec);
+        var db = fieldValue(b, spec);
+        return db < da ? -1 : db > da ? 1 : 0;
+      });
+      if (countEl) {
+        countEl.innerHTML = "<b>" + list.length + " item" + (list.length === 1 ? "" : "s") + "</b> · sorted by " + esc(dateLabel(spec.key));
+      }
+      var html = '<div class="feed-label">Latest activity</div>';
+      if (!list.length) {
+        root.innerHTML = html + '<p class="muted">No items with ' + esc(dateLabel(spec.key)) + ".</p>";
+        return;
+      }
+      list.forEach(function (item) {
+        var when = fieldValue(item, spec);
+        var tags = topicTags(item, 3).map(function (t) {
+          return '<span class="tag">' + esc(t) + "</span>";
+        }).join("");
+        html +=
+          '<article class="item">' +
+            '<div class="item-top">' +
+              "<h3><a href=\"" + esc(safeHref(item.source_url)) + "\">" + esc(displayTitle(item)) + "</a></h3>" +
+            "</div>" +
+            "<p>" + esc(displaySummary(item)) + "</p>" +
+            '<div class="item-meta">' + kindBadge(item) + '<span class="proj">' + esc(item.project || "") + '</span><span class="time" title="' + esc(formatStamp(when)) + '">' + esc(humanDate(when)) + "</span></div>" +
+            (tags ? '<div class="tags">' + tags + "</div>" : "") +
+          "</article>";
+      });
+      root.innerHTML = html;
+    }
+
+    function wireChips(container, attr, key, fallback) {
+      if (!container) return;
+      container.addEventListener("click", function (ev) {
+        var pill = ev.target.closest("[" + attr + "]");
+        if (!pill) return;
+        state[key] = pill.getAttribute(attr) || fallback;
+        container.querySelectorAll(".pill.filter").forEach(function (el) {
+          el.classList.toggle("on", el === pill);
+        });
+        paint();
+      });
+    }
+    wireChips(dateChips, "data-date", "date", "activity_at");
+    wireChips(typeChips, "data-kind", "kind", "all");
+    paint();
   }
 
   function renderTeaser(items) {
     var root = document.getElementById("activity-teaser");
     if (!root) return;
     var head = root.querySelector(".feed-head");
-    var list = sortActivity(items).slice(0, 2);
+    var list = sortActivity(items).slice(0, 5);
     var html = head ? head.outerHTML : "";
     if (!list.length) {
       root.innerHTML = html + '<p class="muted">No activity yet.</p>';
@@ -340,7 +412,7 @@
         '<article class="item">' +
           "<h3><a href=\"" + esc(safeHref(item.source_url)) + "\">" + esc(displayTitle(item)) + "</a></h3>" +
           "<p>" + esc(displaySummary(item)) + "</p>" +
-          '<div class="item-meta"><span class="proj">' + esc(item.project || "") + '</span><span class="time" title="' + esc(formatStamp(itemDate(item))) + '">' + esc(humanDate(itemDate(item))) + "</span></div>" +
+          '<div class="item-meta">' + kindBadge(item) + '<span class="proj">' + esc(item.project || "") + '</span><span class="time" title="' + esc(formatStamp(itemDate(item))) + '">' + esc(humanDate(itemDate(item))) + "</span></div>" +
         "</article>";
     });
     root.innerHTML = html;
@@ -348,7 +420,7 @@
 
   function renderWeek(allItems, weekSlug) {
     var canonicalSlug = (parseWeekSlug(weekSlug) || {}).slug || weekSlug;
-    if (document.querySelectorAll(".rail a[data-week]").length === 0 || !document.querySelector(".rail a[data-week*='-W']")) {
+    if (document.querySelectorAll(".rail a[data-week]").length === 0 || !document.querySelector(".rail a[data-week*='-W']") || !document.querySelector(".rail .lbl")) {
 
       var slugs = [];
       var seen = {};
@@ -367,8 +439,9 @@
         rail.innerHTML = slugs.map(function (slug) {
           var p = parseWeekSlug(slug);
           var num = p ? String(p.week) : slug;
+          var year = p ? String(p.year).slice(-2) : "";
           var on = slug === canonicalSlug ? ' class="on"' : "";
-          return '<a href="/weeks/' + slug + '/" data-week="' + slug + '"' + on + '><span class="wk">W' + num + ' <span class="n"></span></span><span class="sub"></span></a>';
+          return '<a href="/weeks/' + slug + '/" data-week="' + slug + '"' + on + '><span class="wk"><span class="lbl">W' + num + (year ? " ’" + year : "") + '</span> <span class="n"></span></span><span class="sub"></span></a>';
         }).join("");
       }
     }
@@ -401,6 +474,20 @@
         if (sub) sub.textContent = formatWeekRange(p.year, p.week);
         var countEl = a.querySelector(".n");
         if (countEl) countEl.textContent = String(n);
+        var wk = a.querySelector(".wk");
+        var lbl = a.querySelector(".lbl");
+        if (!lbl && wk) {
+          lbl = document.createElement("span");
+          lbl.className = "lbl";
+          wk.insertBefore(lbl, wk.firstChild);
+          var node = lbl.nextSibling;
+          while (node) {
+            var next = node.nextSibling;
+            if (node.nodeType === 3) wk.removeChild(node);
+            node = next;
+          }
+        }
+        if (lbl) lbl.textContent = "W" + p.week + " ’" + String(p.year).slice(-2);
       });
     }
 
@@ -424,7 +511,9 @@
         return (
           '<div class="row">' +
             "<div>" +
-              '<a class="title" href="' + esc(safeHref(item.source_url)) + '">' + esc(displayTitle(item)) + "</a>" +
+              '<div class="left">' + kindBadge(item) +
+                '<a class="title" href="' + esc(safeHref(item.source_url)) + '">' + esc(displayTitle(item)) + "</a>" +
+              "</div>" +
               '<div class="sum">' + esc(displaySummary(item)) + "</div>" +
             "</div>" +
             '<span class="time">' + esc(humanDate(weekItemDate(item))) + "</span>" +
@@ -486,6 +575,11 @@
 
   function sourceKind(item) {
     return TYPE_DOT[item.source_type] || "repo";
+  }
+
+  function kindBadge(item) {
+    var kind = sourceKind(item);
+    return '<span class="kind"><i class="dot ' + kind + '"></i>' + esc(kind) + "</span>";
   }
 
 
@@ -603,12 +697,11 @@
     var state = { q: "", kind: "all" };
     var chips = document.getElementById("source-chips");
     var search = document.getElementById("source-search");
-    var kinds = ["repo", "pr", "docs", "crate", "topic"];
 
     if (chips) {
       chips.innerHTML =
         '<span class="pill filter on" data-kind="all" role="button" tabindex="0">All</span>' +
-        kinds.map(function (k) {
+        SOURCE_KINDS.map(function (k) {
           return '<span class="pill filter" data-kind="' + k + '" role="button" tabindex="0">' + k + "</span>";
         }).join("");
     }

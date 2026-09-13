@@ -8,4 +8,5 @@ __pycache__/
 .wrangler/
 node_modules/
 .dev.vars
+wrangler.dev.jsonc
 
