@@ -36,7 +36,6 @@
   "vars": {
     "GITHUB_DISPATCH_REPO": "",
     "GITHUB_DISPATCH_WORKFLOW": "refresh-feed.yml",
-    "GITHUB_DISPATCH_REF": "main",
-    "REFRESH_CRON": ""
+    "GITHUB_DISPATCH_REF": "main"
   }
 }
