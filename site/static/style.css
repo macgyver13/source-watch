@@ -164,7 +164,7 @@ body[data-page="home"] .hero { padding: 28px 0 8px; }
   font-variant-numeric: tabular-nums;
 }
 
-.start { margin: 22px 0 26px; }
+.start { margin: 22px 0 26px; max-width: 760px; }
 .start-label {
   font-size: 11px;
   letter-spacing: .12em;
@@ -174,7 +174,7 @@ body[data-page="home"] .hero { padding: 28px 0 8px; }
 }
 .start-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: 1fr 1fr;
   gap: 8px;
 }
 .start-tile {
@@ -621,7 +621,6 @@ footer {
   }
   header nav { flex: 1 1 100%; gap: 14px; order: 3; }
   header nav a { padding: 4px 0 8px; }
-  .start-grid { grid-template-columns: 1fr 1fr; }
   .grid { grid-template-columns: 1fr 1fr; }
   .brief { grid-template-columns: 1fr; }
   .sp-grid { grid-template-columns: 1fr 1fr; }

@@ -148,8 +148,8 @@ Promote a candidate for real: Rules → Seed additions (or YAML), then Refresh /
 
 | Field | Meaning | UI |
 |---|---|---|
-| `discovered_at` | When the source appeared | Weeks, "new this week", week row timestamps |
-| `activity_at` | Last real movement | Home feed, project cards |
+| `discovered_at` | When the source appeared | Weeks, start-here "new this week", week row timestamps |
+| `activity_at` | Last real movement | Home feed, hero "active in the last 7 days", project cards |
 | `observed_at` | Last crawl | Not shown as the event time |
 
 Live GitHub search hits **and** seeded GitHub repos/PRs: `discovered_at` = repo/PR `created_at` when that stamp is on or after `watch.yaml` `discovered_after` (unset = no floor). Earlier `created_at` is ignored: live hits are dropped, seeded sources keep yaml/`first-seen`. Weeks still omit those seeded rows when `discovered_at` is before the floor, so repo birth dates do not keep old week pages. `activity_at` = repo `pushed_at` or PR `merged_at`/`updated_at`. Live Delving hits: `discovered_at` = topic `created_at`, `activity_at` = `last_posted_at`, with the same floor. Do not use crawl time as discovery.
@@ -163,7 +163,7 @@ Live GitHub search hits **and** seeded GitHub repos/PRs: `discovered_at` = repo/
 
 - Project cards list linked sources (PRs as `#123` → that PR).
 - Sources page: search + repo/PR/docs/crate chips.
-- Weeks rail: per-week item counts. Rows sort by discovery; timestamps are `discovered_at` (always inside that ISO week).
+- Weeks rail: per-week item counts. Rows sort by discovery; timestamps are `discovered_at` (always inside that ISO week). Start-here "This week" uses that same ISO-week count. The home hero chip is a rolling 7-day `activity_at` window, not the ISO week.
 - Header `nav` styles do not leak onto the week rail.
 
 ## Checks before you stop

@@ -267,19 +267,17 @@
   function fillStartCounts(feed, projects, sources) {
     var nSources = (sources.sources || []).length || (feed.items || []).length;
     var nProjects = (projects.projects || []).length;
-    document.querySelectorAll("[data-count=sources]").forEach(function (el) {
-      el.textContent = nSources + " source" + (nSources === 1 ? "" : "s");
-    });
     document.querySelectorAll("[data-count=projects]").forEach(function (el) {
       el.textContent = nProjects + " project" + (nProjects === 1 ? "" : "s");
     });
     var now = new Date();
     var cur = isoWeekParts(now);
-    var weekNew = (feed.items || []).filter(function (item) {
-      var d = parseDate(item.discovered_at || item.event_time);
+    var slug = cur.year + "-W" + String(cur.week).padStart(2, "0");
+    var items = feed.items || [];
+    var weekNew = itemsForWeek(items, slug).length;
+    var recent = items.filter(function (item) {
+      var d = parseDate(itemDate(item));
       if (!d) return false;
-      var p = isoWeekParts(d);
-      if (p.year === cur.year && p.week === cur.week) return true;
       var days = (now.getTime() - d.getTime()) / 86400000;
       return days >= 0 && days <= 7;
     }).length;
@@ -288,7 +286,7 @@
     });
     setText("stat-sources", String(nSources));
     setText("stat-projects", String(nProjects));
-    setText("stat-new", String(weekNew));
+    setText("stat-new", String(recent));
   }
 
   function topicQuery() {
