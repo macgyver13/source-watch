@@ -4,11 +4,18 @@ from __future__ import annotations
 
 import importlib.util
 import json
+import os
 import tempfile
 import unittest
+from email.message import EmailMessage
+from io import BytesIO
 from pathlib import Path
 from types import ModuleType
 from typing import Any, cast
+from unittest import mock
+from urllib.error import HTTPError
+
+os.environ.setdefault("SOURCE_WATCH_DELVING_MIN_INTERVAL", "0")
 
 ROOT = Path(__file__).resolve().parents[1]
 SCRIPT = ROOT / "scripts" / "build_seed_feed.py"
@@ -456,6 +463,102 @@ class DelvingLiveCollectorTests(unittest.TestCase):
         self.assertEqual(topics, [])
         self.assertEqual(len(build_seed_feed.COLLECTOR_FAILURES), 1)
         self.assertIn("invalid posts array", build_seed_feed.COLLECTOR_FAILURES[0])
+
+
+class _FakeHttpBody:
+    def __init__(self, payload) -> None:
+        self._body = json.dumps(payload).encode("utf-8")
+
+    def read(self):
+        return self._body
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *args):
+        return False
+
+
+def _http_error(url: str, code: int, msg: str, retry_after: str | None = None) -> HTTPError:
+    headers = EmailMessage()
+    if retry_after is not None:
+        headers["Retry-After"] = retry_after
+    err = HTTPError(url, code, msg, hdrs=headers, fp=BytesIO())
+    err.close()
+    return err
+
+
+class DelvingThrottleTests(unittest.TestCase):
+    def setUp(self) -> None:
+        self._old = os.environ.get("SOURCE_WATCH_DELVING_MIN_INTERVAL")
+        os.environ["SOURCE_WATCH_DELVING_MIN_INTERVAL"] = "5"
+        build_seed_feed._last_delving_at = 0.0
+        build_seed_feed.COLLECTOR_FAILURES.clear()
+
+    def tearDown(self) -> None:
+        if self._old is None:
+            os.environ.pop("SOURCE_WATCH_DELVING_MIN_INTERVAL", None)
+        else:
+            os.environ["SOURCE_WATCH_DELVING_MIN_INTERVAL"] = self._old
+        build_seed_feed._last_delving_at = 0.0
+
+    def test_spaces_delving_gets_by_min_interval(self) -> None:
+        now = {"t": 100.0}
+        sleeps: list[float] = []
+
+        def fake_mono() -> float:
+            return now["t"]
+
+        def fake_sleep(seconds: float) -> None:
+            sleeps.append(seconds)
+            now["t"] += seconds
+
+        with mock.patch.object(build_seed_feed.time, "monotonic", side_effect=fake_mono), mock.patch.object(
+            build_seed_feed.time, "sleep", side_effect=fake_sleep
+        ), mock.patch.object(
+            build_seed_feed, "urlopen", side_effect=lambda *_a, **_k: _FakeHttpBody({"ok": True})
+        ):
+            self.assertEqual(
+                build_seed_feed.delving_get_json("https://delvingbitcoin.org/search.json?q=a"),
+                {"ok": True},
+            )
+            self.assertEqual(
+                build_seed_feed.delving_get_json("https://delvingbitcoin.org/search.json?q=b"),
+                {"ok": True},
+            )
+        self.assertEqual(sleeps, [5.0])
+
+    def test_retries_429_using_retry_after(self) -> None:
+        url = "https://delvingbitcoin.org/search.json?q=silentpayments"
+        calls = {"n": 0}
+
+        def fake_open(*_a, **_k):
+            calls["n"] += 1
+            if calls["n"] == 1:
+                raise _http_error(url, 429, "Too Many Requests", retry_after="7")
+            return _FakeHttpBody({"topics": [], "posts": []})
+
+        with mock.patch.object(build_seed_feed.time, "sleep") as sleep, mock.patch.object(
+            build_seed_feed, "urlopen", side_effect=fake_open
+        ):
+            payload = build_seed_feed.delving_get_json(url)
+        self.assertEqual(payload, {"topics": [], "posts": []})
+        self.assertEqual(build_seed_feed.COLLECTOR_FAILURES, [])
+        self.assertGreaterEqual(calls["n"], 2)
+        self.assertIn(7.0, [call.args[0] for call in sleep.call_args_list])
+
+    def test_exhausted_429_notes_collector_failure(self) -> None:
+        url = "https://delvingbitcoin.org/search.json?q=silentpayments"
+
+        def always_429(*_a, **_k):
+            raise _http_error(url, 429, "Too Many Requests", retry_after="1")
+
+        with mock.patch.object(build_seed_feed.time, "sleep"), mock.patch.object(
+            build_seed_feed, "urlopen", side_effect=always_429
+        ):
+            self.assertIsNone(build_seed_feed.delving_get_json(url))
+        self.assertEqual(len(build_seed_feed.COLLECTOR_FAILURES), 1)
+        self.assertIn("429", build_seed_feed.COLLECTOR_FAILURES[0])
 
 
 if __name__ == "__main__":

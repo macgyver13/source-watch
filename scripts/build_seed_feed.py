@@ -19,11 +19,12 @@ import json
 import os
 import re
 import sys
+import time
 from datetime import datetime, timezone
 from email.utils import format_datetime, parsedate_to_datetime
 from pathlib import Path
+from urllib.error import HTTPError
 from urllib.parse import urlencode, urlparse
-
 from urllib.request import Request, urlopen
 
 _SCRIPTS = Path(__file__).resolve().parent
@@ -506,18 +507,81 @@ def delving_headers() -> dict[str, str]:
     }
 
 
-def delving_get_json(url: str) -> dict | None:
-    request = Request(url, headers=delving_headers())
+# Discourse anonymous /search.json defaults (delvingbitcoin.org):
+# 2/sec and 15/min per IP. Space requests so a collect stays under that.
+DELVING_MIN_INTERVAL_SEC = 5.0
+DELVING_429_RETRIES = 4
+_last_delving_at = 0.0
+
+
+def delving_min_interval() -> float:
+    raw = os.environ.get("SOURCE_WATCH_DELVING_MIN_INTERVAL")
+    if raw is None or str(raw).strip() == "":
+        return DELVING_MIN_INTERVAL_SEC
     try:
-        with urlopen(request, timeout=30) as response:
-            payload = json.loads(response.read().decode("utf-8"))
-    except Exception as exc:
-        note_collector_failure(f"Delving GET {url} failed: {exc}")
+        return max(0.0, float(raw))
+    except ValueError:
+        return DELVING_MIN_INTERVAL_SEC
+
+
+def wait_delving_slot() -> None:
+    global _last_delving_at
+    interval = delving_min_interval()
+    if _last_delving_at and interval > 0:
+        delay = interval - (time.monotonic() - _last_delving_at)
+        if delay > 0:
+            time.sleep(delay)
+    _last_delving_at = time.monotonic()
+
+
+def retry_after_seconds(exc: HTTPError) -> float | None:
+    headers = exc.headers
+    if headers is None:
         return None
-    if not isinstance(payload, dict):
-        note_collector_failure(f"Delving GET {url} returned {type(payload).__name__}, expected object")
+    raw = str(headers.get("Retry-After") or "").strip()
+    if not raw:
         return None
-    return payload
+    if raw.isdigit():
+        return float(raw)
+    try:
+        dt = parsedate_to_datetime(raw)
+        if dt.tzinfo is None:
+            dt = dt.replace(tzinfo=timezone.utc)
+        return max(0.0, (dt - datetime.now(timezone.utc)).total_seconds())
+    except (TypeError, ValueError, OverflowError):
+        return None
+
+
+def delving_backoff(attempt: int, retry_after: float | None) -> float:
+    if retry_after is not None:
+        return min(60.0, max(0.0, retry_after))
+    return min(60.0, DELVING_MIN_INTERVAL_SEC * (2 ** attempt))
+
+
+def delving_get_json(url: str) -> dict | None:
+    attempts = DELVING_429_RETRIES + 1
+    for attempt in range(attempts):
+        wait_delving_slot()
+        request = Request(url, headers=delving_headers())
+        try:
+            with urlopen(request, timeout=30) as response:
+                payload = json.loads(response.read().decode("utf-8"))
+        except HTTPError as exc:
+            if exc.code == 429 and attempt + 1 < attempts:
+                time.sleep(delving_backoff(attempt, retry_after_seconds(exc)))
+                continue
+            note_collector_failure(f"Delving GET {url} failed: {exc}")
+            return None
+        except Exception as exc:
+            note_collector_failure(f"Delving GET {url} failed: {exc}")
+            return None
+        if not isinstance(payload, dict):
+            note_collector_failure(
+                f"Delving GET {url} returned {type(payload).__name__}, expected object"
+            )
+            return None
+        return payload
+    return None
 
 
 def discourse_tag_names(tags) -> list[str]:

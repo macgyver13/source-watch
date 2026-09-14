@@ -68,6 +68,8 @@ A candidate is a search or category hit that passed `watch.yaml`
 `relevance` and, if set, `discovered_after`; it is not yet in the accepted
 `seeded_sources` catalog. Hits whose name, URL, or text contains
 `source-watch` (this engine and forks) are dropped.
+Delving anonymous search is 2/sec and 15/min per IP; the collector waits
+5s between Delving HTTP calls and retries HTTP 429.
 Seeded GitHub repos/PRs take live `created_at` as `discovered_at` when that
 stamp is on or after `discovered_after`; older `created_at` keeps the seed
 date. Activity moves if GitHub or Delving is newer. Docs, crates, and

@@ -42,7 +42,7 @@ export const ADMIN_HTML = `<!doctype html>
 </head>
 <body>
   <div id="login">
-    <h1>Admin</h1>
+    <h1>Source Watch admin</h1>
     <p class="muted">Token is stored in sessionStorage and sent as a Bearer header. This page contains no data.</p>
     <input id="token" type="password" placeholder="ADMIN_TOKEN" autocomplete="off">
     <button class="primary" id="login-btn">Open console</button>
@@ -664,3 +664,16 @@ export const ADMIN_HTML = `<!doctype html>
 </body>
 </html>
 `;
+
+function escapeAdminHtml(value) {
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
+export function adminPageHtml(name) {
+  const watchName = String(name || "").trim() || "Source Watch";
+  return ADMIN_HTML.replaceAll("Source Watch admin", escapeAdminHtml(`${watchName} admin`));
+}

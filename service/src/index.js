@@ -1,4 +1,4 @@
-import { ADMIN_HTML } from "./admin-ui.js";
+import { adminPageHtml } from "./admin-ui.js";
 import * as db from "./db.js";
 import { applyItemPatch, applyNamedPatch, applyOverlay, excludedSourceRules, githubRepoFromUrl, isHttpUrl, matchingExclusion, resolveProjectDisplayNames, seedEntryKeys, seedLocatorTaken, slugify, sourceIdForItem } from "./overlay.js";
 
@@ -304,6 +304,18 @@ async function collectorConfig(env) {
     seed_additions: seedAdditions.map((row) => ({ kind: row.kind, entry: row.entry })),
   };
 }
+
+async function watchDisplayName(env) {
+  try {
+    const body = (await db.readRendered(env, "watch.json")) ?? db.emptyPayload("watch.json");
+    const data = JSON.parse(body);
+    const name = String(data?.name || "").trim();
+    return name || "Source Watch";
+  } catch {
+    return "Source Watch";
+  }
+}
+
 
 async function adminState(env) {
   const liveId = await db.getSetting(env, "live_ingest_id");
@@ -967,7 +979,7 @@ export default {
     const path = url.pathname;
 
     if (request.method === "GET" && (path === "/admin" || path === "/admin/")) {
-      return new Response(ADMIN_HTML, {
+      return new Response(adminPageHtml(await watchDisplayName(env)), {
         headers: { "Content-Type": "text/html; charset=utf-8" },
       });
     }

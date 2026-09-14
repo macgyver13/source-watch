@@ -157,5 +157,10 @@ test("D1 smoke: migrate-applied worker boots, ingest+render, /feed.json", async 
     assert.equal(r.status, 200);
     assert.equal(r.json?.raw, 1);
     assert.equal(r.json?.visible, 1);
+
+    r = await req(worker, "/admin");
+    assert.equal(r.status, 200);
+    assert.match(r.text, /<title>Smoke Watch admin<\/title>/);
+    assert.match(r.text, /<h1>Smoke Watch admin<\/h1>/);
   });
 });

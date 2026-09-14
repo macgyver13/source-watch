@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { ADMIN_HTML } from "../src/admin-ui.js";
+import { ADMIN_HTML, adminPageHtml } from "../src/admin-ui.js";
 
 function loadEditHelpers() {
   const start = ADMIN_HTML.indexOf("function pad2");
@@ -89,4 +89,22 @@ test("admin console surfaces read failures and replaces stale refresh feedback",
   assert.doesNotMatch(ADMIN_HTML, /catch\(function \(\) \{\}\)/);
   assert.match(ADMIN_HTML, /note\.textContent = ""/);
   assert.match(ADMIN_HTML, /data\.body \? ": " \+ String\(data\.body\)\.slice\(0, 180\)/);
+});
+
+test("admin title uses the watch name", () => {
+  const html = adminPageHtml("Silent Payments Watch");
+  assert.match(html, /<title>Silent Payments Watch admin<\/title>/);
+  assert.equal((html.match(/<h1>Silent Payments Watch admin<\/h1>/g) || []).length, 2);
+  assert.doesNotMatch(html, /Source Watch admin/);
+});
+
+test("admin title escapes watch name HTML", () => {
+  const html = adminPageHtml('Foo <bar> & "baz"');
+  assert.match(html, /<title>Foo &lt;bar&gt; &amp; &quot;baz&quot; admin<\/title>/);
+  assert.doesNotMatch(html, /<bar>/);
+});
+
+test("admin title falls back to Source Watch", () => {
+  assert.match(adminPageHtml(""), /<title>Source Watch admin<\/title>/);
+  assert.match(adminPageHtml("  "), /<title>Source Watch admin<\/title>/);
 });

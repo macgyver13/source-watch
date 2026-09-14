@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import importlib.util
 import json
+import os
 import sys
 import tempfile
 import unittest
@@ -14,6 +15,8 @@ from types import ModuleType
 
 from typing import Any, cast
 from unittest import mock
+
+os.environ.setdefault("SOURCE_WATCH_DELVING_MIN_INTERVAL", "0")
 
 ROOT = Path(__file__).resolve().parents[1]
 SCRIPT = ROOT / "scripts" / "build_seed_feed.py"
