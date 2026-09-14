@@ -25,6 +25,7 @@
   var HIDDEN_TAGS = {};
   var PREFERRED_CHIPS = ["docs", "spec"];
   var EXPLICIT_CHIPS = false;
+  var DISCOVERED_AFTER = "";
 
   function applyWatch(raw) {
     raw = raw || {};
@@ -37,6 +38,15 @@
     var chips = raw.preferred_chips;
     EXPLICIT_CHIPS = !!(chips && chips.length);
     PREFERRED_CHIPS = EXPLICIT_CHIPS ? chips.slice() : ["docs", "spec"];
+    DISCOVERED_AFTER = String(raw.discovered_after || "");
+  }
+
+  function afterDiscoveryFloor(iso) {
+    if (!DISCOVERED_AFTER || !iso) return true;
+    var left = parseDate(iso);
+    var right = parseDate(DISCOVERED_AFTER);
+    if (!left || !right) return true;
+    return left.getTime() >= right.getTime();
   }
 
   function esc(s) {
@@ -232,6 +242,7 @@
     var parsed = parseWeekSlug(weekSlug);
     if (!parsed) return [];
     return items.filter(function (item) {
+      if (!afterDiscoveryFloor(item.discovered_at || item.event_time)) return false;
       var p = itemWeek(item);
       return p && p.year === parsed.year && p.week === parsed.week;
     });
@@ -422,30 +433,28 @@
 
   function renderWeek(allItems, weekSlug) {
     var canonicalSlug = (parseWeekSlug(weekSlug) || {}).slug || weekSlug;
-    if (document.querySelectorAll(".rail a[data-week]").length === 0 || !document.querySelector(".rail a[data-week*='-W']") || !document.querySelector(".rail .lbl")) {
+    var slugs = [];
+    var seen = {};
+    (allItems || []).forEach(function (item) {
+      if (!afterDiscoveryFloor(item.discovered_at || item.event_time)) return;
+      var parts = itemWeek(item);
+      if (!parts) return;
+      var slug = parts.year + "-W" + String(parts.week).padStart(2, "0");
+      if (seen[slug]) return;
+      seen[slug] = true;
+      slugs.push(slug);
+    });
+    slugs.sort().reverse();
 
-      var slugs = [];
-      var seen = {};
-      (allItems || []).forEach(function (item) {
-        var parts = itemWeek(item);
-        if (!parts) return;
-        var slug = parts.year + "-W" + String(parts.week).padStart(2, "0");
-        if (seen[slug]) return;
-        seen[slug] = true;
-        slugs.push(slug);
-      });
-      slugs.sort().reverse();
-
-      var rail = document.querySelector("nav.rail");
-      if (rail) {
-        rail.innerHTML = slugs.map(function (slug) {
-          var p = parseWeekSlug(slug);
-          var num = p ? String(p.week) : slug;
-          var year = p ? String(p.year).slice(-2) : "";
-          var on = slug === canonicalSlug ? ' class="on"' : "";
-          return '<a href="/weeks/' + slug + '/" data-week="' + slug + '"' + on + '><span class="wk"><span class="lbl">W' + num + (year ? " ’" + year : "") + '</span> <span class="n"></span></span><span class="sub"></span></a>';
-        }).join("");
-      }
+    var rail = document.querySelector("nav.rail");
+    if (rail) {
+      rail.innerHTML = slugs.map(function (slug) {
+        var p = parseWeekSlug(slug);
+        var num = p ? String(p.week) : slug;
+        var year = p ? String(p.year).slice(-2) : "";
+        var on = slug === canonicalSlug ? ' class="on"' : "";
+        return '<a href="/weeks/' + slug + '/" data-week="' + slug + '"' + on + '><span class="wk"><span class="lbl">W' + num + (year ? " ’" + year : "") + '</span> <span class="n"></span></span><span class="sub"></span></a>';
+      }).join("");
     }
     var parsed = parseWeekSlug(weekSlug);
     if (parsed) {

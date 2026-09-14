@@ -649,6 +649,13 @@ class DiscoveryDateTests(unittest.TestCase):
         self.assertFalse(build_seed_feed.discovery_too_old("2023-06-14T17:45:52Z", watch))
         self.assertFalse(build_seed_feed.discovery_too_old("2010-12-19T15:16:43Z", {}))
 
+    def test_watch_client_payload_includes_discovered_after(self) -> None:
+        payload = build_seed_feed.watch_client_payload(
+            build_seed_feed.normalize_watch({"discovered_after": "2020-06-22"}),
+        )
+        self.assertEqual(payload["discovered_after"], "2020-06-22")
+
+
 
 
 

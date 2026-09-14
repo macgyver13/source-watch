@@ -85,6 +85,21 @@ class HugoServingModeTests(unittest.TestCase):
                 promote.WATCH = old_promote_watch
             self.assertTrue((root / "site" / "content" / "weeks" / "live" / "_index.md").exists())
 
+    def test_item_iso_week_skips_stamps_before_discovered_after(self) -> None:
+        watch = {"discovered_after": "2020-06-22T00:00:00Z"}
+        self.assertIsNone(sync_hugo.item_iso_week(
+            {"discovered_at": "2015-06-09T07:19:49Z"}, watch,
+        ))
+        self.assertEqual(
+            sync_hugo.item_iso_week({"discovered_at": "2026-09-09T08:25:30Z"}, watch),
+            "2026-W37",
+        )
+        self.assertEqual(
+            sync_hugo.item_iso_week({"discovered_at": "2015-06-09T07:19:49Z"}, {}),
+            "2015-W24",
+        )
+
+
     def test_service_mode_without_url_remains_strict_for_network_tools(self) -> None:
         with tempfile.NamedTemporaryFile("w", suffix=".yaml", delete=False) as fh:
             fh.write("serving:\n  mode: service\n  service_url: ''\n")

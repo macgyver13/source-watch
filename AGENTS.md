@@ -138,7 +138,7 @@ Refresh is opt-in. Template `wrangler.jsonc` has `triggers.crons: []`. To schedu
 | Exclude | Drops matching **live** hits on the next collect **and** hides current matches in the overlay. Non-GitHub URLs store `url_prefix`. Seeded catalog rows stay in D1; they are hidden, not deleted |
 | Include term | Appended to `relevance` on the **next** collect |
 | Seed addition | Merged into `seeded_sources` on the **next** collect (does not edit YAML) |
-| `discovered_after` | Overrides yaml on the next collect |
+| `discovered_after` | Overrides yaml on the next collect. Save re-renders immediately: public weeks omit `discovered_at` before the floor; live candidates before the floor drop from the public feed. Seeded catalog rows stay |
 | Promote | Patch `status: seeded` on that item only; to keep it across rebuilds add a seed addition or YAML seed |
 | Refresh now | Same dispatch as cron; disabled until dispatch is configured |
 
@@ -152,7 +152,7 @@ Promote a candidate for real: Rules → Seed additions (or YAML), then Refresh /
 | `activity_at` | Last real movement | Home feed, project cards |
 | `observed_at` | Last crawl | Not shown as the event time |
 
-Live GitHub search hits **and** seeded GitHub repos/PRs: `discovered_at` = repo/PR `created_at` when that stamp is on or after `watch.yaml` `discovered_after` (unset = no floor). Earlier `created_at` is ignored: live hits are dropped, seeded sources keep yaml/`first-seen`. `activity_at` = repo `pushed_at` or PR `merged_at`/`updated_at`. Live Delving hits: `discovered_at` = topic `created_at`, `activity_at` = `last_posted_at`, with the same floor. Do not use crawl time as discovery.
+Live GitHub search hits **and** seeded GitHub repos/PRs: `discovered_at` = repo/PR `created_at` when that stamp is on or after `watch.yaml` `discovered_after` (unset = no floor). Earlier `created_at` is ignored: live hits are dropped, seeded sources keep yaml/`first-seen`. Weeks still omit those seeded rows when `discovered_at` is before the floor, so repo birth dates do not keep old week pages. `activity_at` = repo `pushed_at` or PR `merged_at`/`updated_at`. Live Delving hits: `discovered_at` = topic `created_at`, `activity_at` = `last_posted_at`, with the same floor. Do not use crawl time as discovery.
 
 ## Candidate discovery
 

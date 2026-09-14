@@ -2,9 +2,11 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import {
   applyOverlay,
+  discoveryTooOld,
   githubRepoFromUrl,
   isHttpUrl,
   isoWeekSlug,
+  keepItemsAfterDiscoveryFloor,
   renderJsonl,
   renderRss,
   seedLocatorTaken,
@@ -129,6 +131,32 @@ test("weekIndex uses ISO week-year on 2026-01-01", () => {
   assert.deepEqual(weeks, [{ slug: "2026-W01", count: 1 }]);
   assert.equal(isoWeekSlug("2026-01-01T00:00:00Z"), "2026-W01");
 });
+
+test("weekIndex omits items before discovered_after", () => {
+  const weeks = weekIndex(
+    [
+      { discovered_at: "2015-06-09T07:19:49Z", status: "seeded" },
+      { discovered_at: "2026-09-09T08:25:30Z", status: "candidate" },
+    ],
+    "2020-06-22T00:00:00Z",
+  );
+  assert.deepEqual(weeks, [{ slug: "2026-W37", count: 1 }]);
+});
+
+test("keepItemsAfterDiscoveryFloor drops live hits and keeps seeded", () => {
+  const kept = keepItemsAfterDiscoveryFloor(
+    [
+      { id: "seed:old", status: "seeded", discovered_at: "2015-06-09T07:19:49Z" },
+      { id: "live:old", status: "candidate", event_type: "source_discovered", discovered_at: "2019-01-01T00:00:00Z" },
+      { id: "live:new", status: "candidate", event_type: "source_discovered", discovered_at: "2026-01-01T00:00:00Z" },
+    ],
+    "2020-06-22",
+  );
+  assert.deepEqual(kept.map((row) => row.id), ["seed:old", "live:new"]);
+  assert.equal(discoveryTooOld("2015-06-09T07:19:49Z", "2020-06-22"), true);
+  assert.equal(discoveryTooOld("2020-06-22T00:00:00Z", "2020-06-22"), false);
+});
+
 
 test("hiding a source drops its items from the feed", () => {
   const out = applyOverlay({

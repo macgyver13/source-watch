@@ -402,6 +402,23 @@ export function renderJsonl(items) {
     .join("\n");
 }
 
+export function discoveryTooOld(iso, floor) {
+  if (!iso || !floor) return false;
+  const left = Date.parse(iso);
+  const right = Date.parse(floor);
+  if (Number.isNaN(left) || Number.isNaN(right)) return false;
+  return left < right;
+}
+
+/** Live candidates before the floor drop; seeded catalog rows stay. */
+export function keepItemsAfterDiscoveryFloor(items, floor) {
+  return (items || []).filter((item) => {
+    if (!discoveryTooOld(item.discovered_at || item.event_time, floor)) return true;
+    return item.status === "seeded" || item.event_type === "source_seeded";
+  });
+}
+
+
 /** ISO week slug matching Python strftime("%G-W%V"). */
 export function isoWeekSlug(raw) {
   if (!raw) return null;
@@ -419,10 +436,12 @@ export function isoWeekSlug(raw) {
   return `${isoYear}-W${String(week).padStart(2, "0")}`;
 }
 
-export function weekIndex(items) {
+export function weekIndex(items, floor) {
   const counts = new Map();
   for (const item of items || []) {
-    const slug = isoWeekSlug(item.discovered_at || item.event_time);
+    const stamp = item.discovered_at || item.event_time;
+    if (discoveryTooOld(stamp, floor)) continue;
+    const slug = isoWeekSlug(stamp);
     if (!slug) continue;
     counts.set(slug, (counts.get(slug) || 0) + 1);
   }

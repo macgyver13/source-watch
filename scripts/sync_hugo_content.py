@@ -14,7 +14,7 @@ import re
 import shutil
 import sys
 from collections import defaultdict
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 
 _SCRIPTS = Path(__file__).resolve().parent
@@ -60,7 +60,7 @@ def week_title(slug: str) -> str:
     return slug
 
 
-def item_iso_week(item: dict) -> str | None:
+def item_iso_week(item: dict, watch: dict | None = None) -> str | None:
     raw = str(item.get("discovered_at") or item.get("event_time") or "").strip()
     if not raw:
         return None
@@ -68,6 +68,19 @@ def item_iso_week(item: dict) -> str | None:
         dt = datetime.fromisoformat(raw.replace("Z", "+00:00"))
     except ValueError:
         return None
+    floor = str((watch or {}).get("discovered_after") or "").strip()
+    if floor:
+        try:
+            right = datetime.fromisoformat(floor.replace("Z", "+00:00"))
+        except ValueError:
+            right = None
+        if right is not None:
+            left = dt if dt.tzinfo else dt.replace(tzinfo=timezone.utc)
+            right = right if right.tzinfo else right.replace(tzinfo=timezone.utc)
+            if left < right:
+                return None
+    if dt.tzinfo is None:
+        dt = dt.replace(tzinfo=timezone.utc)
     return dt.strftime("%G-W%V")
 
 
@@ -202,7 +215,7 @@ def main() -> int:
 
     week_root = CONTENT / "weeks"
     week_root.mkdir(parents=True, exist_ok=True)
-    wanted = {slug for slug in (item_iso_week(item) for item in items) if slug}
+    wanted = {slug for slug in (item_iso_week(item, watch) for item in items) if slug}
     existing = {path.name for path in week_root.iterdir() if path.is_dir()}
     for slug in existing - wanted:
         shutil.rmtree(week_root / slug)

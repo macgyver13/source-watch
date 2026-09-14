@@ -907,7 +907,17 @@ async function handleAdmin(request, env, path, url) {
       const body = await readJson(request);
       if (!body || typeof body !== "object") return json({ error: "invalid_json" }, 400);
       const value = body.discovered_after == null ? "" : String(body.discovered_after);
+      const prev = await db.getSetting(env, "discovered_after");
       await db.setSetting(env, "discovered_after", value);
+      const fail = await ensureRendered(env);
+      if (fail) {
+        if (prev == null) {
+          await env.DB.prepare("DELETE FROM settings WHERE key = ?").bind("discovered_after").run();
+        } else {
+          await db.setSetting(env, "discovered_after", prev);
+        }
+        return fail;
+      }
       await db.audit(env, "settings_put", "discovered_after", value);
       return json({ discovered_after: value });
     }

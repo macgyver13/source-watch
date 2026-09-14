@@ -1,4 +1,4 @@
-import { applyOverlay, renderJsonl, renderRss, weekIndex } from "./overlay.js";
+import { applyOverlay, keepItemsAfterDiscoveryFloor, renderJsonl, renderRss, weekIndex } from "./overlay.js";
 
 export const CHUNK = 400000;
 export const ROW_BATCH = 20;
@@ -37,6 +37,7 @@ export function emptyPayload(name) {
       preferred_chips: [],
       hidden_tags: [],
       topics: [],
+      discovered_after: "",
     });
   }
   if (name === "items.jsonl") return "";
@@ -352,13 +353,6 @@ export async function renderAll(env, attempt = 0) {
 
     return renderAll(env, attempt + 1);
   }
-  const overlaid = applyOverlay({
-    items: raw.items,
-    projects: raw.projects,
-    sources: raw.sources,
-    overrides,
-    exclusions,
-  });
   let watch = {};
   if (ingest?.watch_json) {
     try {
@@ -367,6 +361,17 @@ export async function renderAll(env, attempt = 0) {
       watch = {};
     }
   }
+  const adminFloor = await getSetting(env, "discovered_after");
+  if (adminFloor != null) watch = { ...watch, discovered_after: adminFloor };
+  const floor = watch.discovered_after || "";
+  const overlaid = applyOverlay({
+    items: keepItemsAfterDiscoveryFloor(raw.items, floor),
+    projects: raw.projects,
+    sources: raw.sources,
+    overrides,
+    exclusions,
+  });
+
   const feed = {
     schema_version: "source-watch.feed.v0",
     title: ingest?.feed_title || watch.name || "Source Watch",
@@ -395,7 +400,7 @@ export async function renderAll(env, attempt = 0) {
     }),
     "application/rss+xml; charset=utf-8",
   );
-  await writeRendered(env, n("weeks-index"), JSON.stringify(weekIndex(overlaid.items)), jsonType);
+  await writeRendered(env, n("weeks-index"), JSON.stringify(weekIndex(overlaid.items, floor)), jsonType);
   const published = await publishLiveRenderTag(env, tag, seq);
   const counts = {
     items: overlaid.items.length,

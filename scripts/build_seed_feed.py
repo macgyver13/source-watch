@@ -1698,6 +1698,7 @@ def watch_client_payload(watch: dict) -> dict:
         "preferred_chips": resolve_preferred_chips(watch),
         "hidden_tags": list(watch.get("hidden_tags") or []),
         "topics": list(watch.get("topics") or []),
+        "discovered_after": watch.get("discovered_after") or "",
     }
 
 
