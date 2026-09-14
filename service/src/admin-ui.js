@@ -28,6 +28,7 @@ export const ADMIN_HTML = `<!doctype html>
     #login input { width: 100%; margin: 8px 0; }
     .edit { display: none; margin-top: 8px; }
     .edit.open { display: grid; gap: 6px; }
+    .edit label { display: grid; gap: 2px; color: var(--muted); font-size: 12px; }
     textarea { width: 100%; min-height: 72px; }
     .err { color: #f88; }
     a { color: var(--accent); }
@@ -161,7 +162,8 @@ export const ADMIN_HTML = `<!doctype html>
         duplicate_seed_locator: "seed url/repo/name already exists",
         duplicate_exclusion: "exclusion already exists",
         duplicate_term: "include term already exists",
-        override_conflict: "changed by another session; reload"
+        override_conflict: "changed by another session; reload",
+        invalid_timestamp: "invalid date"
       };
       var code = err.data && err.data.error;
       var detail = names[code] || (err.data && (err.data.detail || err.data.error));
@@ -192,7 +194,12 @@ export const ADMIN_HTML = `<!doctype html>
           $("login-err").textContent = "Unauthorized. Enter a valid token.";
           throw new Error("401");
         }
-        return res.json().catch(function () { return {}; }).then(function (data) {
+        return res.text().then(function (text) {
+          var data = {};
+          if (text) {
+            try { data = JSON.parse(text); } catch (e) { data = { error: String(text).slice(0, 200) }; }
+          }
+          if (!data || typeof data !== "object") data = { error: String(text || ("HTTP " + res.status)).slice(0, 200) };
           data._status = res.status;
           if (!res.ok) {
             var err = new Error(data.error || ("HTTP " + res.status));
@@ -242,6 +249,7 @@ export const ADMIN_HTML = `<!doctype html>
         if (key === "discovered_at" || key === "activity_at") {
           var next = fromLocal(val);
           if (next === fromLocal(orig)) return;
+          if (val && !next) return;
           patch[key] = next;
           return;
         }
@@ -386,8 +394,8 @@ export const ADMIN_HTML = `<!doctype html>
             "<div class='edit' data-edit='" + esc(item.id) + "'>" +
               "<input data-f='title' data-orig='" + esc(titleVal) + "' value='" + esc(titleVal) + "' placeholder='title'>" +
               "<input data-f='summary' data-orig='" + esc(summaryVal) + "' value='" + esc(summaryVal) + "' placeholder='summary'>" +
-              "<input data-f='discovered_at' type='datetime-local' step='1' data-orig='" + esc(discVal) + "' value='" + esc(discVal) + "'>" +
-              "<input data-f='activity_at' type='datetime-local' step='1' data-orig='" + esc(actVal) + "' value='" + esc(actVal) + "'>" +
+              "<label>discovered_at <input data-f='discovered_at' type='datetime-local' step='1' data-orig='" + esc(discVal) + "' value='" + esc(discVal) + "'></label>" +
+              "<label>activity_at <input data-f='activity_at' type='datetime-local' step='1' data-orig='" + esc(actVal) + "' value='" + esc(actVal) + "'></label>" +
               "<button data-act='save-edit' data-id='" + esc(item.id) + "'>Save</button>" +
             "</div></td>" +
             "<td>" + esc(item.project) + "<div class='muted'>" + esc(item.source_type) + "</div></td>" +

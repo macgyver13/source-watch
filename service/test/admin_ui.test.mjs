@@ -52,6 +52,19 @@ test("unchanged datetime-local with seconds omitted is not a patch", () => {
   assert.deepEqual(patch, {});
 });
 
+test("invalid datetime-local is not patched", () => {
+  const { collectEditPatch } = loadEditHelpers();
+  const patch = collectEditPatch([
+    { key: "discovered_at", orig: "2026-09-01T12:30:00", val: "not-a-date" },
+  ]);
+  assert.deepEqual(patch, {});
+});
+
+test("edit date fields are labeled discovered_at and activity_at", () => {
+  assert.match(ADMIN_HTML, /<label>discovered_at <input data-f='discovered_at' type='datetime-local'/);
+  assert.match(ADMIN_HTML, /<label>activity_at <input data-f='activity_at' type='datetime-local'/);
+});
+
 test("fromLocal fills omitted seconds and ADMIN_HTML keeps digit classes", () => {
   const { fromLocal } = loadEditHelpers();
   assert.match(fromLocal("2026-09-01T12:30"), /^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:00Z$/);

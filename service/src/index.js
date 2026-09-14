@@ -24,6 +24,13 @@ const EXCLUSION_KINDS = new Set(["term", "url_prefix", "repo", "project", "sourc
 const INCLUDE_BUCKETS = new Set(["always_match", "required_any", "context_any"]);
 const SEED_KINDS = new Set(["docs_pages", "github_repositories", "github_pull_requests", "crates"]);
 const RAW_KINDS = new Set(["items", "projects", "sources"]);
+const ISO_UTC = /^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$/;
+
+function validTimestamp(value) {
+  if (value == null) return true;
+  return typeof value === "string" && ISO_UTC.test(value) && !Number.isNaN(Date.parse(value));
+}
+
 
 
 
@@ -567,7 +574,7 @@ async function putOverride(env, kind, id, patch) {
     ? await env.DB.prepare(
         "UPDATE overrides SET patch = ?, updated_at = ?, revision = ? WHERE kind = ? AND target_id = ? AND revision = ?",
       )
-        .bind(written, db.nowIso(), writeRevision, kind, id, existingRow.revision)
+        .bind(written, db.nowIso(), writeRevision, kind, id, existingRow.revision ?? "")
         .run()
     : await env.DB.prepare(
         "INSERT INTO overrides (kind, target_id, patch, updated_at, revision) VALUES (?, ?, ?, ?, ?) ON CONFLICT(kind, target_id) DO NOTHING",
@@ -585,7 +592,7 @@ async function putOverride(env, kind, id, patch) {
       await env.DB.prepare(
         "UPDATE overrides SET patch = ?, updated_at = ?, revision = ? WHERE kind = ? AND target_id = ? AND revision = ?",
       )
-        .bind(existingRow.patch, existingRow.updated_at, crypto.randomUUID(), kind, id, writeRevision)
+        .bind(existingRow.patch ?? "", existingRow.updated_at ?? db.nowIso(), crypto.randomUUID(), kind, id, writeRevision)
         .run();
     }
     return fail;
@@ -707,6 +714,11 @@ async function handleAdmin(request, env, path, url) {
       if (!body || typeof body !== "object") return json({ error: "invalid_json" }, 400);
       if (kind === "item" && Object.prototype.hasOwnProperty.call(body, "project")) {
         return json({ error: "unsupported_patch_field", field: "project" }, 400);
+      }
+      for (const field of ["discovered_at", "activity_at"]) {
+        if (Object.prototype.hasOwnProperty.call(body, field) && !validTimestamp(body[field])) {
+          return json({ error: "invalid_timestamp", field }, 400);
+        }
       }
       const patch = await putOverride(env, kind, id, body);
       if (patch instanceof Response) return patch;
@@ -975,7 +987,11 @@ export default {
       return handleCollector(request, env, path);
     }
     if (path.startsWith("/api/admin/")) {
-      return handleAdmin(request, env, path, url);
+      try {
+        return await handleAdmin(request, env, path, url);
+      } catch (err) {
+        return json({ error: "internal_error", detail: String(err && err.message || err).slice(0, 200) }, 500);
+      }
     }
 
     return env.ASSETS.fetch(request);

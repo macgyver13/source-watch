@@ -97,6 +97,21 @@ test("discovered_at patch reorders feed and moves ISO week", () => {
   assert.equal(weeks.find((w) => w.slug === isoWeekSlug("2026-01-05T00:00:00Z"))?.slug, "2026-W02");
 });
 
+test("discovered_at patch to a 2023 crate date keeps the item and week slug", () => {
+  const out = applyOverlay({
+    items: [itemA],
+    projects: [projectA],
+    sources: [sourceA],
+    overrides: { item: { "seed:a": { discovered_at: "2023-03-09T19:59:47Z" } } },
+    exclusions: [],
+  });
+  assert.equal(out.items[0].id, "seed:a");
+  assert.equal(out.items[0].discovered_at, "2023-03-09T19:59:47Z");
+  assert.equal(out.items[0].event_time, "2023-03-09T19:59:47Z");
+  assert.equal(isoWeekSlug("2023-03-09T19:59:47Z"), "2023-W10");
+  assert.deepEqual(weekIndex(out.items), [{ slug: "2023-W10", count: 1 }]);
+});
+
 test("renderJsonl matches item count and sorts keys", () => {
   const items = [itemA, itemB];
   const body = renderJsonl(items);
