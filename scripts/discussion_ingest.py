@@ -21,11 +21,22 @@ _SCRIPTS = Path(__file__).resolve().parent
 if str(_SCRIPTS) not in sys.path:
     sys.path.insert(0, str(_SCRIPTS))
 
-from build_seed_feed import delving_get_json, wait_delving_slot, delving_headers
+from build_seed_feed import (
+    delving_get_json,
+    wait_delving_slot,
+    delving_headers,
+    github_headers,
+)
+from urllib.request import Request, urlopen
+from urllib.error import HTTPError
 
 DELVING_ORIGIN = "https://delvingbitcoin.org"
 DISCOURSE_TOPIC_URL_RE = re.compile(
     r"^(https?://[^/]+)/t/(?:([^/]+)/)?(\d+)(?:/(\d+))?/?$", re.I
+)
+GITHUB_TARGET_RE = re.compile(
+    r"^(?:https?://github\.com/)?([^/#]+)/([^/#]+)(?:/(?:pull|issues)/|#)(\d+)/?$",
+    re.I,
 )
 
 
@@ -286,6 +297,141 @@ def write_gaps_file(path: Path, gaps: list[int]) -> None:
         f.write("\n")
 
 
+def parse_github_target(target: str) -> tuple[str, str, int]:
+    """Parse a GitHub target into (owner, repo, issue_or_pr_number)."""
+    target = target.strip()
+    match = GITHUB_TARGET_RE.match(target)
+    if not match:
+        raise ValueError(f"Cannot parse GitHub target: {target!r}")
+    owner, repo, num_str = match.groups()
+    return owner, repo, int(num_str)
+
+
+def github_get_json(url: str) -> Any:
+    """Fetch JSON from GitHub API with authentication and error handling."""
+    req = Request(url, headers=github_headers())
+    try:
+        with urlopen(req, timeout=30) as resp:
+            return json.loads(resp.read().decode("utf-8"))
+    except HTTPError as exc:
+        if exc.code == 404:
+            return None
+        print(f"warning: GitHub GET {url} failed: {exc}", file=sys.stderr)
+        return None
+    except Exception as exc:
+        print(f"warning: GitHub GET {url} failed: {exc}", file=sys.stderr)
+        return None
+
+
+def fetch_paginated_github(url_base: str) -> list[dict[str, Any]]:
+    """Fetch all pages from a GitHub API collection endpoint."""
+    items: list[dict[str, Any]] = []
+    page = 1
+    delim = "&" if "?" in url_base else "?"
+    while True:
+        url = f"{url_base}{delim}per_page=100&page={page}"
+        batch = github_get_json(url)
+        if not batch or not isinstance(batch, list):
+            break
+        items.extend(batch)
+        if len(batch) < 100:
+            break
+        page += 1
+    return items
+
+
+def ingest_github(target: str) -> tuple[list[dict[str, Any]], list[int]]:
+    """Ingest a GitHub PR or issue into normalized post records."""
+    owner, repo, number = parse_github_target(target)
+    api_root = f"https://api.github.com/repos/{owner}/{repo}"
+
+    issue_data = github_get_json(f"{api_root}/issues/{number}")
+    if not issue_data or not isinstance(issue_data, dict):
+        raise RuntimeError(f"Could not find GitHub issue or PR {owner}/{repo}#{number}")
+
+    is_pr = "pull_request" in issue_data and issue_data["pull_request"] is not None
+
+    raw_items: list[dict[str, Any]] = []
+
+    # 1. Main PR/issue body
+    main_author = issue_data.get("user", {}).get("login", "")
+    main_author_name = issue_data.get("user", {}).get("name") or main_author
+    raw_items.append({
+        "raw_id": issue_data["id"],
+        "author": main_author,
+        "author_name": main_author_name,
+        "created_at": issue_data["created_at"],
+        "updated_at": issue_data.get("updated_at") or issue_data["created_at"],
+        "url": issue_data["html_url"],
+        "body_text": normalize_html_to_text(issue_data.get("body") or ""),
+        "in_reply_to_id": None,
+        "sort_key": (issue_data["created_at"], 0, issue_data["id"]),
+    })
+
+    # 2. Issue comments
+    issue_comments = fetch_paginated_github(f"{api_root}/issues/{number}/comments")
+    for c in issue_comments:
+        c_author = c.get("user", {}).get("login", "")
+        c_author_name = c.get("user", {}).get("name") or c_author
+        raw_items.append({
+            "raw_id": c["id"],
+            "author": c_author,
+            "author_name": c_author_name,
+            "created_at": c["created_at"],
+            "updated_at": c.get("updated_at") or c["created_at"],
+            "url": c["html_url"],
+            "body_text": normalize_html_to_text(c.get("body") or ""),
+            "in_reply_to_id": None,
+            "sort_key": (c["created_at"], 1, c["id"]),
+        })
+
+    # 3. Review comments (if PR)
+    if is_pr:
+        review_comments = fetch_paginated_github(f"{api_root}/pulls/{number}/comments")
+        for rc in review_comments:
+            rc_author = rc.get("user", {}).get("login", "")
+            rc_author_name = rc.get("user", {}).get("name") or rc_author
+            raw_items.append({
+                "raw_id": rc["id"],
+                "author": rc_author,
+                "author_name": rc_author_name,
+                "created_at": rc["created_at"],
+                "updated_at": rc.get("updated_at") or rc["created_at"],
+                "url": rc["html_url"],
+                "body_text": normalize_html_to_text(rc.get("body") or ""),
+                "in_reply_to_id": rc.get("in_reply_to_id"),
+                "sort_key": (rc["created_at"], 2, rc["id"]),
+            })
+
+    # Stable sort by (created_at, type_priority, id)
+    raw_items.sort(key=lambda item: item["sort_key"])
+
+    id_to_post_number: dict[int, int] = {}
+    for idx, item in enumerate(raw_items, start=1):
+        item["post_number"] = idx
+        id_to_post_number[item["raw_id"]] = idx
+
+    normalized_posts: list[dict[str, Any]] = []
+    for item in raw_items:
+        parent_id = item.get("in_reply_to_id")
+        reply_to = id_to_post_number.get(parent_id) if parent_id is not None else None
+        body_text = item["body_text"]
+        normalized_posts.append({
+            "post_number": item["post_number"],
+            "author": item["author"],
+            "author_name": item["author_name"],
+            "created_at": item["created_at"],
+            "updated_at": item["updated_at"],
+            "url": item["url"],
+            "body_text": body_text,
+            "content_hash": compute_content_hash(body_text),
+            "reply_to_post_number": reply_to,
+        })
+
+    gaps = find_stream_gaps({p["post_number"] for p in normalized_posts})
+    return normalized_posts, gaps
+
+
 def detect_adapter(target: str, adapter_flag: str | None) -> str:
     """Detect whether target is discourse or github."""
     if adapter_flag and adapter_flag != "auto":
@@ -318,7 +464,7 @@ def main() -> None:
     if adapter == "discourse":
         posts, gaps = ingest_discourse(args.target)
     elif adapter == "github":
-        raise NotImplementedError("GitHub adapter will be implemented in Task I2")
+        posts, gaps = ingest_github(args.target)
     else:
         raise ValueError(f"Unknown adapter: {adapter}")
 
@@ -337,3 +483,4 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+

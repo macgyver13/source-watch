@@ -215,5 +215,152 @@ class TestDiscussionIngestDiscourse(unittest.TestCase):
         self.assertEqual(gaps, {"gaps": [3]})
 
 
+FIXTURE_GITHUB_ISSUE = {
+    "id": 5001,
+    "html_url": "https://github.com/bitcoin/bips/pull/2212",
+    "created_at": "2026-07-21T20:00:16Z",
+    "updated_at": "2026-07-21T20:00:16Z",
+    "pull_request": {},
+    "user": {"login": "fjahr", "name": "Fabian Jahr"},
+    "body": "BIP 460: Cross-input signature aggregation proposal.",
+}
+
+FIXTURE_GITHUB_COMMENT = {
+    "id": 6001,
+    "html_url": "https://github.com/bitcoin/bips/pull/2212#issuecomment-1",
+    "created_at": "2026-07-22T10:00:00Z",
+    "updated_at": "2026-07-22T10:00:00Z",
+    "user": {"login": "sipa", "name": "Pieter Wuille"},
+    "body": "General comment on CISA efficiency.",
+}
+
+FIXTURE_GITHUB_REVIEW_COMMENT_1 = {
+    "id": 7001,
+    "html_url": "https://github.com/bitcoin/bips/pull/2212#discussion_r1",
+    "created_at": "2026-07-23T11:00:00Z",
+    "updated_at": "2026-07-23T11:00:00Z",
+    "user": {"login": "ariard", "name": "Antoine Riard"},
+    "body": "Line review: check opcode interaction.",
+    "in_reply_to_id": None,
+}
+
+FIXTURE_GITHUB_REVIEW_COMMENT_2 = {
+    "id": 7002,
+    "html_url": "https://github.com/bitcoin/bips/pull/2212#discussion_r2",
+    "created_at": "2026-07-23T12:00:00Z",
+    "updated_at": "2026-07-23T12:00:00Z",
+    "user": {"login": "fjahr", "name": "Fabian Jahr"},
+    "body": "Good point, opcode interaction addressed in <code>bip-0460.mediawiki</code>.",
+    "in_reply_to_id": 7001,
+}
+
+
+class TestDiscussionIngestGitHub(unittest.TestCase):
+    def setUp(self) -> None:
+        self.temp_dir = tempfile.TemporaryDirectory()
+        self.out_dir = Path(self.temp_dir.name)
+
+    def tearDown(self) -> None:
+        self.temp_dir.cleanup()
+
+    def test_parse_github_target(self) -> None:
+        self.assertEqual(
+            di.parse_github_target("bitcoin/bips#2212"), ("bitcoin", "bips", 2212)
+        )
+        self.assertEqual(
+            di.parse_github_target("https://github.com/bitcoin/bips/pull/2212"),
+            ("bitcoin", "bips", 2212),
+        )
+        self.assertEqual(
+            di.parse_github_target("https://github.com/bitcoin/bips/issues/2212"),
+            ("bitcoin", "bips", 2212),
+        )
+
+    @mock.patch("discussion_ingest.github_get_json")
+    def test_github_ingest_fixture(self, mock_get_json: mock.MagicMock) -> None:
+        def side_effect(url: str) -> Any:
+            if url.endswith("/issues/2212"):
+                return copy.deepcopy(FIXTURE_GITHUB_ISSUE)
+            if "/issues/2212/comments" in url:
+                if "page=1" in url:
+                    return [copy.deepcopy(FIXTURE_GITHUB_COMMENT)]
+                return []
+            if "/pulls/2212/comments" in url:
+                if "page=1" in url:
+                    return [
+                        copy.deepcopy(FIXTURE_GITHUB_REVIEW_COMMENT_1),
+                        copy.deepcopy(FIXTURE_GITHUB_REVIEW_COMMENT_2),
+                    ]
+                return []
+            return None
+
+        mock_get_json.side_effect = side_effect
+
+        posts, gaps = di.ingest_github("bitcoin/bips#2212")
+        self.assertEqual(len(posts), 4)  # 1 issue + 1 comment + 2 review comments
+        self.assertEqual(gaps, [])
+
+        output_file = self.out_dir / "posts.jsonl"
+        gaps_file = self.out_dir / "gaps.json"
+        di.write_jsonl(output_file, posts)
+        di.write_gaps_file(gaps_file, gaps)
+
+        loaded = di.load_existing_jsonl(output_file)
+        self.assertEqual(len(loaded), 4)
+        self.assertEqual([p["post_number"] for p in loaded], [1, 2, 3, 4])
+        self.assertEqual(loaded[0]["author"], "fjahr")
+        self.assertIsNone(loaded[0]["reply_to_post_number"])
+
+        self.assertEqual(loaded[1]["author"], "sipa")
+        self.assertIsNone(loaded[1]["reply_to_post_number"])
+
+        self.assertEqual(loaded[2]["author"], "ariard")
+        self.assertIsNone(loaded[2]["reply_to_post_number"])
+
+        # Review comment 2 replied to review comment 1 (which became post_number 3)
+        self.assertEqual(loaded[3]["author"], "fjahr")
+        self.assertEqual(loaded[3]["reply_to_post_number"], 3)
+
+        with open(gaps_file, "r", encoding="utf-8") as f:
+            gaps_data = json.load(f)
+        self.assertEqual(gaps_data, {"gaps": []})
+
+    @mock.patch("discussion_ingest.github_get_json")
+    def test_github_idempotency_and_hash_rewrite(self, mock_get_json: mock.MagicMock) -> None:
+        issue = copy.deepcopy(FIXTURE_GITHUB_ISSUE)
+        comment = copy.deepcopy(FIXTURE_GITHUB_COMMENT)
+
+        def side_effect(url: str) -> Any:
+            if url.endswith("/issues/2212"):
+                return copy.deepcopy(issue)
+            if "/issues/2212/comments" in url:
+                if "page=1" in url:
+                    return [copy.deepcopy(comment)]
+                return []
+            if "/pulls/2212/comments" in url:
+                return []
+            return None
+
+        mock_get_json.side_effect = side_effect
+
+        output_file = self.out_dir / "posts.jsonl"
+        posts, gaps = di.ingest_github("bitcoin/bips#2212")
+        di.write_jsonl(output_file, posts)
+
+        first_posts = di.load_existing_jsonl(output_file)
+        original_hash_1 = first_posts[1]["content_hash"]
+
+        # Simulate comment edited
+        comment["body"] = "Updated comment text with new insights."
+        posts_run2, _ = di.ingest_github("bitcoin/bips#2212")
+        merged = di.merge_posts_idempotent(first_posts, posts_run2)
+        di.write_jsonl(output_file, merged)
+
+        second_posts = di.load_existing_jsonl(output_file)
+        self.assertEqual(len(second_posts), 2)
+        self.assertEqual(second_posts[1]["previous_hash"], original_hash_1)
+        self.assertNotEqual(second_posts[1]["content_hash"], original_hash_1)
+
+
 if __name__ == "__main__":
     unittest.main()
