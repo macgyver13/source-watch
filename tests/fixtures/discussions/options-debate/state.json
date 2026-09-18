@@ -1,0 +1,144 @@
+{
+  "schema_version": "source-watch.discussion.v0",
+  "discussion": {
+    "id": "example-options",
+    "title": "Registry format options",
+    "sources": [
+      {
+        "platform": "discourse",
+        "url": "https://forum.example/t/101",
+        "cursor": 4
+      }
+    ],
+    "updated_at": "2026-03-05T15:00:00Z"
+  },
+  "options": [
+    {
+      "id": "format-a",
+      "name": "Format A",
+      "kind": "option",
+      "gloss": "Compact single level format"
+    },
+    {
+      "id": "format-b",
+      "name": "Format B",
+      "kind": "option",
+      "gloss": "Nested format with a new parser"
+    },
+    {
+      "id": "grouping-shim",
+      "name": "Grouping shim",
+      "kind": "mechanism",
+      "gloss": "Adds grouping on top of Format A"
+    }
+  ],
+  "claims": [
+    {
+      "id": "c1",
+      "hash": "ea066da507b89172d22d5af7fafbb4cb7080a2fbf708207c9d207931ad212296",
+      "polarity": "benefit",
+      "target": "format-a",
+      "participant": "ada",
+      "post_url": "https://forum.example/t/101/1",
+      "quote": "Format A keeps the registry small",
+      "date": "2026-03-02T09:15:00Z",
+      "status": "open",
+      "confidence": 0.8
+    },
+    {
+      "id": "c2",
+      "hash": "b51f457dff4638d6dc5e5f355f9234463f49de5318fe120367eb8eda058b3869",
+      "polarity": "blocker",
+      "target": "format-b",
+      "participant": "ada",
+      "post_url": "https://forum.example/t/101/1",
+      "quote": "Format B needs a new parser",
+      "date": "2026-03-02T09:15:00Z",
+      "status": "answered",
+      "answered_by": "c3"
+    },
+    {
+      "id": "c3",
+      "hash": "38875c3fc7d9a8c8943970d88044d50fdec532d1fc86331889f24fbaa551c015",
+      "polarity": "benefit",
+      "target": "format-b",
+      "participant": "cyd",
+      "post_url": "https://forum.example/t/101/3",
+      "quote": "Nested groups are worth the extra code",
+      "date": "2026-03-03T08:05:00Z",
+      "status": "open"
+    },
+    {
+      "id": "c4",
+      "hash": "4d08357fa8b6fbf532e2f853135adb10a10aa69e96aac06e0fe4190ac3142af7",
+      "polarity": "blocker",
+      "target": "format-a",
+      "participant": "brin",
+      "post_url": "https://forum.example/t/101/2",
+      "quote": "Format A cannot express nested groups",
+      "date": "2026-03-02T11:40:00Z",
+      "status": "open",
+      "hidden": {
+        "reason": "source_edited",
+        "at": "2026-03-02T12:10:00Z"
+      }
+    },
+    {
+      "id": "c5",
+      "hash": "5b6f56897b50b21b9fe6aa72895907675fc5ace15d39305125aadc08554c5b6b",
+      "polarity": "benefit",
+      "target": "grouping-shim",
+      "participant": "cyd",
+      "post_url": "https://forum.example/t/101/4",
+      "quote": "Format A plus the grouping shim is enough",
+      "date": "2026-03-05T14:20:00Z",
+      "status": "open",
+      "text": "Shim closes the grouping gap"
+    }
+  ],
+  "positions": [
+    {
+      "id": "p1",
+      "participant": "cyd",
+      "prefers": [
+        "format-b"
+      ],
+      "basis": "stated",
+      "post_url": "https://forum.example/t/101/3",
+      "date": "2026-03-03T08:05:00Z"
+    },
+    {
+      "id": "p2",
+      "participant": "cyd",
+      "prefers": [
+        "format-a",
+        "grouping-shim"
+      ],
+      "basis": "stated",
+      "post_url": "https://forum.example/t/101/4",
+      "date": "2026-03-05T14:20:00Z",
+      "supersedes": "p1"
+    },
+    {
+      "id": "p3",
+      "participant": "ada",
+      "prefers": [
+        "format-a"
+      ],
+      "basis": "inferred",
+      "post_url": "https://forum.example/t/101/1",
+      "date": "2026-03-02T09:15:00Z",
+      "confidence": 0.62
+    }
+  ],
+  "questions": [
+    {
+      "id": "q1",
+      "text": "Does Format A support nested groups without a shim?",
+      "raised_by": "brin",
+      "post_url": "https://forum.example/t/101/2",
+      "date": "2026-03-02T11:40:00Z",
+      "status": "open"
+    }
+  ]
+}

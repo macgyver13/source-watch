@@ -1,0 +1,60 @@
+{
+  "schema_version": "source-watch.discussion.v0",
+  "discussion": {
+    "id": "example-proposal",
+    "title": "Single proposal review",
+    "sources": [
+      {
+        "platform": "github",
+        "url": "https://code.example/proposal/7",
+        "cursor": 2
+      }
+    ]
+  },
+  "options": [],
+  "claims": [
+    {
+      "id": "c1",
+      "hash": "384352e405fc577a978425f9f5d3e46b6c446e6800b8f8f0cf887e5c2cc20c3c",
+      "polarity": "blocker",
+      "target": "q1",
+      "participant": "dex",
+      "post_url": "https://code.example/proposal/7#issue-1",
+      "quote": "The proposal needs a fallback for clients that cannot verify the new field",
+      "date": "2026-04-10T10:00:00Z",
+      "status": "open"
+    },
+    {
+      "id": "c2",
+      "hash": "4f5f6f5cf60aa2edf0d5320f63ac76257d12a776126759d104d887a929af3455",
+      "polarity": "blocker",
+      "target": "q1",
+      "participant": "eri",
+      "post_url": "https://code.example/proposal/7#issuecomment-2",
+      "quote": "Section 3 does not say what happens when the field is absent",
+      "date": "2026-04-11T16:30:00Z",
+      "status": "open"
+    }
+  ],
+  "positions": [
+    {
+      "id": "p1",
+      "participant": "dex",
+      "prefers": [],
+      "basis": "inferred",
+      "post_url": "https://code.example/proposal/7#issue-1",
+      "date": "2026-04-10T10:00:00Z",
+      "confidence": 0.4
+    }
+  ],
+  "questions": [
+    {
+      "id": "q1",
+      "text": "What happens when the new field is absent?",
+      "raised_by": "eri",
+      "post_url": "https://code.example/proposal/7#issuecomment-2",
+      "date": "2026-04-11T16:30:00Z",
+      "status": "open"
+    }
+  ]
+}
