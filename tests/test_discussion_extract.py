@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import sys
+import tempfile
 import unittest
 from copy import deepcopy
 from pathlib import Path
@@ -112,6 +113,12 @@ def run_extract(state, posts, draft, judge, **kwargs):
 
 def _claim_ids(state: dict) -> list[str]:
     return [claim["id"] for claim in state["claims"] if isinstance(claim, dict)]
+
+
+def _changed_keys(old: dict, new: dict) -> set[str]:
+    keys = set(old) | set(new)
+    return {key for key in keys if old.get(key) != new.get(key)}
+
 
 
 class DiscussionExtractTests(unittest.TestCase):
@@ -602,6 +609,335 @@ class DiscussionExtractTests(unittest.TestCase):
         self.assertEqual(second["basis"], "inferred")
         self.assertEqual(second["supersedes"], "p1")
         self.assertEqual(ds.validate(out), [])
+
+    def test_incremental_split_is_byte_identical(self) -> None:
+        posts = vd.load_posts(OPTIONS / "posts.jsonl")
+        state = empty_from(ds.load(OPTIONS / "state.json"))
+        drafts = {
+            1: {
+                "claims": [{"quote": "Format A keeps the registry small", "text": "small"}],
+                "questions": [],
+            },
+            2: {
+                "claims": [{"quote": "Format A cannot express nested groups", "text": "blocks"}],
+                "questions": [],
+            },
+            3: {
+                "claims": [{"quote": "Nested groups are worth the extra code", "text": "nested"}],
+                "questions": [],
+            },
+            4: {
+                "claims": [{"quote": "Format A plus the grouping shim is enough", "text": "shim"}],
+                "questions": [],
+            },
+        }
+
+        def target(payload, labels):
+            quote = payload["quote"]
+            if "Nested groups" in quote:
+                return "format-b", 0.9
+            if "shim" in quote:
+                return "grouping-shim", 0.9
+            return "format-a", 0.9
+
+        def polarity(payload, labels):
+            if "cannot express" in payload["quote"]:
+                return "blocker", 0.8
+            return "benefit", 0.8
+
+        plan = {"target": target, "polarity": polarity}
+        out1, log1 = run_extract(
+            state, posts, ScriptedDraft(drafts), ScriptedJudge(plan), limit=2
+        )
+        self.assertEqual(log1["cursor_out"], 2)
+        out2, log2 = run_extract(
+            out1, posts, ScriptedDraft(drafts), ScriptedJudge(plan)
+        )
+        self.assertEqual(log2["cursor_in"], 2)
+        self.assertEqual(log2["cursor_out"], 4)
+        run1_ids = {claim["id"] for claim in out1["claims"]}
+        run1_by_id = {claim["id"]: claim for claim in out1["claims"]}
+        run2_by_id = {claim["id"]: claim for claim in out2["claims"]}
+        self.assertTrue(run1_ids <= set(run2_by_id))
+        for cid in run1_ids:
+            self.assertEqual(
+                json.dumps(run1_by_id[cid], sort_keys=True),
+                json.dumps(run2_by_id[cid], sort_keys=True),
+            )
+        new_ids = [claim["id"] for claim in out2["claims"] if claim["id"] not in run1_ids]
+        max_old = max(int(cid[1:]) for cid in run1_ids)
+        for cid in new_ids:
+            self.assertGreater(int(cid[1:]), max_old)
+
+    def test_status_changes_are_the_only_permitted_mutation(self) -> None:
+        posts = deepcopy(vd.load_posts(OPTIONS / "posts.jsonl"))
+        posts[2]["reply_to_post_number"] = 1
+        posts[3]["author"] = "brin"
+        state = empty_from(ds.load(OPTIONS / "state.json"))
+        drafts = {
+            1: {
+                "claims": [{"quote": "Format A keeps the registry small", "text": "small"}],
+                "questions": [],
+            },
+            2: {
+                "claims": [{"quote": "Format A cannot express nested groups", "text": "blocks"}],
+                "questions": [],
+            },
+            3: {
+                "claims": [{"quote": "Nested groups are worth the extra code", "text": "nested"}],
+                "questions": [],
+            },
+        }
+
+        def target(payload, labels):
+            if "Nested groups" in payload["quote"]:
+                return "format-b", 0.9
+            return "format-a", 0.9
+
+        def polarity(payload, labels):
+            if "cannot express" in payload["quote"]:
+                return "blocker", 0.8
+            return "benefit", 0.8
+
+        def responds_to(payload, labels):
+            if "Nested groups" in payload["quote"] and "c1" in labels:
+                return "c1", 0.9
+            return dx.NONE_LABEL, 0.5
+
+        def concedes(payload, labels):
+            if payload.get("claim_quote") == "Format A cannot express nested groups":
+                return 0.9
+            return 0.0
+
+        plan = {
+            "target": target,
+            "polarity": polarity,
+            "responds_to": responds_to,
+            "concedes": concedes,
+        }
+        out1, _log1 = run_extract(
+            state, posts, ScriptedDraft(drafts), ScriptedJudge(plan), limit=2
+        )
+        out2, _log2 = run_extract(
+            out1, posts, ScriptedDraft(drafts), ScriptedJudge(plan)
+        )
+        run1 = {claim["id"]: claim for claim in out1["claims"]}
+        run2 = {claim["id"]: claim for claim in out2["claims"]}
+        self.assertEqual(_changed_keys(run1["c1"], run2["c1"]), {"status", "answered_by"})
+        self.assertEqual(_changed_keys(run1["c2"], run2["c2"]), {"status"})
+        self.assertEqual(run2["c1"]["status"], "answered")
+        self.assertEqual(run2["c1"]["answered_by"], "c3")
+        self.assertEqual(run2["c2"]["status"], "conceded")
+        self.assertEqual(ds.validate(out2), [])
+
+    def test_supersedes_chain_survives_the_split(self) -> None:
+        posts = vd.load_posts(OPTIONS / "posts.jsonl")
+        state = empty_from(ds.load(OPTIONS / "state.json"))
+
+        def explicit_preference(payload, labels):
+            excerpt = payload.get("post_excerpt", "")
+            if "Changing my mind" in excerpt or "now prefer Format A" in excerpt:
+                return "format-a", 0.5
+            if "prefer Format B" in excerpt:
+                return "format-b", 0.9
+            return dx.NONE_LABEL, 0.5
+
+        plan = {"explicit_preference": explicit_preference}
+        out1, log1 = run_extract(
+            state, posts, ScriptedDraft({}), ScriptedJudge(plan), limit=3
+        )
+        self.assertEqual(log1["cursor_out"], 3)
+        self.assertEqual(len(out1["positions"]), 1)
+        out2, _log2 = run_extract(out1, posts, ScriptedDraft({}), ScriptedJudge(plan))
+        self.assertEqual(len(out2["positions"]), 2)
+        first, second = out2["positions"]
+        self.assertEqual(second["supersedes"], first["id"])
+        seen = set()
+        current = second["id"]
+        by_id = {row["id"]: row for row in out2["positions"]}
+        while current:
+            self.assertNotIn(current, seen)
+            seen.add(current)
+            current = by_id[current].get("supersedes")
+        self.assertEqual(ds.validate(out2), [])
+
+    def test_edited_post_hides_dependent_claims(self) -> None:
+        posts = vd.load_posts(OPTIONS / "posts.jsonl")
+        state = empty_from(ds.load(OPTIONS / "state.json"))
+        drafts = {
+            1: {
+                "claims": [{"quote": "Format A keeps the registry small", "text": "small"}],
+                "questions": [],
+            },
+            2: {
+                "claims": [{"quote": "Format A cannot express nested groups", "text": "blocks"}],
+                "questions": [],
+            },
+        }
+        plan = {
+            "target": lambda payload, labels: ("format-a", 0.9),
+            "polarity": lambda payload, labels: (
+                ("blocker", 0.8) if "cannot express" in payload["quote"] else ("benefit", 0.8)
+            ),
+        }
+        with tempfile.TemporaryDirectory() as tmp:
+            seen_path = Path(tmp) / "seen.json"
+            out1, log1 = run_extract(
+                state, posts, ScriptedDraft(drafts), ScriptedJudge(plan)
+            )
+            dx.save_seen(seen_path, posts)
+            edited = deepcopy(posts)
+            old_hash = edited[1]["content_hash"]
+            edited[1]["body_text"] = (
+                edited[1]["body_text"] + " Extra commentary that does not touch the quote."
+            )
+            edited[1]["content_hash"] = ds.post_content_hash(edited[1]["body_text"])
+            new_hash = edited[1]["content_hash"]
+            seen = dx.load_seen(seen_path)
+            out2, log2 = run_extract(
+                out1,
+                edited,
+                ScriptedDraft(drafts),
+                ScriptedJudge(plan),
+                seen=seen,
+                cursor=log1["cursor_out"],
+            )
+            post2_url = posts[1]["url"]
+            run1_by_id = {claim["id"]: claim for claim in out1["claims"]}
+            dependent = [claim for claim in out2["claims"] if claim["post_url"] == post2_url]
+            others = [claim for claim in out2["claims"] if claim["post_url"] != post2_url]
+            self.assertTrue(dependent)
+            for claim in others:
+                self.assertEqual(
+                    json.dumps(run1_by_id[claim["id"]], sort_keys=True),
+                    json.dumps(claim, sort_keys=True),
+                )
+            for claim in dependent:
+                old = run1_by_id[claim["id"]]
+                stripped = dict(claim)
+                hidden = stripped.pop("hidden")
+                self.assertEqual(
+                    json.dumps(old, sort_keys=True),
+                    json.dumps(stripped, sort_keys=True),
+                )
+                self.assertEqual(hidden["reason"], "source_edited")
+                self.assertIn(old_hash[:12], hidden["note"])
+                self.assertIn(new_hash[:12], hidden["note"])
+            self.assertEqual(log2["hidden"]["source_edited"], len(dependent))
+            self.assertEqual(ds.validate(out2), [])
+
+    def test_edited_post_without_sidecar_falls_back_to_the_verifier(self) -> None:
+        posts = vd.load_posts(OPTIONS / "posts.jsonl")
+        state = empty_from(ds.load(OPTIONS / "state.json"))
+        drafts = {
+            2: {
+                "claims": [{"quote": "Format A cannot express nested groups", "text": "blocks"}],
+                "questions": [],
+            }
+        }
+        plan = {
+            "target": lambda payload, labels: ("format-a", 0.9),
+            "polarity": lambda payload, labels: ("blocker", 0.8),
+        }
+        with tempfile.TemporaryDirectory() as tmp:
+            seen_path = Path(tmp) / "seen.json"
+            out1, log1 = run_extract(
+                state, posts, ScriptedDraft(drafts), ScriptedJudge(plan)
+            )
+            dx.save_seen(seen_path, posts)
+            seen_path.unlink()
+            edited = deepcopy(posts)
+            edited[1]["body_text"] = "The quoted sentence is gone now."
+            edited[1]["content_hash"] = ds.post_content_hash(edited[1]["body_text"])
+            seen = dx.load_seen(seen_path)
+            out2, log2 = run_extract(
+                out1,
+                edited,
+                ScriptedDraft(drafts),
+                ScriptedJudge(plan),
+                seen=seen,
+                cursor=log1["cursor_out"],
+            )
+            dependent = [
+                claim for claim in out2["claims"] if claim["post_url"] == posts[1]["url"]
+            ]
+            self.assertEqual(len(dependent), 1)
+            self.assertEqual(dependent[0]["hidden"]["reason"], "source_edited")
+            self.assertIn("quote is not a verbatim substring", dependent[0]["hidden"]["note"])
+            self.assertEqual(log2["hidden"]["source_edited"], 1)
+            self.assertEqual(ds.validate(out2), [])
+
+    def test_deleted_post_hides_dependent_claims(self) -> None:
+        posts = vd.load_posts(OPTIONS / "posts.jsonl")
+        state = empty_from(ds.load(OPTIONS / "state.json"))
+        drafts = {
+            1: {
+                "claims": [{"quote": "Format A keeps the registry small", "text": "small"}],
+                "questions": [],
+            },
+            2: {
+                "claims": [{"quote": "Format A cannot express nested groups", "text": "blocks"}],
+                "questions": [],
+            },
+        }
+        plan = {
+            "target": lambda payload, labels: ("format-a", 0.9),
+            "polarity": lambda payload, labels: (
+                ("blocker", 0.8) if "cannot express" in payload["quote"] else ("benefit", 0.8)
+            ),
+        }
+        out1, log1 = run_extract(state, posts, ScriptedDraft(drafts), ScriptedJudge(plan))
+        remaining = [post for post in posts if post["post_number"] != 2]
+        out2, log2 = run_extract(
+            out1,
+            remaining,
+            ScriptedDraft(drafts),
+            ScriptedJudge(plan),
+            cursor=log1["cursor_out"],
+        )
+        dependent = [claim for claim in out2["claims"] if claim["post_url"] == posts[1]["url"]]
+        self.assertEqual(len(dependent), 1)
+        self.assertEqual(dependent[0]["id"], "c2")
+        self.assertEqual(dependent[0]["hidden"]["reason"], "source_deleted")
+        self.assertEqual(log2["hidden"]["source_deleted"], 1)
+        self.assertEqual(ds.validate(out2), [])
+
+    def test_snapshot_records_cursor_and_counts(self) -> None:
+        posts = vd.load_posts(OPTIONS / "posts.jsonl")
+        state = empty_from(ds.load(OPTIONS / "state.json"))
+        drafts = {
+            1: {
+                "claims": [{"quote": "Format A keeps the registry small", "text": "small"}],
+                "questions": [],
+            }
+        }
+        plan = {
+            "target": lambda payload, labels: ("format-a", 0.9),
+            "polarity": lambda payload, labels: ("benefit", 0.8),
+        }
+        out, _log = run_extract(state, posts, ScriptedDraft(drafts), ScriptedJudge(plan))
+        self.assertTrue(out["snapshots"])
+        snap = out["snapshots"][-1]
+        self.assertEqual(snap["at"], "2026-03-05T14:20:00Z")
+        self.assertEqual(snap["cursors"], {"https://forum.example/t/101": 4})
+        hidden = 0
+        visible = {"claims": 0, "positions": 0, "questions": 0}
+        for key in visible:
+            for row in out.get(key) or []:
+                if "hidden" in row:
+                    hidden += 1
+                else:
+                    visible[key] += 1
+        self.assertEqual(
+            snap["counts"],
+            {
+                "claims": visible["claims"],
+                "positions": visible["positions"],
+                "questions": visible["questions"],
+                "hidden": hidden,
+            },
+        )
+
 
 
 if __name__ == "__main__":
