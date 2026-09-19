@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import sys
 import unittest
+from collections import Counter
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -24,6 +25,14 @@ class GoldRecordTests(unittest.TestCase):
         state = ds.load(FIXTURE / "state.json")
         posts = vd.load_posts(FIXTURE / "posts.jsonl")
         self.assertEqual(vd.verify(state, posts), [])
+
+    def test_gold_record_claim_status_counts(self) -> None:
+        state = ds.load(FIXTURE / "state.json")
+        counts = Counter(claim["status"] for claim in state["claims"])
+        self.assertEqual(counts["open"], 111)
+        self.assertEqual(counts["answered"], 29)
+        self.assertEqual(counts["conceded"], 3)
+        self.assertEqual(len(state["claims"]), 143)
 
 
 if __name__ == "__main__":
