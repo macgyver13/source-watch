@@ -1,0 +1,17 @@
+{
+  "schema_version": "source-watch.discussion.v0",
+  "discussion": {
+    "id": "bips-2212",
+    "title": "BIP460: CISA for Taproot Key Path Spends",
+    "sources": [
+      { "platform": "github", "url": "https://github.com/bitcoin/bips/pull/2212", "cursor": 0 }
+    ]
+  },
+  "options": [
+    { "id": "bip-460", "name": "BIP 460", "kind": "option",
+      "gloss": "Cross input signature aggregation for taproot key path spends" }
+  ],
+  "claims": [],
+  "positions": [],
+  "questions": []
+}

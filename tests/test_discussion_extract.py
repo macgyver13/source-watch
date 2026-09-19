@@ -938,6 +938,13 @@ class DiscussionExtractTests(unittest.TestCase):
             },
         )
 
+    def test_seeded_single_option_state_validates(self) -> None:
+        seed = ds.load(FIXTURES / "bips-2212" / "state-seed.json")
+        self.assertEqual(ds.validate(seed), [])
+        labels, _options_text, _questions_text = dx.target_catalog(seed)
+        self.assertEqual(labels, ["bip-460"])
+
+
 
 
 if __name__ == "__main__":
