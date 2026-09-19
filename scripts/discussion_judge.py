@@ -1,5 +1,11 @@
 #!/usr/bin/env python3
-"""Typed judge primitives over a short state dict, with JSON model backends."""
+"""Typed judge primitives over a short state dict, with JSON model backends.
+
+The jev backend body shape is provisional until TypeSafe publishes the endpoint:
+choose {"kind": "choice", "state", "instructions", "labels"},
+truth {"kind": "noul", "state", "instructions", "statement"},
+score {"kind": "score", "state", "instructions", "levels"}.
+"""
 from __future__ import annotations
 
 import argparse
@@ -20,6 +26,9 @@ DEFAULT_TIMEOUT = 180.0
 DEFAULT_MAX_TOKENS = 512
 QUESTIONS_PATH = Path(__file__).resolve().parents[1] / "schema" / "judge-questions.yaml"
 CompleteFn = Callable[[list[dict]], str]
+JevTransport = Callable[[str, dict], dict]
+JEV_KINDS = {"choose": "choice", "score": "score", "truth": "noul"}
+JEV_MAX_BODY_BYTES = 12000
 
 CHOOSE_SHAPE = {"choice": "<label>", "probabilities": {"<label>": 0.0}}
 TRUTH_SHAPE = {"probability": 0.0}
@@ -421,6 +430,122 @@ def anthropic_complete(
     return complete
 
 
+def _jev_unavailable(kind: str, body: dict) -> dict:
+    # TODO: replace with the published TypeSafe Jev endpoint once its request and response
+    # shape is documented. base_url is stored for that transport and is unused until then.
+    raise JudgeError(
+        "jev transport is not configured: the TypeSafe Jev endpoint shape is not published, inject a transport to use this backend"
+    )
+
+
+def _jev_check_body(body: dict) -> None:
+    n = len(json.dumps(body).encode("utf-8"))
+    if n > JEV_MAX_BODY_BYTES:
+        raise JudgeError(f"jev request body is {n} bytes, over the {JEV_MAX_BODY_BYTES} byte cap")
+
+
+def _jev_response(data: object) -> dict:
+    if not isinstance(data, dict):
+        raise JudgeError("jev response must be a JSON object")
+    return data
+
+
+def _jev_require(data: dict, key: str) -> object:
+    if key not in data:
+        raise JudgeError(f"jev response is missing {key}")
+    return data[key]
+
+
+class JevJudge(Judge):
+    def __init__(
+        self,
+        *,
+        api_key: str,
+        transport: JevTransport | None = None,
+        base_url: str | None = None,
+        timeout: float = DEFAULT_TIMEOUT,
+    ) -> None:
+        if not api_key:
+            raise JudgeError("TYPESAFE_API_KEY is not set")
+        self.api_key = api_key
+        self.transport = transport or _jev_unavailable
+        self.base_url = base_url
+        self.timeout = timeout
+        self.name = "jev"
+        self.model = None
+
+    def _dispatch(self, primitive: str, body: dict) -> dict:
+        _jev_check_body(body)
+        return _jev_response(self.transport(JEV_KINDS[primitive], body))
+
+    def choose(self, state: dict, options: Sequence[str], *, instructions: str = "") -> Verdict:
+        labels = list(options)
+        if len(labels) < 2:
+            raise JudgeError("choose needs at least two options")
+        normalized = normalize_state(state)
+        data = self._dispatch(
+            "choose",
+            {
+                "kind": "choice",
+                "state": normalized,
+                "instructions": instructions,
+                "labels": labels,
+            },
+        )
+        label = _jev_require(data, "label")
+        if not isinstance(label, str) or label not in labels:
+            raise JudgeError(f"choice '{label}' is not one of: {', '.join(labels)}")
+        probs = _probabilities(_jev_require(data, "probabilities"), labels)
+        raw_conf = data.get("confidence")
+        if _is_non_bool_number(raw_conf) and 0 <= float(raw_conf) <= 1:
+            confidence = float(raw_conf)
+        else:
+            confidence = probs[label]
+        return Verdict(label, probs, confidence)
+
+    def truth(self, state: dict, statement: str, *, instructions: str = "") -> float:
+        if not statement:
+            raise JudgeError("truth needs a statement")
+        normalized = normalize_state(state)
+        data = self._dispatch(
+            "truth",
+            {
+                "kind": "noul",
+                "state": normalized,
+                "instructions": instructions,
+                "statement": statement,
+            },
+        )
+        value = _jev_require(data, "probability")
+        if not _is_non_bool_number(value) or not (0 <= float(value) <= 1):
+            raise JudgeError("probability must be a number between 0 and 1")
+        return float(value)
+
+    def score(self, state: dict, rubric: Sequence[str], *, instructions: str = "") -> Verdict:
+        levels = list(rubric)
+        if len(levels) < 2:
+            raise JudgeError("score needs at least two rubric levels")
+        labels = [str(i) for i in range(len(levels))]
+        normalized = normalize_state(state)
+        data = self._dispatch(
+            "score",
+            {
+                "kind": "score",
+                "state": normalized,
+                "instructions": instructions,
+                "levels": levels,
+            },
+        )
+        if "level" in data:
+            level = data["level"]
+            n = len(levels)
+            if not isinstance(level, int) or isinstance(level, bool) or not (0 <= level < n):
+                raise JudgeError(f"level {level} is outside 0..{n - 1}")
+        probs = _probabilities(_jev_require(data, "probabilities"), labels)
+        return Verdict(_score_from_probabilities(probs), probs, max(probs.values()))
+
+
+
 def _question_err(index: int, qid: str, message: str) -> JudgeError:
     slot = qid if qid else "?"
     return JudgeError(f"judge-questions[{index}] {slot}: {message}")
@@ -543,6 +668,15 @@ def judge_from_env(env: Mapping[str, str] | None = None) -> Judge:
         raise JudgeError(
             f"DISCUSSION_JUDGE is not set (expected one of: {_expected_backends()})"
         )
+    if backend == "jev":
+        key_env_name = (env.get("DISCUSSION_JUDGE_API_KEY_ENV") or "TYPESAFE_API_KEY").strip()
+        api_key = env.get(key_env_name, "") if key_env_name else ""
+        raw_base = (env.get("TYPESAFE_BASE_URL") or "").strip()
+        return JevJudge(
+            api_key=api_key,
+            base_url=raw_base or None,
+            timeout=_env_timeout(env),
+        )
     if backend not in ("anthropic", "ollama", "openai-compatible"):
         raise JudgeError(
             f"unknown DISCUSSION_JUDGE backend '{backend}' (expected one of: {_expected_backends()})"
@@ -648,15 +782,27 @@ def _format_answer(question: Question, result: Verdict | float) -> str:
     if question.primitive == "truth":
         return f"{question.id} {question.primitive} -> {result}"
     assert isinstance(result, Verdict)
+    if question.primitive == "score":
+        return (
+            f"{question.id} {question.primitive} -> {result.value:.2f} "
+            f"(confidence {result.confidence:.2f})"
+        )
     return (
         f"{question.id} {question.primitive} -> {result.value} "
-        f"(confidence {result.confidence})"
+        f"(confidence {result.confidence:.2f})"
     )
 
 
 def _answer_record(question: Question, result: Verdict | float) -> dict:
     if question.primitive == "truth":
-        return {"primitive": question.primitive, "value": result}
+        probability = float(result)
+        false_p = round(1.0 - probability, 6)
+        return {
+            "primitive": question.primitive,
+            "value": probability,
+            "probabilities": {"true": probability, "false": false_p},
+            "confidence": max(probability, false_p),
+        }
     assert isinstance(result, Verdict)
     return {
         "primitive": question.primitive,
