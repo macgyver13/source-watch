@@ -1,0 +1,41 @@
+{
+  "model": "gemma4-31b",
+  "judge_model": "gemma4-31b",
+  "base_url": "http://localhost:8080/v1",
+  "posts_total": 30,
+  "posts_processed": 30,
+  "cursor_in": 0,
+  "cursor_out": 30,
+  "drafted_claims": 73,
+  "kept_claims": 67,
+  "dropped": {
+    "verify": 0,
+    "duplicate_hash": 0,
+    "duplicate_of": 4,
+    "no_target": 0,
+    "judge_error": 2
+  },
+  "drop_reasons": [
+    "probabilities sum to zero",
+    "probabilities sum to zero",
+    "c31 duplicates c19",
+    "c35 duplicates c24",
+    "c45 duplicates c40",
+    "c68 duplicates c38"
+  ],
+  "questions_added": 9,
+  "positions_added": 1,
+  "answered_links": 9,
+  "conceded": 17,
+  "concede_calls": 209,
+  "preference_skipped": 0,
+  "candidate_batches": 23,
+  "catalog_truncated": 0,
+  "hidden": {
+    "source_deleted": 0,
+    "source_edited": 0
+  },
+  "judge_errors": [],
+  "parse_failures": [],
+  "wall_seconds": 383.342
+}
