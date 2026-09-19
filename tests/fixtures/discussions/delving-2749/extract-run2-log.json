@@ -1,0 +1,51 @@
+{
+  "model": "gemma4-31b",
+  "judge_model": "gemma4-31b",
+  "base_url": "http://localhost:8080/v1",
+  "posts_total": 35,
+  "posts_processed": 13,
+  "cursor_in": 22,
+  "cursor_out": 36,
+  "drafted_claims": 102,
+  "kept_claims": 86,
+  "dropped": {
+    "verify": 3,
+    "duplicate_hash": 0,
+    "duplicate_of": 13,
+    "no_target": 0,
+    "judge_error": 0
+  },
+  "drop_reasons": [
+    "c149 duplicates c45",
+    "c149 duplicates c46",
+    "c149 duplicates c107",
+    "c150 duplicates c145",
+    "c152 duplicates c151",
+    "c155 duplicates c124",
+    "c158 duplicates c138",
+    "c180 duplicates c158",
+    "c180 duplicates c159",
+    "c192 duplicates c98",
+    "claim c200: quote is not a verbatim substring of post 32",
+    "c211 duplicates c192",
+    "claim c213: quote is not a verbatim substring of post 34",
+    "c215 duplicates c16",
+    "c220 duplicates c180",
+    "claim c221: quote is not a verbatim substring of post 36"
+  ],
+  "questions_added": 12,
+  "positions_added": 2,
+  "answered_links": 27,
+  "conceded": 5,
+  "concede_calls": 213,
+  "preference_skipped": 0,
+  "candidate_batches": 117,
+  "catalog_truncated": 99,
+  "hidden": {
+    "source_deleted": 0,
+    "source_edited": 0
+  },
+  "judge_errors": [],
+  "parse_failures": [],
+  "wall_seconds": 715.791
+}
