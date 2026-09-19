@@ -1,0 +1,53 @@
+schema_version: source-watch.judge-questions.v0
+questions:
+  - id: polarity
+    primitive: choose
+    inputs: [target, quote]
+    labels: [benefit, blocker]
+    instructions: Does the quoted span argue a benefit of the target, or a blocker against it?
+  - id: target
+    primitive: choose
+    inputs: [quote, options, post_excerpt]
+    label_source: options
+    instructions: Which catalog entry does the quoted span argue about?
+  - id: duplicate_of
+    primitive: choose
+    inputs: [quote, candidates]
+    label_source: candidates
+    extra_labels: [none]
+    instructions: Does the quoted span make the same argument as one of the candidate claims? Answer none if it is a new argument.
+  - id: responds_to
+    primitive: choose
+    inputs: [quote, candidates, reply_to]
+    label_source: candidates
+    extra_labels: [none]
+    instructions: Which candidate claim is the quoted span replying to? Answer none if it replies to none of them.
+  - id: explicit_preference
+    primitive: choose
+    inputs: [participant, options, post_excerpt]
+    label_source: options
+    extra_labels: [none]
+    instructions: Which option does the author state a preference for in this post? Answer none if the post states no preference.
+  - id: concedes
+    primitive: truth
+    inputs: [participant, claim_quote, post_excerpt]
+    statement: In this post the author gives up the argument quoted in claim_quote.
+    instructions: Weigh only what the post itself concedes.
+  - id: quote_fairness
+    primitive: score
+    inputs: [quote, post_excerpt]
+    instructions: How fairly does the quoted span represent the post it came from?
+    levels:
+      - the quote reverses or misrepresents what the post says
+      - the quote drops context that changes its meaning
+      - the quote is accurate but the post makes the point more narrowly
+      - the quote represents the post fairly on its own
+  - id: track_worthiness
+    primitive: score
+    inputs: [title, post_excerpt, participants, posts_count]
+    instructions: How much does this discussion need a tracked record?
+    levels:
+      - one person thinking out loud, nothing to track
+      - a small exchange that has not reached a decision point
+      - an active debate with several participants and distinct options
+      - a decision-shaping debate a reader cannot follow without a record
