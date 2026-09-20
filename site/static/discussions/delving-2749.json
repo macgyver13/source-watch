@@ -1,0 +1,1980 @@
+{
+ "schema_version": "source-watch.discussion.v0",
+ "discussion": {
+  "id": "delving-2749",
+  "title": "PQC output type discussion",
+  "topic": "post-quantum",
+  "sources": [
+   {
+    "platform": "discourse",
+    "url": "https://delvingbitcoin.org/t/pqc-output-type-discussion/2749",
+    "cursor": 36
+   }
+  ],
+  "updated_at": "2026-09-18T07:46:46Z"
+ },
+ "options": [
+  {
+   "id": "p2mr",
+   "name": "P2MR",
+   "kind": "option",
+   "gloss": "Pay to Merkle Root (BIP-360): the scriptPubKey commits to a Merkle root of leaf scripts, so no EC point is on chain before a spend"
+  },
+  {
+   "id": "p2trv2",
+   "name": "P2TRv2",
+   "kind": "option",
+   "gloss": "Pay to Taproot v2: BIP-341 semantics plus PQC leaf types, an EC point on every output, ECC key path expected to be disabled later"
+  },
+  {
+   "id": "p2trh",
+   "name": "P2TRH",
+   "kind": "option",
+   "gloss": "Pay to Taproot Hash: like P2TRv2 but the scriptPubKey is a hash of the tweaked key and the key path uses public key recovery"
+  },
+  {
+   "id": "p2qr",
+   "name": "P2QR",
+   "kind": "option",
+   "gloss": "Pay to Quantum Resistant: the P2MR structure with all ECC opcodes disabled from the start"
+  },
+  {
+   "id": "p2trv2-cisa",
+   "name": "P2TRv2 plus CISA",
+   "kind": "option",
+   "gloss": "P2TRv2 bundled with cross input signature aggregation as a single deployment"
+  },
+  {
+   "id": "cisa-output",
+   "name": "CISA output type",
+   "kind": "option",
+   "gloss": "A standalone aggregation output type (BIP 460) deployed separately from the PQC work"
+  },
+  {
+   "id": "tripwire",
+   "name": "Tripwire",
+   "kind": "mechanism",
+   "gloss": "An on chain proof of an ECDLP break automatically disables ECC spends inside the output type"
+  },
+  {
+   "id": "miner-lockdown",
+   "name": "Miner Lockdown",
+   "kind": "mechanism",
+   "gloss": "A hashrate majority trigger that disables ECC spends inside the output type"
+  },
+  {
+   "id": "new-witness-style",
+   "name": "New witness style",
+   "kind": "mechanism",
+   "gloss": "An extra witness with its own discount and costing rules, needing a serialization and P2P change"
+  },
+  {
+   "id": "pkr",
+   "name": "Public Key Recovery",
+   "kind": "mechanism",
+   "gloss": "Spending without publishing the public key, saving about 32 bytes at the cost of a BIP-340 variant and of batch validation"
+  },
+  {
+   "id": "hybrid-pqc-opcodes",
+   "name": "Hybrid PQC opcodes",
+   "kind": "mechanism",
+   "gloss": "Opcodes that accept an ECC and a PQC signature together"
+  },
+  {
+   "id": "separate-pqc-leaf-version",
+   "name": "Separate PQC leaf version",
+   "kind": "mechanism",
+   "gloss": "PQC opcodes confined to a leaf version that has no ECC opcodes"
+  },
+  {
+   "id": "upgrade-hook",
+   "name": "Upgrade hook",
+   "kind": "mechanism",
+   "gloss": "A dated anyone can spend deadline that forces a later consensus patch"
+  },
+  {
+   "id": "cisa",
+   "name": "CISA",
+   "kind": "mechanism",
+   "gloss": "Cross input signature aggregation itself, argued as a bundle or as a later separate step"
+  },
+  {
+   "id": "snark-aggregation",
+   "name": "SNARK signature aggregation",
+   "kind": "mechanism",
+   "gloss": "Post mine SNARK aggregation of signatures to curtail chain growth"
+  },
+  {
+   "id": "shrincs",
+   "name": "SHRINCS",
+   "kind": "mechanism",
+   "gloss": "A hash based signature proposal not coupled to a block size increase"
+  },
+  {
+   "id": "half-aggregation",
+   "name": "Half aggregation flow",
+   "kind": "mechanism",
+   "gloss": "Who aggregates signatures and where, signer side or relay side"
+  },
+  {
+   "id": "cisa-optin-flag",
+   "name": "Later CISA opt in flag",
+   "kind": "mechanism",
+   "gloss": "A pubkey grind bit or an extra output byte that lets a later CISA fork reuse the same witness version"
+  },
+  {
+   "id": "two-stage-deployment",
+   "name": "Two stage deployment",
+   "kind": "mechanism",
+   "gloss": "A simple first output type now and a fuller one later"
+  },
+  {
+   "id": "extension-block",
+   "name": "Extension block",
+   "kind": "mechanism",
+   "gloss": "A separate block area with its own UTXO set"
+  },
+  {
+   "id": "replay-protection",
+   "name": "Replay protection",
+   "kind": "mechanism",
+   "gloss": "Opt in replay protection shipped with the first SegWit v2"
+  }
+ ],
+ "claims": [
+  {
+   "id": "c1",
+   "hash": "96ed26d972e7fd5eb4312da97489d99a31f6bf7a4a290641c559857849435e5e",
+   "polarity": "benefit",
+   "target": "p2mr",
+   "participant": "sipa",
+   "post_url": "https://delvingbitcoin.org/t/pqc-output-type-discussion/2749/1",
+   "quote": "This loses some spending efficiency compared to P2TR (see below), but does not reveal EC points on chain before spending.",
+   "date": "2026-07-27T21:20:53Z",
+   "status": "open"
+  },
+  {
+   "id": "c2",
+   "hash": "10703b68cc1ea6271d6ad8eaaa98f36f1450a12d663dd791116c828b41ff2567",
+   "polarity": "blocker",
+   "target": "p2trv2",
+   "participant": "sipa",
+   "post_url": "https://delvingbitcoin.org/t/pqc-output-type-discussion/2749/1",
+   "quote": "Leaves an EC point exposed on chain for every output, but is most similar to today\u2019s usage.",
+   "date": "2026-07-27T21:20:53Z",
+   "status": "open"
+  },
+  {
+   "id": "c3",
+   "hash": "95fe61dc60f75015c107d53d5b0e9a07465949e38d275d34bbf44c85720ef9a4",
+   "polarity": "benefit",
+   "target": "p2trv2",
+   "participant": "sipa",
+   "post_url": "https://delvingbitcoin.org/t/pqc-output-type-discussion/2749/1",
+   "quote": "The exact same semantics as BIP-341 P2TR, but with PQC opcodes/leaf types added",
+   "date": "2026-07-27T21:20:53Z",
+   "status": "open"
+  },
+  {
+   "id": "c4",
+   "hash": "d6294362a9cbffe30739d9fb47973e8a0c26d8bc21179db0bd5dc22a16ca5cc3",
+   "polarity": "benefit",
+   "target": "p2trh",
+   "participant": "sipa",
+   "post_url": "https://delvingbitcoin.org/t/pqc-output-type-discussion/2749/1",
+   "quote": "Key path spending uses public key recovery (see below), giving it the same weight profile as P2TRv2, without EC point on chain.",
+   "date": "2026-07-27T21:20:53Z",
+   "status": "open"
+  },
+  {
+   "id": "c5",
+   "hash": "d9466ce21a7fd90c99ddc8353515f1e46319978796e5c7cd72dc49f79c88baef",
+   "polarity": "blocker",
+   "target": "p2trh",
+   "participant": "sipa",
+   "post_url": "https://delvingbitcoin.org/t/pqc-output-type-discussion/2749/1",
+   "quote": "Needs a new BIP-340 variant, and breaks batch validation.",
+   "date": "2026-07-27T21:20:53Z",
+   "status": "open"
+  },
+  {
+   "id": "c6",
+   "hash": "415dfcd3e9f2162067ab79e60627ab94b626511529084b19650d8635d43df373",
+   "polarity": "benefit",
+   "target": "p2qr",
+   "participant": "sipa",
+   "post_url": "https://delvingbitcoin.org/t/pqc-output-type-discussion/2749/1",
+   "quote": "This makes it unconditionally quantum-resistant, but loses the efficiency of ECC even before Q-day.",
+   "date": "2026-07-27T21:20:53Z",
+   "status": "open"
+  },
+  {
+   "id": "c7",
+   "hash": "426e966f45e0b25cdd93bf466acd8f564916f9995ee52f919ae0e678c7287d20",
+   "polarity": "benefit",
+   "target": "pkr",
+   "participant": "sipa",
+   "post_url": "https://delvingbitcoin.org/t/pqc-output-type-discussion/2749/1",
+   "quote": "This reduces the spending size by ~32 bytes by not publishing the public key explicitly at spend time",
+   "date": "2026-07-27T21:20:53Z",
+   "status": "open"
+  },
+  {
+   "id": "c8",
+   "hash": "56e5de6bcd1ad8d0718e7baa13865c25fc86f5bc427ae714d33a768b31bb0d3d",
+   "polarity": "blocker",
+   "target": "pkr",
+   "participant": "sipa",
+   "post_url": "https://delvingbitcoin.org/t/pqc-output-type-discussion/2749/1",
+   "quote": "at the cost of needing a BIP-340 variant, and breaking batch validation.",
+   "date": "2026-07-27T21:20:53Z",
+   "status": "open"
+  },
+  {
+   "id": "c9",
+   "hash": "3b435fac4c6c1985f38635554e7251822e7aebb2e761e8faae630527ce10aee6",
+   "polarity": "blocker",
+   "target": "new-witness-style",
+   "participant": "sipa",
+   "post_url": "https://delvingbitcoin.org/t/pqc-output-type-discussion/2749/1",
+   "quote": "This comes at the cost of needing to deploy a transaction serialization change and P2P protocol extension.",
+   "date": "2026-07-27T21:20:53Z",
+   "status": "open"
+  },
+  {
+   "id": "c10",
+   "hash": "3c5b617234a966ce1f5df6f68c379b1aa97c0384f249e7bcc21ced3fe8a21bc9",
+   "polarity": "benefit",
+   "target": "tripwire",
+   "participant": "sipa",
+   "post_url": "https://delvingbitcoin.org/t/pqc-output-type-discussion/2749/1",
+   "quote": "This makes it unambiguously clear that EC disabling is expected.",
+   "date": "2026-07-27T21:20:53Z",
+   "status": "open"
+  },
+  {
+   "id": "c11",
+   "hash": "129d3ba15011baef9b43bfbd08a6041c6cd4200bc550bf17d93616a5db7f68d8",
+   "polarity": "blocker",
+   "target": "miner-lockdown",
+   "participant": "sipa",
+   "post_url": "https://delvingbitcoin.org/t/pqc-output-type-discussion/2749/1",
+   "quote": "This avoids the need for ecosystem action for EC disabling, at the cost of giving miners more power.",
+   "date": "2026-07-27T21:20:53Z",
+   "status": "open"
+  },
+  {
+   "id": "c12",
+   "hash": "178238c2250d309e9d799620fad10b892f2a165e58c450f0c677ac0410500c0b",
+   "polarity": "benefit",
+   "target": "hybrid-pqc-opcodes",
+   "participant": "sipa",
+   "post_url": "https://delvingbitcoin.org/t/pqc-output-type-discussion/2749/1",
+   "quote": "This provides security if a PQC scheme were broken (possibility classically) or used incorrectly",
+   "date": "2026-07-27T21:20:53Z",
+   "status": "open"
+  },
+  {
+   "id": "c13",
+   "hash": "54aa859833a9745403c94a26af4a20611a3f9318b29938957cf227bce929bdc8",
+   "polarity": "blocker",
+   "target": "hybrid-pqc-opcodes",
+   "participant": "sipa",
+   "post_url": "https://delvingbitcoin.org/t/pqc-output-type-discussion/2749/1",
+   "quote": "The downside is (even) larger signatures and higher verification costs.",
+   "date": "2026-07-27T21:20:53Z",
+   "status": "open"
+  },
+  {
+   "id": "c14",
+   "hash": "adacaac263718490ce74699e48e1f1473d14e21bf558593a3e518a778fbd927e",
+   "polarity": "blocker",
+   "target": "separate-pqc-leaf-version",
+   "participant": "sipa",
+   "post_url": "https://delvingbitcoin.org/t/pqc-output-type-discussion/2749/1",
+   "quote": "at the cost of preventing the usage of (user-defined) hybrid schemes in script.",
+   "date": "2026-07-27T21:20:53Z",
+   "status": "open"
+  },
+  {
+   "id": "c15",
+   "hash": "459a29688b0c01b58fb06caadf9966eda1999ecb584baf118e745db6837eb71c",
+   "polarity": "benefit",
+   "target": "p2trv2",
+   "participant": "sipa",
+   "post_url": "https://delvingbitcoin.org/t/pqc-output-type-discussion/2749/2",
+   "quote": "P2TRv2 preserves the same fee profile as P2TR, avoiding \u201cnot migrating because it costs more\u201d",
+   "date": "2026-07-27T21:23:00Z",
+   "status": "open"
+  },
+  {
+   "id": "c16",
+   "hash": "d7eaa9941b048de491deff1cd86c26379298b2073c90cbde76febea05670d0e5",
+   "polarity": "benefit",
+   "target": "p2trv2",
+   "participant": "sipa",
+   "post_url": "https://delvingbitcoin.org/t/pqc-output-type-discussion/2749/2",
+   "quote": "For developers/infrastructure, it is maximally close to today\u2019s world, avoids the complexity of adding a new witness style or a new ECC signature scheme.",
+   "date": "2026-07-27T21:23:00Z",
+   "status": "open"
+  },
+  {
+   "id": "c17",
+   "hash": "2ec9854655d936469df89d928c7d979ceedd69d0f9ce5c88767acd05dd14b8db",
+   "polarity": "benefit",
+   "target": "p2trv2",
+   "participant": "sipa",
+   "post_url": "https://delvingbitcoin.org/t/pqc-output-type-discussion/2749/2",
+   "quote": "It is compatible with most/all workflows I\u2019m familiar with, including xpub/descriptor sharing",
+   "date": "2026-07-27T21:23:00Z",
+   "status": "open"
+  },
+  {
+   "id": "c18",
+   "hash": "72f695abee4ee5f78d116745f4810f5c83ecdcf455006dd5ed4b17cdc0a69d7d",
+   "polarity": "blocker",
+   "target": "p2mr",
+   "participant": "sipa",
+   "post_url": "https://delvingbitcoin.org/t/pqc-output-type-discussion/2749/2",
+   "quote": "No P2MR or P2TRH. These add additional complexity, cost, or both, to users that may stifle adoption",
+   "date": "2026-07-27T21:23:00Z",
+   "status": "open"
+  },
+  {
+   "id": "c19",
+   "hash": "863180e1628af95b81bfc08e042803f7d2124ee5e67f1078ea98fa2053bac935",
+   "polarity": "blocker",
+   "target": "p2trh",
+   "participant": "sipa",
+   "post_url": "https://delvingbitcoin.org/t/pqc-output-type-discussion/2749/2",
+   "quote": "the additional security to be had from the ability to not expose EC points on chain before ECC spending requires careful and uncommon workflows from users anyway",
+   "date": "2026-07-27T21:23:00Z",
+   "status": "open"
+  },
+  {
+   "id": "c20",
+   "hash": "4dd958ccad5e37b969fe642c7d08fa55d87a30158829bdff0c122db86c497756",
+   "polarity": "blocker",
+   "target": "miner-lockdown",
+   "participant": "sipa",
+   "post_url": "https://delvingbitcoin.org/t/pqc-output-type-discussion/2749/2",
+   "quote": "The actual automatic ECC-disabling mechanisms (especially Miner Lockdown) that may be more bikeshed-prone could be introduced later",
+   "date": "2026-07-27T21:23:00Z",
+   "status": "answered",
+   "answered_by": "c100"
+  },
+  {
+   "id": "c21",
+   "hash": "bd0311c01b03fd7a6fb2bcc233fe139789929f7a7878926e60f484d31eb85dd9",
+   "polarity": "benefit",
+   "target": "p2mr",
+   "participant": "sipa",
+   "post_url": "https://delvingbitcoin.org/t/pqc-output-type-discussion/2749/2",
+   "quote": "To prepare for longer-term full migration, a P2MR-based output type, with Tripwire and Miner Lockdown as well, plus a new witness style",
+   "date": "2026-07-27T21:23:00Z",
+   "status": "open"
+  },
+  {
+   "id": "c22",
+   "hash": "5f60ad3092b7bd6ddb6c9b623e6825ba742cd4b687ee7b9013d4d3e698512660",
+   "polarity": "blocker",
+   "target": "p2trv2",
+   "participant": "sipa",
+   "post_url": "https://delvingbitcoin.org/t/pqc-output-type-discussion/2749/2",
+   "quote": "No more P2TR variants, to avoid the overhead/complexity of a privileged ECC-only path which is useless in a post-ECC world.",
+   "date": "2026-07-27T21:23:00Z",
+   "status": "open"
+  },
+  {
+   "id": "c23",
+   "hash": "2bef85a8d7aa913ac4905e15cc6016f4f1a90f6eff3f9e0070b7fbe573fe28f2",
+   "polarity": "blocker",
+   "target": "pkr",
+   "participant": "sipa",
+   "post_url": "https://delvingbitcoin.org/t/pqc-output-type-discussion/2749/2",
+   "quote": "given that PKR verification is (slightly) slower than normal ECC verification, I don\u2019t think it\u2019s unreasonable to just use normal BIP-340 for ECC instead",
+   "date": "2026-07-27T21:23:00Z",
+   "status": "open"
+  },
+  {
+   "id": "c24",
+   "hash": "1ef10f9b7a376b2669a8ebff6b43e27204617b80ee5868247ff31f463112f869",
+   "polarity": "benefit",
+   "target": "p2trv2",
+   "participant": "sipa",
+   "post_url": "https://delvingbitcoin.org/t/pqc-output-type-discussion/2749/2",
+   "quote": "P2TRv2 is effectively offering users the ability to opt out of making that call themselves.",
+   "date": "2026-07-27T21:23:00Z",
+   "status": "open"
+  },
+  {
+   "id": "c25",
+   "hash": "4dd1ba6febe73f691509d31ebc5cae633eb18b73d076f3049de6ddf0195b3f78",
+   "polarity": "blocker",
+   "target": "p2qr",
+   "participant": "sipa",
+   "post_url": "https://delvingbitcoin.org/t/pqc-output-type-discussion/2749/2",
+   "quote": "P2QR would only be adopted by a tiny minority",
+   "date": "2026-07-27T21:23:00Z",
+   "status": "open"
+  },
+  {
+   "id": "c26",
+   "hash": "b2a1b1320b90c8db60e5fff3fde6736e5703ea28281f594244b7c79b6fe2a929",
+   "polarity": "benefit",
+   "target": "miner-lockdown",
+   "participant": "sipa",
+   "post_url": "https://delvingbitcoin.org/t/pqc-output-type-discussion/2749/2",
+   "quote": "Even a few weeks notice may be enough with Miner Lockdown.",
+   "date": "2026-07-27T21:23:00Z",
+   "status": "open"
+  },
+  {
+   "id": "c27",
+   "hash": "77c979ee1df48f650bca3e43965b17dafbe67b9921b32d8802ec8a2400798e7e",
+   "polarity": "benefit",
+   "target": "p2mr",
+   "participant": "jeanpablojp",
+   "post_url": "https://delvingbitcoin.org/t/pqc-output-type-discussion/2749/3",
+   "quote": "The P2MR witness comes out 32 bytes lighter than the equivalent P2TR script path spend at every depth",
+   "date": "2026-07-29T13:39:19Z",
+   "status": "open"
+  },
+  {
+   "id": "c28",
+   "hash": "9f6ce78648da4a7b4b4fc0c09890004651d8906b4def03d94818222f6142ddb7",
+   "polarity": "blocker",
+   "target": "p2mr",
+   "participant": "jeanpablojp",
+   "post_url": "https://delvingbitcoin.org/t/pqc-output-type-discussion/2749/3",
+   "quote": "a P2TR key path spend at 64 witness bytes stays far cheaper, consistent with the 64 vs 128 comparison in the table.",
+   "date": "2026-07-29T13:39:19Z",
+   "status": "open"
+  },
+  {
+   "id": "c29",
+   "hash": "856a02dfb5f72316637ff1b96a0fd6ac5671fa1371f082b85a0114d772e48d8c",
+   "polarity": "benefit",
+   "target": "p2mr",
+   "participant": "jeanpablojp",
+   "post_url": "https://delvingbitcoin.org/t/pqc-output-type-discussion/2749/3",
+   "quote": "Of the types listed, P2MR (and P2QR, which shares its structure) is the only one that is nearly free to implement given taproot",
+   "date": "2026-07-29T13:39:19Z",
+   "status": "open"
+  },
+  {
+   "id": "c30",
+   "hash": "f60a8299ba427c65dda89a9bff6d3e012ddc908fdaa1ac7dc6993e32f37b68c7",
+   "polarity": "blocker",
+   "target": "p2trh",
+   "participant": "jeanpablojp",
+   "post_url": "https://delvingbitcoin.org/t/pqc-output-type-discussion/2749/3",
+   "quote": "P2TRH and PKR need a BIP-340 variant, and the new witness styles need serialization and P2P changes.",
+   "date": "2026-07-29T13:39:19Z",
+   "status": "open"
+  },
+  {
+   "id": "c31",
+   "hash": "32e191e0477bd6e9893fbd34e516a9d2df1b0c71fbc12b5b1552a4c3d3afc3ad",
+   "polarity": "benefit",
+   "target": "p2trv2-cisa",
+   "participant": "conduition",
+   "post_url": "https://delvingbitcoin.org/t/pqc-output-type-discussion/2749/5",
+   "quote": "CISA provides a natural vessel for P2TRv2 which is asymptotically (as the number of outputs inputs grows) so efficient as to only require 1 byte witnesses for full-agg EC spends.",
+   "date": "2026-08-05T23:19:24Z",
+   "status": "open"
+  },
+  {
+   "id": "c32",
+   "hash": "dc2c7867605d1691d1b8ba2e75c3fbe9ecb29243ef977521f541ac213d406f32",
+   "polarity": "blocker",
+   "target": "p2trv2-cisa",
+   "participant": "conduition",
+   "post_url": "https://delvingbitcoin.org/t/pqc-output-type-discussion/2749/5",
+   "quote": "CISA\u2019s output type requires we post bare EC pubkeys on-chain in the SPK and so it has the same PQ-security profile as P2TRv2.",
+   "date": "2026-08-05T23:19:24Z",
+   "status": "open"
+  },
+  {
+   "id": "c33",
+   "hash": "a7977c51b1be8d2a3cb0c4f65fcdf142ad1cedc1bedf86df2df5573eb100ee3a",
+   "polarity": "blocker",
+   "target": "p2mr",
+   "participant": "conduition",
+   "post_url": "https://delvingbitcoin.org/t/pqc-output-type-discussion/2749/5",
+   "quote": "P2MR can also be deployed with CISA, but we cannot use public-key recovery (except for with one input, according to @starius)",
+   "date": "2026-08-05T23:19:24Z",
+   "status": "open"
+  },
+  {
+   "id": "c34",
+   "hash": "33dd24f6a3b13e8b5fa319db580567cb30ea8a1814c4edceedc2bf6b461a7f79",
+   "polarity": "benefit",
+   "target": "p2trh",
+   "participant": "conduition",
+   "post_url": "https://delvingbitcoin.org/t/pqc-output-type-discussion/2749/5",
+   "quote": "This trick works for P2TRH as well, with asymptotic EC witness weight reduced to 32 bytes per input (just one pubkey per full-agg output).",
+   "date": "2026-08-05T23:19:24Z",
+   "status": "open"
+  },
+  {
+   "id": "c35",
+   "hash": "2a147f6124af38811b74c10da6a041dc634fa03c48ee70e582784d5db14b6409",
+   "polarity": "blocker",
+   "target": "p2trv2-cisa",
+   "participant": "conduition",
+   "post_url": "https://delvingbitcoin.org/t/pqc-output-type-discussion/2749/5",
+   "quote": "P2TRv2+CISA will be so overwhelmingly efficient compared to P2MR (with or without CISA), that I expect most users will gravitate towards P2TRv2",
+   "date": "2026-08-05T23:19:24Z",
+   "status": "open"
+  },
+  {
+   "id": "c36",
+   "hash": "7c47ebbc65561bc2af9ab09de08b56416356b9cdc58448ef3d2315907929587a",
+   "polarity": "blocker",
+   "target": "p2trv2-cisa",
+   "participant": "conduition",
+   "post_url": "https://delvingbitcoin.org/t/pqc-output-type-discussion/2749/5",
+   "quote": "With CISA, disabling ECC and switching to PQC is now even more expensive than it would\u2019ve been without CISA.",
+   "date": "2026-08-05T23:19:24Z",
+   "status": "open"
+  },
+  {
+   "id": "c37",
+   "hash": "8bcf146f7e8b5994637d25af037cfa48cba613fde4ad37de8d7aa7fa5449c570",
+   "polarity": "benefit",
+   "target": "p2mr",
+   "participant": "conduition",
+   "post_url": "https://delvingbitcoin.org/t/pqc-output-type-discussion/2749/5",
+   "quote": "we\u2019ll still want P2MR (possibly deployed without any ECC?) for maximum efficiency after Q-day.",
+   "date": "2026-08-05T23:19:24Z",
+   "status": "open"
+  },
+  {
+   "id": "c38",
+   "hash": "99b0833c68eeec37b7608156279558177ee547bd0233f75e9472af6250d0fc9a",
+   "polarity": "benefit",
+   "target": "snark-aggregation",
+   "participant": "conduition",
+   "post_url": "https://delvingbitcoin.org/t/pqc-output-type-discussion/2749/5",
+   "quote": "maybe SNARK aggregation could be the silver bullet to incentivize migration to PQ.",
+   "date": "2026-08-05T23:19:24Z",
+   "status": "open"
+  },
+  {
+   "id": "c39",
+   "hash": "e9109b1eec3971cb091a124fe1b899caa73e2996ef351b4a3c6191f6d1f2a2a0",
+   "polarity": "blocker",
+   "target": "p2mr",
+   "participant": "sipa",
+   "post_url": "https://delvingbitcoin.org/t/pqc-output-type-discussion/2749/6",
+   "quote": "users may not want to adopt things that increase cost. This is why I argued against (pure) P2MR before.",
+   "date": "2026-08-17T22:28:41Z",
+   "status": "open"
+  },
+  {
+   "id": "c40",
+   "hash": "e55218ed76736069048edac03cdadab411a5f001288117476049af88d9b410fa",
+   "polarity": "blocker",
+   "target": "cisa",
+   "participant": "sipa",
+   "post_url": "https://delvingbitcoin.org/t/pqc-output-type-discussion/2749/6",
+   "quote": "adding CISA to the mix may be a net negative for the goal of getting the long tail to adopt PQC",
+   "date": "2026-08-17T22:28:41Z",
+   "status": "open"
+  },
+  {
+   "id": "c41",
+   "hash": "c878255e077ae6e5235fd7b1697280f9fe82d4d1f13b027592e0910c51131748",
+   "polarity": "blocker",
+   "target": "cisa",
+   "participant": "sipa",
+   "post_url": "https://delvingbitcoin.org/t/pqc-output-type-discussion/2749/6",
+   "quote": "I even have a mild concern about entities taking a stance of \u201cwe\u2019ll do a big rewrite one day and switch from P2TR to P2TRv2+PQC+CISA, but stick with P2TR for now\u201d",
+   "date": "2026-08-17T22:28:41Z",
+   "status": "open"
+  },
+  {
+   "id": "c42",
+   "hash": "8509a49b9c177df00c61a31daa8757e3e3df63d6f18e9d8ea0b175e3a57f6e5e",
+   "polarity": "benefit",
+   "target": "new-witness-style",
+   "participant": "sipa",
+   "post_url": "https://delvingbitcoin.org/t/pqc-output-type-discussion/2749/6",
+   "quote": "I wouldn\u2019t do this for the intermediary-step P2TRv2 output type, but if the differentiation becomes that P2MR is more for the longer term, it does make sense to have it there",
+   "date": "2026-08-17T22:28:41Z",
+   "status": "open"
+  },
+  {
+   "id": "c43",
+   "hash": "5f00fa3a99e1e8c3e091094443243d53999e30dcbf3859b04cf3e7f19ccae689",
+   "polarity": "benefit",
+   "target": "new-witness-style",
+   "participant": "sipa",
+   "post_url": "https://delvingbitcoin.org/t/pqc-output-type-discussion/2749/6",
+   "quote": "Or, it may even be reasonable to assign it a cost that\u2019s similar to CISA, without actually needing aggregation of the signatures.",
+   "date": "2026-08-17T22:28:41Z",
+   "status": "open"
+  },
+  {
+   "id": "c44",
+   "hash": "3b1723ccb48b72940b58e469b918f4333819b51ee747ad08657da0777f93bf76",
+   "polarity": "blocker",
+   "target": "snark-aggregation",
+   "participant": "sipa",
+   "post_url": "https://delvingbitcoin.org/t/pqc-output-type-discussion/2749/6",
+   "quote": "I am very skeptical about the idea of having aggregation be done incrementally by third-party relay nodes",
+   "date": "2026-08-17T22:28:41Z",
+   "status": "open"
+  },
+  {
+   "id": "c45",
+   "hash": "e60dcf156a2ba162f82475ead9c29ef51ebc318a28b281c95d8d6cb42f7458d2",
+   "polarity": "blocker",
+   "target": "snark-aggregation",
+   "participant": "sipa",
+   "post_url": "https://delvingbitcoin.org/t/pqc-output-type-discussion/2749/6",
+   "quote": "I would caution about thinking of anything as a silver bullet; most if not all things come with significant trade-offs.",
+   "date": "2026-08-17T22:28:41Z",
+   "status": "open"
+  },
+  {
+   "id": "c46",
+   "hash": "8320c76a8b59cf9fe8ba2095eafc6391d5b0a94c4b4722d8ee296448fda78741",
+   "polarity": "benefit",
+   "target": "cisa-output",
+   "participant": "conduition",
+   "post_url": "https://delvingbitcoin.org/t/pqc-output-type-discussion/2749/7",
+   "quote": "they could still very easily deploy the CISA output type using non-aggregated BIP340 signatures for spending.",
+   "date": "2026-08-19T17:25:20Z",
+   "status": "open"
+  },
+  {
+   "id": "c47",
+   "hash": "45bc4831f8867f65b9b88a641a2bdd70eea8cf3c31e6f31553991fb4f349157e",
+   "polarity": "blocker",
+   "target": "new-witness-style",
+   "participant": "conduition",
+   "post_url": "https://delvingbitcoin.org/t/pqc-output-type-discussion/2749/7",
+   "quote": "Currently i gravitate away from the idea, even for P2MR.",
+   "date": "2026-08-19T17:25:20Z",
+   "status": "open"
+  },
+  {
+   "id": "c48",
+   "hash": "b190e762f5732e3cdcc9f2daf362e1f47306b21789015bd818828496d7700e3c",
+   "polarity": "blocker",
+   "target": "new-witness-style",
+   "participant": "conduition",
+   "post_url": "https://delvingbitcoin.org/t/pqc-output-type-discussion/2749/7",
+   "quote": "A block size increase of the magnitude needed to make even the smallest (XMSS) hash-based sigs fee-competitive with ECC would be an 8 fold increase",
+   "date": "2026-08-19T17:25:20Z",
+   "status": "open"
+  },
+  {
+   "id": "c49",
+   "hash": "3be131041d2bcd1c38340ee23fa953d4125268459b93edb832899bd8c1014a3e",
+   "polarity": "benefit",
+   "target": "snark-aggregation",
+   "participant": "conduition",
+   "post_url": "https://delvingbitcoin.org/t/pqc-output-type-discussion/2749/7",
+   "quote": "to increase the block size, we must also allow retroactive aggregation of signatures (or blocks) via SNARKs to curtail chain growth",
+   "date": "2026-08-19T17:25:20Z",
+   "status": "open"
+  },
+  {
+   "id": "c50",
+   "hash": "ef947bdaad4a95d4e366ce47b42f57a39c1e817a6f15fa329ec06086ec861b39",
+   "polarity": "benefit",
+   "target": "shrincs",
+   "participant": "conduition",
+   "post_url": "https://delvingbitcoin.org/t/pqc-output-type-discussion/2749/7",
+   "quote": "With SHRINCS we have not coupled our proposal to a blocksize increase - at least, not initially.",
+   "date": "2026-08-19T17:25:20Z",
+   "status": "open"
+  },
+  {
+   "id": "c51",
+   "hash": "3b10228c743b073d47a9c2082712304beb8afb8e343fcdbf6c0ffd3681a196fe",
+   "polarity": "blocker",
+   "target": "snark-aggregation",
+   "participant": "conduition",
+   "post_url": "https://delvingbitcoin.org/t/pqc-output-type-discussion/2749/7",
+   "quote": "in the near-term it seems like SNARKs will remain far too large to be practical within bitcoin transactions.",
+   "date": "2026-08-19T17:25:20Z",
+   "status": "open"
+  },
+  {
+   "id": "c52",
+   "hash": "8f8a62d7355e094eec506771854eba1aebd8c9e138bfc929d083d0ae796a187c",
+   "polarity": "blocker",
+   "target": "cisa",
+   "participant": "sipa",
+   "post_url": "https://delvingbitcoin.org/t/pqc-output-type-discussion/2749/8",
+   "quote": "adding CISA to the P2TRv2 bundle will increase the time it takes for P2TRv2 to become available, and that will likely reduce adoption before Q-day by the long tail more than fee incentives will",
+   "date": "2026-08-20T18:14:23Z",
+   "status": "open"
+  },
+  {
+   "id": "c53",
+   "hash": "316718cbfbe0822b184eee2b7e7e4d117278209a5d5a9282b0298eae7585d190",
+   "polarity": "benefit",
+   "target": "new-witness-style",
+   "participant": "sipa",
+   "post_url": "https://delvingbitcoin.org/t/pqc-output-type-discussion/2749/8",
+   "quote": "Post-Q-day, if hash-based PQC is adopted, I think the need for a different witness costing rule (and thus larger (pre-aggregated) serialized block sizes) is almost an inevitability",
+   "date": "2026-08-20T18:14:23Z",
+   "status": "open"
+  },
+  {
+   "id": "c54",
+   "hash": "62d07db8f37e99af840e05da6e1a4ee25556d2852d62de0094daed4da7d6aa9f",
+   "polarity": "blocker",
+   "target": "snark-aggregation",
+   "participant": "sipa",
+   "post_url": "https://delvingbitcoin.org/t/pqc-output-type-discussion/2749/8",
+   "quote": "Of all the potential ways additional block data impacts network properties, I consider archive node storage size the least concerning.",
+   "date": "2026-08-20T18:14:23Z",
+   "status": "open"
+  },
+  {
+   "id": "c55",
+   "hash": "d427ffb0f99a183b5a9765b26f251abff95cc95f4550138037a32c57c67d3a30",
+   "polarity": "blocker",
+   "target": "snark-aggregation",
+   "participant": "sipa",
+   "post_url": "https://delvingbitcoin.org/t/pqc-output-type-discussion/2749/8",
+   "quote": "Aggregation, even at the block level, won\u2019t remove the need for bandwidth for transaction relay prior to block building.",
+   "date": "2026-08-20T18:14:23Z",
+   "status": "open"
+  },
+  {
+   "id": "c56",
+   "hash": "97c6e3073a8f2268b15e4c4cb33bdabd0349e424a852e73dae64d12d48e5bd6f",
+   "polarity": "blocker",
+   "target": "p2trv2",
+   "participant": "sipa",
+   "post_url": "https://delvingbitcoin.org/t/pqc-output-type-discussion/2749/8",
+   "quote": "I agree, it shouldn\u2019t. I think in general the \u201cnear-term P2TRv2\u201d idea shouldn\u2019t include any such thing in general.",
+   "date": "2026-08-20T18:14:23Z",
+   "status": "open"
+  },
+  {
+   "id": "c57",
+   "hash": "f5da6e7f46c3fda73edbcddb24a2490f37c45eac143f6024b8914361a37662ef",
+   "polarity": "blocker",
+   "target": "shrincs",
+   "participant": "sipa",
+   "post_url": "https://delvingbitcoin.org/t/pqc-output-type-discussion/2749/8",
+   "quote": "To give a different weight to block data (below 1 WU/byte) you need a new witness extension",
+   "date": "2026-08-20T18:14:23Z",
+   "status": "answered",
+   "answered_by": "c61"
+  },
+  {
+   "id": "c58",
+   "hash": "a503e39a6bc6f42f90c716666068cf4cbd7d1313e96553076b715e3279414639",
+   "polarity": "blocker",
+   "target": "p2trv2-cisa",
+   "participant": "conduition",
+   "post_url": "https://delvingbitcoin.org/t/pqc-output-type-discussion/2749/9",
+   "quote": "If we bundle CISA+P2TRv2 then P2TRv2 can\u2019t deploy until CISA consensus validation rules are ready. Perhaps you\u2019re right.",
+   "date": "2026-08-22T05:51:35Z",
+   "status": "conceded"
+  },
+  {
+   "id": "c59",
+   "hash": "55d692e7e9a6efb01c6fe84e37a61ca3fa7b4041acbda5062afa830c4f5054e5",
+   "polarity": "benefit",
+   "target": "p2trv2-cisa",
+   "participant": "conduition",
+   "post_url": "https://delvingbitcoin.org/t/pqc-output-type-discussion/2749/9",
+   "quote": "However I do think you underestimate the mass appeal of an output type with PQC support which is also the cheapest output type available.",
+   "date": "2026-08-22T05:51:35Z",
+   "status": "answered",
+   "answered_by": "c66"
+  },
+  {
+   "id": "c60",
+   "hash": "592abf4d1531afa4c9f4fd036d8a74741d5afbcab43f6b80f249999c1a85a708",
+   "polarity": "benefit",
+   "target": "p2mr",
+   "participant": "conduition",
+   "post_url": "https://delvingbitcoin.org/t/pqc-output-type-discussion/2749/9",
+   "quote": "Heck, people seem to like P2MR quite a bit even though until very recently it was twice as expensive as P2TR.",
+   "date": "2026-08-22T05:51:35Z",
+   "status": "answered",
+   "answered_by": "c67"
+  },
+  {
+   "id": "c61",
+   "hash": "41ac6f329eb7e6e44d4c9bb28c73189f55682db428b315d11695c785a601cee8",
+   "polarity": "benefit",
+   "target": "new-witness-style",
+   "participant": "conduition",
+   "post_url": "https://delvingbitcoin.org/t/pqc-output-type-discussion/2749/9",
+   "quote": "if compute cost is a more important metric, and a witness extension with a new steeper discount is acceptable, then SHRINCS can be parameterized to target a low computational cost per byte",
+   "date": "2026-08-22T05:51:35Z",
+   "status": "open"
+  },
+  {
+   "id": "c62",
+   "hash": "35052c7080e88725300d38d8452682194dd296aa1a31caa182aa7812050452a0",
+   "polarity": "benefit",
+   "target": "cisa",
+   "participant": "fjahr",
+   "post_url": "https://delvingbitcoin.org/t/pqc-output-type-discussion/2749/11",
+   "quote": "as far as I am concerned they are complete with reference implementations and pretty extensive test vectors.",
+   "date": "2026-08-23T22:55:02Z",
+   "status": "open"
+  },
+  {
+   "id": "c63",
+   "hash": "5f0f8118ef5f6c76d1024ebb8ae540c17f68a5dfd8a1e9a2a067a931f53c23f0",
+   "polarity": "benefit",
+   "target": "p2trv2-cisa",
+   "participant": "fjahr",
+   "post_url": "https://delvingbitcoin.org/t/pqc-output-type-discussion/2749/11",
+   "quote": "What this should do is take wallet adoption out of the equation since there is no need for them to adopt any new signing logic.",
+   "date": "2026-08-23T22:55:02Z",
+   "status": "open"
+  },
+  {
+   "id": "c64",
+   "hash": "f060370b81d32e78c1d4c51d3678b6279cfc2f14c60b29505606202b49105dc1",
+   "polarity": "blocker",
+   "target": "tripwire",
+   "participant": "fjahr",
+   "post_url": "https://delvingbitcoin.org/t/pqc-output-type-discussion/2749/11",
+   "quote": "This also goes for the design details of the necessary companion pieces: tripwire, miner lockdown etc.",
+   "date": "2026-08-23T22:55:02Z",
+   "status": "open"
+  },
+  {
+   "id": "c65",
+   "hash": "ebfa87f0bda0e9acfc9e184a2b58ce6fde8595bd52b0e81812981abc1042c8e2",
+   "polarity": "benefit",
+   "target": "p2trv2-cisa",
+   "participant": "fjahr",
+   "post_url": "https://delvingbitcoin.org/t/pqc-output-type-discussion/2749/11",
+   "quote": "CISA can be an insurance to keep driving adoption in this scenario when CRQCs may be closer than they appear.",
+   "date": "2026-08-23T22:55:02Z",
+   "status": "answered",
+   "answered_by": "c70"
+  },
+  {
+   "id": "c66",
+   "hash": "a265ace61b5cf708b3dad5c1e8d0d15106a652a4bd7169580205842984db07e8",
+   "polarity": "blocker",
+   "target": "cisa",
+   "participant": "sipa",
+   "post_url": "https://delvingbitcoin.org/t/pqc-output-type-discussion/2749/12",
+   "quote": "Realistically, I don\u2019t think we should expect CISA to have a bigger impact than that, I think.",
+   "date": "2026-08-24T17:51:30Z",
+   "status": "answered",
+   "answered_by": "c71"
+  },
+  {
+   "id": "c67",
+   "hash": "63e9ca1910ca91a91e2298fee8c06e7a5ee6cdf7fad8cb70ecf2c148030e8eff",
+   "polarity": "blocker",
+   "target": "p2mr",
+   "participant": "sipa",
+   "post_url": "https://delvingbitcoin.org/t/pqc-output-type-discussion/2749/12",
+   "quote": "That sounds more like an argument that people like P2MR for other reasons than its economics.",
+   "date": "2026-08-24T17:51:30Z",
+   "status": "open"
+  },
+  {
+   "id": "c68",
+   "hash": "abae0e08f22c5159457e1fb02437cc6486d90f412501107880dfc9109d8df358",
+   "polarity": "blocker",
+   "target": "extension-block",
+   "participant": "sipa",
+   "post_url": "https://delvingbitcoin.org/t/pqc-output-type-discussion/2749/12",
+   "quote": "An extension block, as discussed years ago as a scalability proposal, is something very different and much more invasive than what we\u2019re talking about here.",
+   "date": "2026-08-24T17:51:30Z",
+   "status": "open"
+  },
+  {
+   "id": "c69",
+   "hash": "ba3b738fdd1a92475712922644d3dbfc7fb81a5f73bbe1373c052ec291b70069",
+   "polarity": "benefit",
+   "target": "new-witness-style",
+   "participant": "sipa",
+   "post_url": "https://delvingbitcoin.org/t/pqc-output-type-discussion/2749/12",
+   "quote": "I am just talking about a new witness in transaction serialization, like Segwit did",
+   "date": "2026-08-24T17:51:30Z",
+   "status": "open"
+  },
+  {
+   "id": "c70",
+   "hash": "4d27ba8f81945da78e85c396e3b5a01597f38f5500c34a78889421beb1bd7aba",
+   "polarity": "blocker",
+   "target": "p2trv2-cisa",
+   "participant": "sipa",
+   "post_url": "https://delvingbitcoin.org/t/pqc-output-type-discussion/2749/12",
+   "quote": "I feel like P2TRv2 and CISA kind of pull in opposite directions in terms of messaging.",
+   "date": "2026-08-24T17:51:30Z",
+   "status": "open"
+  },
+  {
+   "id": "c71",
+   "hash": "532f5d6931862cd4b6e9062ecf9a2a13170f277fea5f909a7cb0cf98b84a5893",
+   "polarity": "blocker",
+   "target": "cisa",
+   "participant": "ajtowns",
+   "post_url": "https://delvingbitcoin.org/t/pqc-output-type-discussion/2749/13",
+   "quote": "So I don\u2019t think you can draw any meaningful conclusions: prior to this year, getting cheaper fees was an open research problem",
+   "date": "2026-08-25T15:06:32Z",
+   "status": "open"
+  },
+  {
+   "id": "c72",
+   "hash": "e0925fd092c8ab61db70eb4a2f87c6deef453da6b53d3f3a6cbebe0ae009590e",
+   "polarity": "benefit",
+   "target": "cisa",
+   "participant": "ajtowns",
+   "post_url": "https://delvingbitcoin.org/t/pqc-output-type-discussion/2749/13",
+   "quote": "I think for exchanges it could be significant \u2013 maybe reducing tx fees by 30% for larger consolidation txs",
+   "date": "2026-08-25T15:06:32Z",
+   "status": "open"
+  },
+  {
+   "id": "c73",
+   "hash": "791d3f4fb07898ad077c3e11696fe4f0f779956ccebe7f6e086ea0c579995f78",
+   "polarity": "benefit",
+   "target": "new-witness-style",
+   "participant": "ajtowns",
+   "post_url": "https://delvingbitcoin.org/t/pqc-output-type-discussion/2749/13",
+   "quote": "8MB blocks with w=64 seems almost appealing (pq sigs ending up 2.77x as expensive as a schnorr sig, while being 5.5x the size of a schnorr sig",
+   "date": "2026-08-25T15:06:32Z",
+   "status": "answered",
+   "answered_by": "c74"
+  },
+  {
+   "id": "c74",
+   "hash": "5541855a6820ca38203f1d812d721594020d86e387de41efd0b3c00ebb350de7",
+   "polarity": "benefit",
+   "target": "new-witness-style",
+   "participant": "sipa",
+   "post_url": "https://delvingbitcoin.org/t/pqc-output-type-discussion/2749/14",
+   "quote": "I\u2019d argue for a general tx weight limit (which would implicitly limit serialized size up to style=1).",
+   "date": "2026-08-25T20:16:36Z",
+   "status": "open"
+  },
+  {
+   "id": "c75",
+   "hash": "62e6136674186c972a8686b8962e22e103b48da79d6963a0a22775647bb6402b",
+   "polarity": "blocker",
+   "target": "p2trv2-cisa",
+   "participant": "AdamISZ",
+   "post_url": "https://delvingbitcoin.org/t/pqc-output-type-discussion/2749/15",
+   "quote": "I tend to agree with Pieter that it\u2019s somehow slightly \u2018off\u2019 to merge CISA into this.",
+   "date": "2026-08-25T20:18:38Z",
+   "status": "answered",
+   "answered_by": "c78"
+  },
+  {
+   "id": "c76",
+   "hash": "2c90be08bc035bb4c9d9bd6cac431927e453583703f50481e14f80a5cc807dba",
+   "polarity": "blocker",
+   "target": "cisa",
+   "participant": "AdamISZ",
+   "post_url": "https://delvingbitcoin.org/t/pqc-output-type-discussion/2749/15",
+   "quote": "CISA, I agree, does not have nearly as big of a selling point in practice as some people want to believe.",
+   "date": "2026-08-25T20:18:38Z",
+   "status": "open"
+  },
+  {
+   "id": "c77",
+   "hash": "053b5bd2d22e22c3eb9fd993c443be630ac818bd17c3da8f692dcb40eb5b25f9",
+   "polarity": "blocker",
+   "target": "cisa",
+   "participant": "AdamISZ",
+   "post_url": "https://delvingbitcoin.org/t/pqc-output-type-discussion/2749/15",
+   "quote": "The best CISA can hope for is that a 20-25% discount for consolidation matters, I think.",
+   "date": "2026-08-25T20:18:38Z",
+   "status": "answered",
+   "answered_by": "c80"
+  },
+  {
+   "id": "c78",
+   "hash": "430e98ec0a8191335457ba97c08e5cc092aecba52bb29e4ada2a256c770e7c0d",
+   "polarity": "benefit",
+   "target": "p2trv2-cisa",
+   "participant": "fjahr",
+   "post_url": "https://delvingbitcoin.org/t/pqc-output-type-discussion/2749/16",
+   "quote": "This is why I think bundling would help PQC adoption in many possible scenarios.",
+   "date": "2026-08-27T10:10:53Z",
+   "status": "open"
+  },
+  {
+   "id": "c79",
+   "hash": "3554ea2af7afc1607c23a09974d0b5a2b69087ebe257e618f0abf377b0ecebe0",
+   "polarity": "blocker",
+   "target": "cisa-output",
+   "participant": "fjahr",
+   "post_url": "https://delvingbitcoin.org/t/pqc-output-type-discussion/2749/16",
+   "quote": "Having a P2TRv2 with PQC and another P2TRv3 with CISA seems to be worse for adoption in my mind.",
+   "date": "2026-08-27T10:10:53Z",
+   "status": "open"
+  },
+  {
+   "id": "c80",
+   "hash": "3e670dc2c2cf9cf7271e05b8df38ed4e45f4d01be1749a4a02c2f35ae06108b8",
+   "polarity": "benefit",
+   "target": "p2trv2-cisa",
+   "participant": "fjahr",
+   "post_url": "https://delvingbitcoin.org/t/pqc-output-type-discussion/2749/16",
+   "quote": "P2TRv2 + PQC + CISA could be implemented and used without CISA (only use plain BIP341 opted-out) or without PQC",
+   "date": "2026-08-27T10:10:53Z",
+   "status": "answered",
+   "answered_by": "c114"
+  },
+  {
+   "id": "c81",
+   "hash": "7606bca9e699189a09b1af5893c43576948c1de9e5edb18bd11040ff6beecc6b",
+   "polarity": "benefit",
+   "target": "p2trv2",
+   "participant": "ariard",
+   "post_url": "https://delvingbitcoin.org/t/pqc-output-type-discussion/2749/18",
+   "quote": "I do see the P2TRv2 with an ulterior disablement of ECC spends within the output type itself as a reasonable path forward.",
+   "date": "2026-09-07T02:58:37Z",
+   "status": "open"
+  },
+  {
+   "id": "c82",
+   "hash": "258dbb6ec94b1c14deb082e34be64341f4c3bdac1ac73c35f94030f27d6019d2",
+   "polarity": "benefit",
+   "target": "p2trv2",
+   "participant": "ariard",
+   "post_url": "https://delvingbitcoin.org/t/pqc-output-type-discussion/2749/18",
+   "quote": "This avoids any kind of generic freezing debate.",
+   "date": "2026-09-07T02:58:37Z",
+   "status": "open"
+  },
+  {
+   "id": "c83",
+   "hash": "273d5f6cd15bf94e45637e1c354b51f137e04b96ce6ceca98c5d1093fa1e0b8b",
+   "polarity": "blocker",
+   "target": "cisa",
+   "participant": "ariard",
+   "post_url": "https://delvingbitcoin.org/t/pqc-output-type-discussion/2749/18",
+   "quote": "About the idea bundling P2TRv2 with CISA, I would rather suggest a no.",
+   "date": "2026-09-07T02:58:37Z",
+   "status": "open"
+  },
+  {
+   "id": "c84",
+   "hash": "70f323132dacf46c9831bd1f73daf30d49a82ad95b9fb7c2cc87d0aeb4d8c5cb",
+   "polarity": "benefit",
+   "target": "p2mr",
+   "participant": "ariard",
+   "post_url": "https://delvingbitcoin.org/t/pqc-output-type-discussion/2749/18",
+   "quote": "i\u2019m +1 with a flexible no-special witness no CISA version of P2TR2 and a latter P2MR based output with a new witness structure and consensus accounting optimization of the whole.",
+   "date": "2026-09-07T02:58:37Z",
+   "status": "open"
+  },
+  {
+   "id": "c85",
+   "hash": "e0879943c6afe385fab124e160d6e54e67ff5cd725a30ef8c9215ed850e61fb2",
+   "polarity": "benefit",
+   "target": "p2mr",
+   "participant": "conduition",
+   "post_url": "https://delvingbitcoin.org/t/pqc-output-type-discussion/2749/19",
+   "quote": "Quantum-resistance is the greater selling point, which is why i think P2MR is still the best option on the table.",
+   "date": "2026-09-08T19:06:09Z",
+   "status": "open"
+  },
+  {
+   "id": "c86",
+   "hash": "cb7f47a7f7bb43e5e15d0bc9131274aa74d3bbc96a81fe159421430ff2c8441b",
+   "polarity": "benefit",
+   "target": "p2trv2-cisa",
+   "participant": "conduition",
+   "post_url": "https://delvingbitcoin.org/t/pqc-output-type-discussion/2749/19",
+   "quote": "if your goal is to maximize migration for the \u201clong-tail\u201d of retail wallets who don\u2019t care about PQ, then it seems like P2TRv2+CISA is the best choice for you",
+   "date": "2026-09-08T19:06:09Z",
+   "status": "answered",
+   "answered_by": "c95"
+  },
+  {
+   "id": "c87",
+   "hash": "d4221d575b11d0958d248f027e2678b016ff021ca8f5b0980ca398c4d8b0e004",
+   "polarity": "blocker",
+   "target": "p2trv2",
+   "participant": "conduition",
+   "post_url": "https://delvingbitcoin.org/t/pqc-output-type-discussion/2749/19",
+   "quote": "Without CISA, we might as well do P2MR.",
+   "date": "2026-09-08T19:06:09Z",
+   "status": "answered",
+   "answered_by": "c96"
+  },
+  {
+   "id": "c88",
+   "hash": "6bce0f946249a3b50cdb81965c0f41583b96f61a89a1ef3fdb256adfce697428",
+   "polarity": "blocker",
+   "target": "p2trv2",
+   "participant": "conduition",
+   "post_url": "https://delvingbitcoin.org/t/pqc-output-type-discussion/2749/19",
+   "quote": "Also note that P2TRv2 by itself does not address the critical security risk (ECDLP being broken).",
+   "date": "2026-09-08T19:06:09Z",
+   "status": "open"
+  },
+  {
+   "id": "c89",
+   "hash": "0079f3f7238bbc8aeb70acefc4e89990d6c79e12c34dc9f60c9f7f1fdd770584",
+   "polarity": "blocker",
+   "target": "p2trv2",
+   "participant": "conduition",
+   "post_url": "https://delvingbitcoin.org/t/pqc-output-type-discussion/2749/20",
+   "quote": "We\u2019ve been talking about P2TRv2 as if it will be an easy upgrade that even lazy wallet devs can manage, or at least that it\u2019s easier than supporting P2MR.",
+   "date": "2026-09-08T23:30:29Z",
+   "status": "open"
+  },
+  {
+   "id": "c90",
+   "hash": "d14e128471f72d56ff2aee791a820ee98739de2eadb1fd0b8d72d2327abc60f2",
+   "polarity": "blocker",
+   "target": "p2trv2",
+   "participant": "conduition",
+   "post_url": "https://delvingbitcoin.org/t/pqc-output-type-discussion/2749/20",
+   "quote": "Simply \u201cbumping the witness version\u201d is insufficient even for P2TRv2, with or without CISA.",
+   "date": "2026-09-08T23:30:29Z",
+   "status": "open"
+  },
+  {
+   "id": "c91",
+   "hash": "c4ce16d649e4a867f3fa26dd0e36c2fe2ecc97fbd33301957214ecd7de263562",
+   "polarity": "blocker",
+   "target": "cisa",
+   "participant": "ariard",
+   "post_url": "https://delvingbitcoin.org/t/pqc-output-type-discussion/2749/21",
+   "quote": "Where I can be skeptical, it\u2019s on the wallet and node complexity changes required to support CISA in itself.",
+   "date": "2026-09-11T00:59:28Z",
+   "status": "open"
+  },
+  {
+   "id": "c92",
+   "hash": "37e098377c246ebf1a211358fb69fc0232fc4fc98828431ffd5975f15dedb345",
+   "polarity": "blocker",
+   "target": "p2trv2",
+   "participant": "ariard",
+   "post_url": "https://delvingbitcoin.org/t/pqc-output-type-discussion/2749/21",
+   "quote": "So yes with this information in mind, a *naked* P2TRv2 sounds less interesting.",
+   "date": "2026-09-11T00:59:28Z",
+   "status": "answered",
+   "answered_by": "c109"
+  },
+  {
+   "id": "c93",
+   "hash": "1546193ff27e1630fc218e8624f03c4f8786b7e74ddf393caa8a29e861a7328c",
+   "polarity": "benefit",
+   "target": "new-witness-style",
+   "participant": "ariard",
+   "post_url": "https://delvingbitcoin.org/t/pqc-output-type-discussion/2749/21",
+   "quote": "it does sounds to me technically possible to introduce discount for a future post-quantum scheme by introducing a novel witness scheme at the same time.",
+   "date": "2026-09-11T00:59:28Z",
+   "status": "open"
+  },
+  {
+   "id": "c94",
+   "hash": "5261797540323dc2cc894cc5651f7431001b82732014734d1412220e58cbb94e",
+   "polarity": "blocker",
+   "target": "half-aggregation",
+   "participant": "ariard",
+   "post_url": "https://delvingbitcoin.org/t/pqc-output-type-discussion/2749/21",
+   "quote": "the part where it\u2019s unclear and where I\u2019m a bit skeptical is on the half-aggregastion and full aggregation flow.",
+   "date": "2026-09-11T00:59:28Z",
+   "status": "answered",
+   "answered_by": "c115"
+  },
+  {
+   "id": "c95",
+   "hash": "2906d0fe6e8a11b4ef6fcf4ebf89fe3af667bb3daefb8bdc45484de4eab31655",
+   "polarity": "blocker",
+   "target": "cisa",
+   "participant": "sipa",
+   "post_url": "https://delvingbitcoin.org/t/pqc-output-type-discussion/2749/22",
+   "quote": "My main view is simply that CISA won\u2019t help adoption, and is thus not worth the additional complexity of consensus changes.",
+   "date": "2026-09-11T14:48:38Z",
+   "status": "open"
+  },
+  {
+   "id": "c96",
+   "hash": "d185e4fcf05b3e839145ff62a31fe3cb0b6930267aee227552f848db43adebc2",
+   "polarity": "blocker",
+   "target": "p2mr",
+   "participant": "sipa",
+   "post_url": "https://delvingbitcoin.org/t/pqc-output-type-discussion/2749/22",
+   "quote": "Neither P2TRv2 nor P2MR are a \u201cquantum secure output type\u201d in an absolute sense.",
+   "date": "2026-09-11T14:48:38Z",
+   "status": "open"
+  },
+  {
+   "id": "c97",
+   "hash": "848578d69d75364b9930ee5b88aa0afb417d5954005be8bb0eb32114bc3e0922",
+   "polarity": "blocker",
+   "target": "p2mr",
+   "participant": "sipa",
+   "post_url": "https://delvingbitcoin.org/t/pqc-output-type-discussion/2749/22",
+   "quote": "I believe that it is a practical impossibility for many software and users to adopt workflows in which P2MR provides quantum-resistance, due to ingrained use of public key sharing.",
+   "date": "2026-09-11T14:48:38Z",
+   "status": "answered",
+   "answered_by": "c125"
+  },
+  {
+   "id": "c98",
+   "hash": "04d61528cc0fdbbf737e04620b3ebe5067cae1adcb047c1d1f45c31453534298",
+   "polarity": "benefit",
+   "target": "p2qr",
+   "participant": "sipa",
+   "post_url": "https://delvingbitcoin.org/t/pqc-output-type-discussion/2749/22",
+   "quote": "Having a separate, and possibly later-dated, separate P2QR or P2MR output type (with new witness styles etc) can fill that need.",
+   "date": "2026-09-11T14:48:38Z",
+   "status": "open"
+  },
+  {
+   "id": "c99",
+   "hash": "bef5641c4b6302e9f1d809af27a88c54aa49df916cde27cf620bc8042436f20e",
+   "polarity": "benefit",
+   "target": "two-stage-deployment",
+   "participant": "sjors",
+   "post_url": "https://delvingbitcoin.org/t/pqc-output-type-discussion/2749/23",
+   "quote": "I like the idea of a two-staged approach, with the first stage being as simple and uncontroversial as possible.",
+   "date": "2026-09-11T15:21:26Z",
+   "status": "open"
+  },
+  {
+   "id": "c100",
+   "hash": "46553d96f3bfaa6ad6799a6afde0b6768f31745503d14f1e5470f10fadf7381c",
+   "polarity": "benefit",
+   "target": "tripwire",
+   "participant": "sjors",
+   "post_url": "https://delvingbitcoin.org/t/pqc-output-type-discussion/2749/23",
+   "quote": "I think there should be at least one in the initial deployment, to set a clear expectation.",
+   "date": "2026-09-11T15:21:26Z",
+   "status": "open"
+  },
+  {
+   "id": "c101",
+   "hash": "6b93332c1a8913373260afe5bede28c60f29bdcfff958c6d727a85502ff4f0bb",
+   "polarity": "benefit",
+   "target": "tripwire",
+   "participant": "sjors",
+   "post_url": "https://delvingbitcoin.org/t/pqc-output-type-discussion/2749/23",
+   "quote": "A tripwire is probably the best choice.",
+   "date": "2026-09-11T15:21:26Z",
+   "status": "open"
+  },
+  {
+   "id": "c102",
+   "hash": "c5883637f63db248c8754f01515cb3b259fa684729e117c50089b06125aace89",
+   "polarity": "benefit",
+   "target": "replay-protection",
+   "participant": "sjors",
+   "post_url": "https://delvingbitcoin.org/t/pqc-output-type-discussion/2749/23",
+   "quote": "Finally I\u2019d like to suggest we consider replay protection, from the start.",
+   "date": "2026-09-11T15:21:26Z",
+   "status": "open"
+  },
+  {
+   "id": "c103",
+   "hash": "e082d030371c7c83b0f8f1b095cb1314e5023aaedeb5ef986401cc6609d9f546",
+   "polarity": "benefit",
+   "target": "cisa-optin-flag",
+   "participant": "sjors",
+   "post_url": "https://delvingbitcoin.org/t/pqc-output-type-discussion/2749/24",
+   "quote": "we could allocate 1 bit of the public key to mark it anyone-can-spend, with the later CISA fork using that as the opt-in all wallets set it by default",
+   "date": "2026-09-11T15:54:26Z",
+   "status": "answered",
+   "answered_by": "c107"
+  },
+  {
+   "id": "c104",
+   "hash": "3efd45e142f8fb310ee1272c9597599e666b3d76f4bd6c433c13d6eb4b0eddb8",
+   "polarity": "blocker",
+   "target": "cisa-optin-flag",
+   "participant": "sjors",
+   "post_url": "https://delvingbitcoin.org/t/pqc-output-type-discussion/2749/24",
+   "quote": "Neither helps with the anonymity set , and moving forward such a flag would likely reveal wallet capability.",
+   "date": "2026-09-11T15:54:26Z",
+   "status": "open"
+  },
+  {
+   "id": "c105",
+   "hash": "8efbf8e33b6ab110dc211ee477cb95982a38528aa5f94076d7f0be490d70098c",
+   "polarity": "blocker",
+   "target": "p2mr",
+   "participant": "sipa",
+   "post_url": "https://delvingbitcoin.org/t/pqc-output-type-discussion/2749/25",
+   "quote": "It\u2019s about why the first output type (the P2TRv2 one) does not use P2MR or P2TRH.",
+   "date": "2026-09-11T16:58:55Z",
+   "status": "open"
+  },
+  {
+   "id": "c106",
+   "hash": "3f6a1c7c0e98771b1465c32f9d666eae15a13205274a3400b947c9216dadfd3b",
+   "polarity": "blocker",
+   "target": "cisa",
+   "participant": "sipa",
+   "post_url": "https://delvingbitcoin.org/t/pqc-output-type-discussion/2749/25",
+   "quote": "No. If it needs to cover key path spends (which is the most interesting application), it needs a separate output type.",
+   "date": "2026-09-11T16:58:55Z",
+   "status": "open"
+  },
+  {
+   "id": "c107",
+   "hash": "e05febf5afd4d4d9817abc420216859c4727f3854dd0b4b1552a06ebc3d1f325",
+   "polarity": "blocker",
+   "target": "cisa-optin-flag",
+   "participant": "sipa",
+   "post_url": "https://delvingbitcoin.org/t/pqc-output-type-discussion/2749/25",
+   "quote": "That makes it, for all intents and purposes, a separate output type. Just one that shares the same witness version.",
+   "date": "2026-09-11T16:58:55Z",
+   "status": "open"
+  },
+  {
+   "id": "c108",
+   "hash": "798d4b5dc6c5900e6cd7f0528f854665c9b2228db4e7c95d205b72f46f9295df",
+   "polarity": "blocker",
+   "target": "cisa-optin-flag",
+   "participant": "sjors",
+   "post_url": "https://delvingbitcoin.org/t/pqc-output-type-discussion/2749/26",
+   "quote": "Either at the expense of making every output 1 byte larger, or extra complexity due to having to grind an extra bit. Neither is hugely appealing.",
+   "date": "2026-09-11T17:46:32Z",
+   "status": "open"
+  },
+  {
+   "id": "c109",
+   "hash": "aec392c702e4cc35832eea8ac06ae594c9c7415ea5941a9fdde7be24065dbc70",
+   "polarity": "blocker",
+   "target": "p2trv2",
+   "participant": "conduition",
+   "post_url": "https://delvingbitcoin.org/t/pqc-output-type-discussion/2749/27",
+   "quote": "i wasn\u2019t suggesting naked P2TRv2 - I think that\u2019s a bad idea, because it\u2019d be unsafe to use due to the risk of later confiscation via tripwire.",
+   "date": "2026-09-14T04:49:01Z",
+   "status": "open"
+  },
+  {
+   "id": "c110",
+   "hash": "f5441f7e41904dcfd69a37afb6af54dabf3ddb4d2522b38474838e98ab36c3d6",
+   "polarity": "blocker",
+   "target": "p2trv2",
+   "participant": "conduition",
+   "post_url": "https://delvingbitcoin.org/t/pqc-output-type-discussion/2749/27",
+   "quote": "I was pointing out that P2TRv2 is not actually quantum-secure unless key-spending is disabled punctually later.",
+   "date": "2026-09-14T04:49:01Z",
+   "status": "open"
+  },
+  {
+   "id": "c111",
+   "hash": "fe0861543af7dae96538fb1d1f22de89bc13d28c25a5744660e95dd2f5ad1d33",
+   "polarity": "benefit",
+   "target": "p2mr",
+   "participant": "conduition",
+   "post_url": "https://delvingbitcoin.org/t/pqc-output-type-discussion/2749/27",
+   "quote": "P2TRv2 is easy to use \u201ccorrectly\u201d but even with correct usage your coins are not necessarily safe. With P2MR, perfectly \u201ccorrect\u201d usage is harder, but has meaningful impact on security.",
+   "date": "2026-09-14T04:49:01Z",
+   "status": "answered",
+   "answered_by": "c117"
+  },
+  {
+   "id": "c112",
+   "hash": "b111f3aa2ef7fac69efc5ce22268f385cfd802f2c75320d661a52c2c2bb28f02",
+   "polarity": "benefit",
+   "target": "cisa",
+   "participant": "conduition",
+   "post_url": "https://delvingbitcoin.org/t/pqc-output-type-discussion/2749/27",
+   "quote": "With CISA in play, i feel like we can accept that insecurity as a trade-off in exchange for the better classical performance",
+   "date": "2026-09-14T04:49:01Z",
+   "status": "answered",
+   "answered_by": "c118"
+  },
+  {
+   "id": "c113",
+   "hash": "c163ec8455e92d7da72a98521e73b5e8bd830bbce0e39041d291ae0f7d627245",
+   "polarity": "blocker",
+   "target": "cisa",
+   "participant": "AdamISZ",
+   "post_url": "https://delvingbitcoin.org/t/pqc-output-type-discussion/2749/28",
+   "quote": "Because they\u2019re two radically different proposals with radically different motivations, that\u2019s all I meant.",
+   "date": "2026-09-14T12:25:45Z",
+   "status": "open"
+  },
+  {
+   "id": "c114",
+   "hash": "396a9fb798386bb524e51ce325e8f31cee51124e416dcaefcfca5be2ee345ee3",
+   "polarity": "blocker",
+   "target": "cisa",
+   "participant": "AdamISZ",
+   "post_url": "https://delvingbitcoin.org/t/pqc-output-type-discussion/2749/28",
+   "quote": "They might be orthogonal elements of a proposal on paper, but might not be in practice.",
+   "date": "2026-09-14T12:25:45Z",
+   "status": "open"
+  },
+  {
+   "id": "c115",
+   "hash": "1fb3826aec419968ecb6f006fbc324c989e9777a05eb4a202cb6a5eb53cac1be",
+   "polarity": "blocker",
+   "target": "half-aggregation",
+   "participant": "fjahr",
+   "post_url": "https://delvingbitcoin.org/t/pqc-output-type-discussion/2749/29",
+   "quote": "That is a significant change for no conceivable benefit.",
+   "date": "2026-09-15T13:40:42Z",
+   "status": "open"
+  },
+  {
+   "id": "c116",
+   "hash": "3222bbf83591f3d670f3af228932e19e39c10e67dfe3f79c2056b8f406f22af8",
+   "polarity": "benefit",
+   "target": "cisa",
+   "participant": "fjahr",
+   "post_url": "https://delvingbitcoin.org/t/pqc-output-type-discussion/2749/29",
+   "quote": "This is prevented with the explicit opt-out rules for these signatures which works well with a potential second reason that motivated adoption of the output type, like the PQC stuff discussed here.",
+   "date": "2026-09-15T13:40:42Z",
+   "status": "open"
+  },
+  {
+   "id": "c117",
+   "hash": "8ea84bafc4799646b2ff8d5ac0963e9c160ccabaa5cb0db7a1b31500ea6d1e13",
+   "polarity": "blocker",
+   "target": "p2mr",
+   "participant": "sipa",
+   "post_url": "https://delvingbitcoin.org/t/pqc-output-type-discussion/2749/30",
+   "quote": "Yes, it\u2019s possible. But most users won\u2019t, and not recognizing that is not responsible design.",
+   "date": "2026-09-16T20:37:50Z",
+   "status": "open"
+  },
+  {
+   "id": "c118",
+   "hash": "e7910e1db81ea83d94958e2c2e9f30db00fba8ce85c25cd0a33a17f9c83c2b65",
+   "polarity": "blocker",
+   "target": "cisa",
+   "participant": "sipa",
+   "post_url": "https://delvingbitcoin.org/t/pqc-output-type-discussion/2749/30",
+   "quote": "If you view P2TRv2 as insufficiently secure, why would you want anyone to use it, and worse, incentivize it with CISA?",
+   "date": "2026-09-16T20:37:50Z",
+   "status": "answered",
+   "answered_by": "c133"
+  },
+  {
+   "id": "c119",
+   "hash": "932a46280cc5601bfbb07f40e6c9dcd77df4a1f1af212f0683f216c41b4ae86d",
+   "polarity": "blocker",
+   "target": "upgrade-hook",
+   "participant": "sipa",
+   "post_url": "https://delvingbitcoin.org/t/pqc-output-type-discussion/2749/30",
+   "quote": "I don\u2019t consider that acceptable. You\u2019re proposing an output type that, barring a future consensus change, automatically becomes insecure.",
+   "date": "2026-09-16T20:37:50Z",
+   "status": "answered",
+   "answered_by": "c134"
+  },
+  {
+   "id": "c120",
+   "hash": "f7d16c82db6cb4948a45ae3fbcf26f9c6987a7400d668e32d0d635d516e6c832",
+   "polarity": "benefit",
+   "target": "p2trv2",
+   "participant": "sipa",
+   "post_url": "https://delvingbitcoin.org/t/pqc-output-type-discussion/2749/30",
+   "quote": "I want to remove friction that may stand in the way of adoption. Fee increases may be one of them.",
+   "date": "2026-09-16T20:37:50Z",
+   "status": "open"
+  },
+  {
+   "id": "c121",
+   "hash": "c3802e5e12d5c79906b40aa1b04e066422b30ba57613beaf0974fc39dc2f4aaf",
+   "polarity": "blocker",
+   "target": "cisa",
+   "participant": "AntoineP",
+   "post_url": "https://delvingbitcoin.org/t/pqc-output-type-discussion/2749/32",
+   "quote": "i agree with Pieter that P2TRv2 and CISA pull in opposite directions.",
+   "date": "2026-09-16T20:38:13Z",
+   "status": "open"
+  },
+  {
+   "id": "c122",
+   "hash": "965b021502885ff31a31352867a98685690285d61678b45c9379c271945855cd",
+   "polarity": "blocker",
+   "target": "tripwire",
+   "participant": "AntoineP",
+   "post_url": "https://delvingbitcoin.org/t/pqc-output-type-discussion/2749/32",
+   "quote": "I believe Tripwire without miner lockdown is a non-binding constraint and as such does not really provide \u201cteeth\u201d to EC disabling",
+   "date": "2026-09-16T20:38:13Z",
+   "status": "open"
+  },
+  {
+   "id": "c123",
+   "hash": "91e8a61f9706f7d213f15ec7011d8efc432cbd023b8f05cc313e3004b8b31aff",
+   "polarity": "benefit",
+   "target": "miner-lockdown",
+   "participant": "AntoineP",
+   "post_url": "https://delvingbitcoin.org/t/pqc-output-type-discussion/2749/32",
+   "quote": "Miner Lockdown, while it gives the collective of miners the ability to (i believe irrationally) trigger it prematurely, may help in reassuring those stakeholders",
+   "date": "2026-09-16T20:38:13Z",
+   "status": "open"
+  },
+  {
+   "id": "c124",
+   "hash": "3a93c0c32803db3f88fb9c8b5f2e094d1de62cac53fb23cd62370e2fc8cbc250",
+   "polarity": "benefit",
+   "target": "p2trv2",
+   "participant": "AntoineP",
+   "post_url": "https://delvingbitcoin.org/t/pqc-output-type-discussion/2749/32",
+   "quote": "I think risk mitigation (P2TRv2 + Tripwire) and full migration (P2MR + eventual EC disabling + Witness style) should be provided in separate deployments.",
+   "date": "2026-09-16T20:38:13Z",
+   "status": "answered",
+   "answered_by": "c135"
+  },
+  {
+   "id": "c125",
+   "hash": "d1b979856ecdabd8673b08f1ae7937830d83d1feb3f169b5c0c80950b9aeb909",
+   "polarity": "benefit",
+   "target": "p2mr",
+   "participant": "ArmchairCryptologist",
+   "post_url": "https://delvingbitcoin.org/t/pqc-output-type-discussion/2749/33",
+   "quote": "Crucially, address reuse is not a problem for properly managed long-term holding addresses, simply because address reuse per se does not cause funds to have an exposed public key",
+   "date": "2026-09-17T09:53:53Z",
+   "status": "answered",
+   "answered_by": "c131"
+  },
+  {
+   "id": "c126",
+   "hash": "7765a49c5390b12244b4933a721a60dd7451b9d683b5c2c2d67d8d7b57c32315",
+   "polarity": "blocker",
+   "target": "p2trv2",
+   "participant": "ArmchairCryptologist",
+   "post_url": "https://delvingbitcoin.org/t/pqc-output-type-discussion/2749/33",
+   "quote": "P2TR and P2TRv2 are both clearly a regression from a PQ perspective compared to P2WPKH and other address types with hashed keys, until/unless ECC spending is disabled.",
+   "date": "2026-09-17T09:53:53Z",
+   "status": "answered",
+   "answered_by": "c129"
+  },
+  {
+   "id": "c127",
+   "hash": "03355cb3ff6d695919c4b5ec42a22ae83a43facb43beb1f601e6ffdb4cb759e8",
+   "polarity": "benefit",
+   "target": "p2mr",
+   "participant": "ArmchairCryptologist",
+   "post_url": "https://delvingbitcoin.org/t/pqc-output-type-discussion/2749/33",
+   "quote": "moving such funds to P2MR rather than P2TRv2 would certainly feel less risky to someone who is informed about the potential threat of a CRQC.",
+   "date": "2026-09-17T09:53:53Z",
+   "status": "answered",
+   "answered_by": "c129"
+  },
+  {
+   "id": "c128",
+   "hash": "d941c7e273f6ce86b3f9c938a365349481e7df57c7c435f5039896b47842b24a",
+   "polarity": "blocker",
+   "target": "p2trv2",
+   "participant": "fjahr",
+   "post_url": "https://delvingbitcoin.org/t/pqc-output-type-discussion/2749/34",
+   "quote": "If people believe they are too risky, P2TRv2 likely won\u2019t reach consensus in the first place, with or without CISA.",
+   "date": "2026-09-17T14:50:00Z",
+   "status": "open"
+  },
+  {
+   "id": "c129",
+   "hash": "04ffb25d3ffcc7586a73344ec8699484801191e7c3066847c6e534d79b685df0",
+   "polarity": "benefit",
+   "target": "p2mr",
+   "participant": "sipa",
+   "post_url": "https://delvingbitcoin.org/t/pqc-output-type-discussion/2749/35",
+   "quote": "which is part of the reason for favoring also adding a later-stage P2MR output type in addition to the long-tail P2TRv2 one",
+   "date": "2026-09-17T15:16:35Z",
+   "status": "open"
+  },
+  {
+   "id": "c130",
+   "hash": "8b8ffd1b99b9cd1c0a5b17963f68edf818d1cdfc94eebcb11e75f9d3746556c3",
+   "polarity": "blocker",
+   "target": "cisa",
+   "participant": "sipa",
+   "post_url": "https://delvingbitcoin.org/t/pqc-output-type-discussion/2749/35",
+   "quote": "If CISA truly does make P2TRv2 more appealing (which I\u2019m skeptical of), that shouldn\u2019t be a reason to let it compromise on your sense of security about it.",
+   "date": "2026-09-17T15:16:35Z",
+   "status": "open"
+  },
+  {
+   "id": "c131",
+   "hash": "872b66bcd20dcf04686971947c8a821e6e949227ab63f7dcc75b218db1a770de",
+   "polarity": "blocker",
+   "target": "p2trv2",
+   "participant": "sipa",
+   "post_url": "https://delvingbitcoin.org/t/pqc-output-type-discussion/2749/35",
+   "quote": "That\u2019s fair. But I also don\u2019t think these are the target audience for P2TRv2. If they\u2019re properly managed they can migrate in time to a later P2MR output type too.",
+   "date": "2026-09-17T15:16:35Z",
+   "status": "open"
+  },
+  {
+   "id": "c132",
+   "hash": "0a61c223ce1643ba6161db188ebda7f99d37a89c97ee56349cf4c50a53484298",
+   "polarity": "benefit",
+   "target": "p2mr",
+   "participant": "conduition",
+   "post_url": "https://delvingbitcoin.org/t/pqc-output-type-discussion/2749/36",
+   "quote": "My stance is still that P2MR is the only truly post-quantum address format.",
+   "date": "2026-09-18T07:46:46Z",
+   "status": "open"
+  },
+  {
+   "id": "c133",
+   "hash": "bb3a10d82ddd637f7e5f6f0f345f7e1955632bf466194fedfcf84579faba115a",
+   "polarity": "blocker",
+   "target": "p2trv2",
+   "participant": "conduition",
+   "post_url": "https://delvingbitcoin.org/t/pqc-output-type-discussion/2749/36",
+   "quote": "I believe that the benefits of P2TRv2 compared to P2MR (drop-in compat, 8vb efficiency gain) are negligible compared to the existential risk of all the P2TRv2 coins being exposed on Q-day.",
+   "date": "2026-09-18T07:46:46Z",
+   "status": "open"
+  },
+  {
+   "id": "c134",
+   "hash": "43a9e4f5814e57dd352429afd8cf612b4bb193bb5d55d3e5564a431c5b97b6c2",
+   "polarity": "benefit",
+   "target": "upgrade-hook",
+   "participant": "conduition",
+   "post_url": "https://delvingbitcoin.org/t/pqc-output-type-discussion/2749/36",
+   "quote": "An upgrade hook\u2019s deadline is fixed, certain, can be deferred at will, and requires no migration (provided the upgrade is completed or deferred in time).",
+   "date": "2026-09-18T07:46:46Z",
+   "status": "open"
+  },
+  {
+   "id": "c135",
+   "hash": "8e21566e75667feb96b8feae3fd011234de9584892ea203aef66cfa5ff0e1f99",
+   "polarity": "benefit",
+   "target": "p2mr",
+   "participant": "conduition",
+   "post_url": "https://delvingbitcoin.org/t/pqc-output-type-discussion/2749/36",
+   "quote": "I\u2019m still partial to P2MR (and/or CISA) + tripwire with a rudimentary hash-based PQC spending path as the first stage.",
+   "date": "2026-09-18T07:46:46Z",
+   "status": "open"
+  },
+  {
+   "id": "c136",
+   "hash": "f1b844016578a703bf5c6197813390163ed2e8cb1a6463926942f8770f14255b",
+   "polarity": "blocker",
+   "target": "p2mr",
+   "participant": "sipa",
+   "post_url": "https://delvingbitcoin.org/t/pqc-output-type-discussion/2749/35",
+   "quote": "I personally agree, and think we should treat and identical, because their difference only matters under a tenuous condition (no address reuse/pubkey sharing)",
+   "date": "2026-09-17T15:16:35Z",
+   "status": "conceded"
+  },
+  {
+   "id": "c137",
+   "hash": "7e09ad722d55f7e3755c5c8785f30e63b7b4ae2febdf90bf1d193fc7591999c6",
+   "polarity": "benefit",
+   "target": "new-witness-style",
+   "participant": "conduition",
+   "post_url": "https://delvingbitcoin.org/t/pqc-output-type-discussion/2749/9",
+   "quote": "aha, i stand corrected!",
+   "date": "2026-08-22T05:51:35Z",
+   "status": "conceded"
+  },
+  {
+   "id": "c138",
+   "hash": "bc485195d8dd2821b0b87359461023df8975cae20562e5e437ebe9f06da04142",
+   "polarity": "benefit",
+   "target": "p2trv2-cisa",
+   "participant": "conduition",
+   "post_url": "https://delvingbitcoin.org/t/pqc-output-type-discussion/2749/19",
+   "quote": "All a wallet has to do to support CISA key-spending (opt-out path) now is to bump their witness version.",
+   "date": "2026-09-08T19:06:09Z",
+   "status": "answered",
+   "answered_by": "c90"
+  },
+  {
+   "id": "c139",
+   "hash": "8c644b890aedff44fa31fb2bf4f79bbfc1473037dff425fa2606b96999adbf2f",
+   "polarity": "blocker",
+   "target": "p2trv2",
+   "participant": "conduition",
+   "post_url": "https://delvingbitcoin.org/t/pqc-output-type-discussion/2749/19",
+   "quote": "In the taproot upgrade, a significant amount of additional cryptographic design and implementation complexity was devoted to removing just a single byte from every key and signature",
+   "date": "2026-09-08T19:06:09Z",
+   "status": "answered",
+   "answered_by": "c140"
+  },
+  {
+   "id": "c140",
+   "hash": "fbc4d88cc45b89b66f6e395cf99116cbdb539d4efb87c6a4069165dd23cc3fd7",
+   "polarity": "blocker",
+   "target": "p2trv2",
+   "participant": "sipa",
+   "post_url": "https://delvingbitcoin.org/t/pqc-output-type-discussion/2749/22",
+   "quote": "in retrospect I agree the complexity of saving that one byte was probably not worth it.",
+   "date": "2026-09-11T14:48:38Z",
+   "status": "open"
+  },
+  {
+   "id": "c141",
+   "hash": "f60935d8e3fcbf9bca7788d0cd6d70b7ccca773a859d88cd177f9ed3566d600d",
+   "polarity": "benefit",
+   "target": "p2trv2",
+   "participant": "conduition",
+   "post_url": "https://delvingbitcoin.org/t/pqc-output-type-discussion/2749/19",
+   "quote": "Then at least we can correctly claim we have deployed a quantum secure output type, and shame wallets who don\u2019t migrate.",
+   "date": "2026-09-08T19:06:09Z",
+   "status": "answered",
+   "answered_by": "c97"
+  },
+  {
+   "id": "c142",
+   "hash": "023352505495266ea45aec12c624eb4bcb392259f61632e56af250ca093f19df",
+   "polarity": "benefit",
+   "target": "upgrade-hook",
+   "participant": "conduition",
+   "post_url": "https://delvingbitcoin.org/t/pqc-output-type-discussion/2749/27",
+   "quote": "Actually it is possible to deploy P2TRv2 with a time-based upgrade hook that transmutes P2TRv2 outputs into anyone-can-spend after a specific deadline block height T",
+   "date": "2026-09-14T04:49:01Z",
+   "status": "answered",
+   "answered_by": "c119"
+  },
+  {
+   "id": "c143",
+   "hash": "f258575f12f9a8af771e0b84ba9804a993ff40ff04bbb3ff5ba40ec9d9ddb3bb",
+   "polarity": "blocker",
+   "target": "cisa",
+   "participant": "AntoineP",
+   "post_url": "https://delvingbitcoin.org/t/pqc-output-type-discussion/2749/32",
+   "quote": "I don\u2019t think CRQC-skeptic CISA enthusiasts would accept an expectation that their EC spending path becomes unspendable before CRQCs materialize.",
+   "date": "2026-09-16T20:38:13Z",
+   "status": "answered",
+   "answered_by": "c128"
+  }
+ ],
+ "positions": [
+  {
+   "id": "p1",
+   "participant": "sipa",
+   "prefers": [
+    "p2trv2",
+    "p2mr"
+   ],
+   "basis": "stated",
+   "post_url": "https://delvingbitcoin.org/t/pqc-output-type-discussion/2749/2",
+   "date": "2026-07-27T21:23:00Z"
+  },
+  {
+   "id": "p2",
+   "participant": "jeanpablojp",
+   "prefers": [
+    "p2mr"
+   ],
+   "basis": "inferred",
+   "post_url": "https://delvingbitcoin.org/t/pqc-output-type-discussion/2749/3",
+   "date": "2026-07-29T13:39:19Z",
+   "confidence": 0.55
+  },
+  {
+   "id": "p3",
+   "participant": "conduition",
+   "prefers": [
+    "p2trv2",
+    "p2mr"
+   ],
+   "basis": "stated",
+   "post_url": "https://delvingbitcoin.org/t/pqc-output-type-discussion/2749/5",
+   "date": "2026-08-05T23:19:24Z"
+  },
+  {
+   "id": "p4",
+   "participant": "ajtowns",
+   "prefers": [],
+   "basis": "inferred",
+   "post_url": "https://delvingbitcoin.org/t/pqc-output-type-discussion/2749/13",
+   "date": "2026-08-25T15:06:32Z",
+   "confidence": 0.4
+  },
+  {
+   "id": "p5",
+   "participant": "AdamISZ",
+   "prefers": [
+    "cisa-output"
+   ],
+   "basis": "stated",
+   "post_url": "https://delvingbitcoin.org/t/pqc-output-type-discussion/2749/15",
+   "date": "2026-08-25T20:18:38Z"
+  },
+  {
+   "id": "p6",
+   "participant": "fjahr",
+   "prefers": [
+    "p2trv2-cisa"
+   ],
+   "basis": "stated",
+   "post_url": "https://delvingbitcoin.org/t/pqc-output-type-discussion/2749/16",
+   "date": "2026-08-27T10:10:53Z"
+  },
+  {
+   "id": "p7",
+   "participant": "ariard",
+   "prefers": [
+    "p2trv2",
+    "p2mr"
+   ],
+   "basis": "stated",
+   "post_url": "https://delvingbitcoin.org/t/pqc-output-type-discussion/2749/18",
+   "date": "2026-09-07T02:58:37Z"
+  },
+  {
+   "id": "p8",
+   "participant": "conduition",
+   "prefers": [
+    "p2mr"
+   ],
+   "basis": "stated",
+   "post_url": "https://delvingbitcoin.org/t/pqc-output-type-discussion/2749/19",
+   "date": "2026-09-08T19:06:09Z",
+   "supersedes": "p3"
+  },
+  {
+   "id": "p9",
+   "participant": "sjors",
+   "prefers": [
+    "p2trv2"
+   ],
+   "basis": "stated",
+   "post_url": "https://delvingbitcoin.org/t/pqc-output-type-discussion/2749/23",
+   "date": "2026-09-11T15:21:26Z",
+   "confidence": 0.7
+  },
+  {
+   "id": "p10",
+   "participant": "conduition",
+   "prefers": [
+    "p2mr"
+   ],
+   "basis": "stated",
+   "post_url": "https://delvingbitcoin.org/t/pqc-output-type-discussion/2749/27",
+   "date": "2026-09-14T04:49:01Z",
+   "supersedes": "p8"
+  },
+  {
+   "id": "p11",
+   "participant": "AntoineP",
+   "prefers": [
+    "p2trv2",
+    "p2mr"
+   ],
+   "basis": "stated",
+   "post_url": "https://delvingbitcoin.org/t/pqc-output-type-discussion/2749/32",
+   "date": "2026-09-16T20:38:13Z"
+  },
+  {
+   "id": "p12",
+   "participant": "ArmchairCryptologist",
+   "prefers": [
+    "p2mr"
+   ],
+   "basis": "inferred",
+   "post_url": "https://delvingbitcoin.org/t/pqc-output-type-discussion/2749/33",
+   "date": "2026-09-17T09:53:53Z",
+   "confidence": 0.65
+  }
+ ],
+ "questions": [
+  {
+   "id": "q1",
+   "text": "Should the first PQC opcode be hybrid, accepting an ECC and a PQC signature together, despite the extra adoption complexity?",
+   "raised_by": "sipa",
+   "post_url": "https://delvingbitcoin.org/t/pqc-output-type-discussion/2749/2",
+   "date": "2026-07-27T21:23:00Z",
+   "status": "open"
+  },
+  {
+   "id": "q2",
+   "text": "Do we want P2TRv2 plus CISA as an intermediate stage in the migration path, or should CISA stay out of it?",
+   "raised_by": "conduition",
+   "post_url": "https://delvingbitcoin.org/t/pqc-output-type-discussion/2749/5",
+   "date": "2026-08-05T23:19:24Z",
+   "status": "open"
+  },
+  {
+   "id": "q3",
+   "text": "Does the fee efficiency of an output type only matter once it becomes less efficient than what exists today?",
+   "raised_by": "conduition",
+   "post_url": "https://delvingbitcoin.org/t/pqc-output-type-discussion/2749/7",
+   "date": "2026-08-19T17:25:20Z",
+   "status": "open"
+  },
+  {
+   "id": "q4",
+   "text": "Which tip synchronization metrics matter most when signatures get larger: block propagation, transaction relay, or validation cost?",
+   "raised_by": "conduition",
+   "post_url": "https://delvingbitcoin.org/t/pqc-output-type-discussion/2749/9",
+   "date": "2026-08-22T05:51:35Z",
+   "status": "open"
+  },
+  {
+   "id": "q5",
+   "text": "Would the review work needed to land CISA draw reviewers away from the post quantum side and delay it?",
+   "raised_by": "fjahr",
+   "post_url": "https://delvingbitcoin.org/t/pqc-output-type-discussion/2749/11",
+   "date": "2026-08-23T22:55:02Z",
+   "status": "open"
+  },
+  {
+   "id": "q6",
+   "text": "Why is merging CISA into the PQC output type work considered off?",
+   "raised_by": "conduition",
+   "post_url": "https://delvingbitcoin.org/t/pqc-output-type-discussion/2749/19",
+   "date": "2026-09-08T19:06:09Z",
+   "status": "open"
+  },
+  {
+   "id": "q7",
+   "text": "Who performs CISA aggregation in practice: wallets alone, full nodes, or mempool logic that does not exist yet?",
+   "raised_by": "ariard",
+   "post_url": "https://delvingbitcoin.org/t/pqc-output-type-discussion/2749/21",
+   "date": "2026-09-11T00:59:28Z",
+   "status": "open"
+  },
+  {
+   "id": "q8",
+   "text": "Was the first P2MR in the two stage plan a typo, or did it mean not in the same deployment?",
+   "raised_by": "sjors",
+   "post_url": "https://delvingbitcoin.org/t/pqc-output-type-discussion/2749/23",
+   "date": "2026-09-11T15:21:26Z",
+   "status": "resolved",
+   "resolved_by": "c105"
+  },
+  {
+   "id": "q9",
+   "text": "Can a v2 SegWit be designed so CISA soft forks into it later without another witness version bump?",
+   "raised_by": "sjors",
+   "post_url": "https://delvingbitcoin.org/t/pqc-output-type-discussion/2749/24",
+   "date": "2026-09-11T15:54:26Z",
+   "status": "resolved",
+   "resolved_by": "c106"
+  },
+  {
+   "id": "q10",
+   "text": "Would those against CISA today accept a time based upgrade hook so it can be activated on P2TRv2 later?",
+   "raised_by": "conduition",
+   "post_url": "https://delvingbitcoin.org/t/pqc-output-type-discussion/2749/27",
+   "date": "2026-09-14T04:49:01Z",
+   "status": "resolved",
+   "resolved_by": "c119"
+  },
+  {
+   "id": "q11",
+   "text": "Why include the orange threat model at all, given that under its assumptions today's hashed key outputs would already be secure?",
+   "raised_by": "AntoineP",
+   "post_url": "https://delvingbitcoin.org/t/pqc-output-type-discussion/2749/32",
+   "date": "2026-09-16T20:38:13Z",
+   "status": "open"
+  },
+  {
+   "id": "q12",
+   "text": "Is CISA being pictured without PQC support, or without a tripwire?",
+   "raised_by": "conduition",
+   "post_url": "https://delvingbitcoin.org/t/pqc-output-type-discussion/2749/36",
+   "date": "2026-09-18T07:46:46Z",
+   "status": "open"
+  }
+ ],
+ "_prototype_note": "Prototype data: the human-curated gold record for this thread, not live extraction output."
+}

@@ -1,0 +1,43 @@
+{{ define "main" }}
+<div class="wrap">
+  <div class="hero">
+    {{ partial "crumb.html" (dict "section" "Discussions") }}
+    <h1 id="d-title">Discussion</h1>
+    <p class="lede" id="d-lede">Build your own view of what was argued, by whom, and whether it was answered. Nothing here decides the outcome.</p>
+    <p class="coverage" id="d-source">–</p>
+  </div>
+
+  <section class="d-builder" aria-label="View builder">
+    <div class="filter-stack">
+      <div class="filter-row">
+        <span class="filter-label">Show</span>
+        <div class="filters" id="d-view-chips" role="group" aria-label="What to show"></div>
+      </div>
+      <div class="filter-row" data-pivot-only>
+        <span class="filter-label">Rows</span>
+        <div class="filters" id="d-rows-chips" role="group" aria-label="Row dimension"></div>
+      </div>
+      <div class="filter-row" data-pivot-only>
+        <span class="filter-label">Columns</span>
+        <div class="filters" id="d-cols-chips" role="group" aria-label="Column dimension"></div>
+      </div>
+      <div class="filter-row" data-pivot-only>
+        <span class="filter-label">Measure</span>
+        <div class="filters" id="d-measure-chips" role="group" aria-label="Measure"></div>
+      </div>
+      <div class="filter-row">
+        <span class="filter-label">Filter</span>
+        <div class="filters" id="d-filter-chips" role="group" aria-label="Filters"></div>
+      </div>
+    </div>
+    <p class="d-caption" id="d-caption">–</p>
+  </section>
+
+  <section class="d-output" id="d-output" aria-live="polite">
+    <p class="muted">Loading discussion…</p>
+  </section>
+
+  <section class="d-detail" id="d-detail" hidden aria-label="Selected claims"></section>
+</div>
+<script src="/discussion.js" defer></script>
+{{ end }}
