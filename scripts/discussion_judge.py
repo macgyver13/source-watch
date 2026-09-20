@@ -15,7 +15,7 @@ import re
 import sys
 from pathlib import Path
 from typing import Callable, Mapping, NamedTuple, Sequence
-from urllib.error import URLError
+from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
 
 BACKENDS = ("anthropic", "jev", "ollama", "openai-compatible")
@@ -309,6 +309,8 @@ def _http_json(url: str, payload: dict, headers: dict[str, str], timeout: float,
     try:
         with urlopen(request, timeout=timeout) as response:
             raw = response.read().decode("utf-8")
+    except HTTPError as exc:
+        raise JudgeError(f"{name} backend request failed: {exc}") from exc
     except (URLError, TimeoutError) as exc:
         raise JudgeError(f"{name} backend request failed: {exc}") from exc
     try:
@@ -320,20 +322,54 @@ def _http_json(url: str, payload: dict, headers: dict[str, str], timeout: float,
     return data
 
 
-def openai_complete(*, base_url: str, model: str, api_key: str, timeout: float) -> CompleteFn:
+def _rejects_temperature(exc: HTTPError) -> bool:
+    """True when a 400 says the endpoint will not accept a temperature field."""
+    if exc.code != 400:
+        return False
+    try:
+        body = exc.read().decode("utf-8", "replace")
+    except Exception:
+        return False
+    return "temperature" in body.lower()
+
+
+def openai_complete(
+    *,
+    base_url: str,
+    model: str,
+    api_key: str,
+    timeout: float,
+    send_temperature: bool = True,
+) -> CompleteFn:
     url = base_url.rstrip("/") + "/chat/completions"
+    state = {"temperature": send_temperature}
 
     def complete(messages: list[dict]) -> str:
         headers = {"Content-Type": "application/json"}
         if api_key:
             headers["Authorization"] = f"Bearer {api_key}"
-        data = _http_json(
-            url,
-            {"model": model, "temperature": 0, "messages": messages},
-            headers,
-            timeout,
-            "openai-compatible",
-        )
+
+        def _payload() -> dict:
+            body: dict = {"model": model, "messages": messages}
+            if state["temperature"]:
+                body["temperature"] = 0
+            return body
+
+        try:
+            data = _http_json(url, _payload(), headers, timeout, "openai-compatible")
+        except JudgeError as exc:
+            cause = exc.__cause__
+            # Some endpoints reject temperature for reasoning models. Drop it and retry
+            # once, then keep it off for the rest of this backend's calls.
+            if (
+                state["temperature"]
+                and isinstance(cause, HTTPError)
+                and _rejects_temperature(cause)
+            ):
+                state["temperature"] = False
+                data = _http_json(url, _payload(), headers, timeout, "openai-compatible")
+            else:
+                raise
         try:
             content = data["choices"][0]["message"]["content"]
         except (KeyError, IndexError, TypeError) as exc:
@@ -689,8 +725,16 @@ def judge_from_env(env: Mapping[str, str] | None = None) -> Judge:
     key_env_name = (env.get("DISCUSSION_JUDGE_API_KEY_ENV") or _DEFAULT_KEY_ENV.get(backend, "")).strip()
     api_key = env.get(key_env_name, "") if key_env_name else ""
     if backend == "openai-compatible":
+        send_temperature = (
+            env.get("DISCUSSION_JUDGE_NO_TEMPERATURE", "").strip().lower()
+            not in ("1", "true", "yes")
+        )
         complete = openai_complete(
-            base_url=base_url, model=model, api_key=api_key, timeout=timeout
+            base_url=base_url,
+            model=model,
+            api_key=api_key,
+            timeout=timeout,
+            send_temperature=send_temperature,
         )
     elif backend == "ollama":
         complete = ollama_complete(base_url=base_url, model=model, timeout=timeout)
