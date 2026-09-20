@@ -92,6 +92,46 @@ def _match_claims(
     return matches
 
 
+def _match_claims_secondary(
+    gold_claims: list[dict],
+    candidate_claims: list[dict],
+    primary: list[tuple[int, int, float]],
+    threshold: float,
+) -> list[tuple[int, int, float]]:
+    """Lower-threshold second pass for claims the primary pass left unmatched.
+
+    Only accepts a pair when post_url, target and polarity all agree, so a loose
+    quote overlap cannot pull together two different claims on the same post.
+    """
+    used_gold = {gi for gi, _ci, _score in primary}
+    used_cand = {ci for _gi, ci, _score in primary}
+    pairs: list[tuple[float, int, int]] = []
+    for gi, gold in enumerate(gold_claims):
+        if gi in used_gold:
+            continue
+        for ci, cand in enumerate(candidate_claims):
+            if ci in used_cand:
+                continue
+            if cand.get("post_url") != gold.get("post_url"):
+                continue
+            if cand.get("target") != gold.get("target"):
+                continue
+            if cand.get("polarity") != gold.get("polarity"):
+                continue
+            pairs.append((token_f1(gold.get("quote"), cand.get("quote")), gi, ci))
+    pairs.sort(key=lambda item: (-item[0], item[1], item[2]))
+    matches: list[tuple[int, int, float]] = []
+    for score, gi, ci in pairs:
+        if score < threshold:
+            break
+        if gi in used_gold or ci in used_cand:
+            continue
+        used_gold.add(gi)
+        used_cand.add(ci)
+        matches.append((gi, ci, score))
+    return matches
+
+
 def _match_positions(
     gold_positions: list[dict], candidate_positions: list[dict]
 ) -> list[tuple[int, int]]:
@@ -114,16 +154,24 @@ def evaluate(
     candidate: dict,
     threshold: float = 0.6,
     label: str = "",
+    secondary_threshold: float | None = None,
 ) -> dict:
     gold_claims = _visible_claims(gold)
     cand_claims = _visible_claims(candidate)
     gold_positions = _positions(gold)
     cand_positions = _positions(candidate)
     claim_matches = _match_claims(gold_claims, cand_claims, threshold)
+    secondary_matches: list[tuple[int, int, float]] = []
+    if secondary_threshold is not None:
+        secondary_matches = _match_claims_secondary(
+            gold_claims, cand_claims, claim_matches, secondary_threshold
+        )
     position_matches = _match_positions(gold_positions, cand_positions)
 
     matched_gold = {gi for gi, _ci, _score in claim_matches}
     matched_cand = {ci for _gi, ci, _score in claim_matches}
+    all_matched_gold = matched_gold | {gi for gi, _ci, _score in secondary_matches}
+    all_matched_cand = matched_cand | {ci for _gi, ci, _score in secondary_matches}
     polarity_hits = sum(
         1
         for gi, ci, _score in claim_matches
@@ -145,6 +193,7 @@ def evaluate(
         for gi, ci, _score in claim_matches
     }
     gold_links = [claim for claim in gold_claims if "answered_by" in claim]
+    candidate_links = [claim for claim in cand_claims if claim.get("answered_by")]
     matched_links = 0
     for claim in gold_links:
         cand_claim = gold_to_cand.get(claim.get("id"))
@@ -155,10 +204,14 @@ def evaluate(
             matched_links += 1
 
     unmatched_gold = [
-        claim.get("id") for i, claim in enumerate(gold_claims) if i not in matched_gold
+        claim.get("id")
+        for i, claim in enumerate(gold_claims)
+        if i not in all_matched_gold
     ]
     unmatched_cand = [
-        claim.get("id") for i, claim in enumerate(cand_claims) if i not in matched_cand
+        claim.get("id")
+        for i, claim in enumerate(cand_claims)
+        if i not in all_matched_cand
     ]
 
     return {
@@ -170,15 +223,35 @@ def evaluate(
         "target_accuracy": _ratio(target_hits, len(claim_matches)),
         "position_recall": _ratio(len(position_matches), len(gold_positions)),
         "position_basis_agreement": _ratio(basis_hits, len(position_matches)),
-        "answered_by_recall": _ratio(matched_links, len(gold_links)),
+        "answered_by_recall": (
+            None if not candidate_links else _ratio(matched_links, len(gold_links))
+        ),
+        "answered_by_note": (
+            "candidate has no answered_by links; drafting-only runs cannot produce them"
+            if not candidate_links
+            else ""
+        ),
+        "secondary_threshold": secondary_threshold,
+        "claim_precision_with_secondary": (
+            None
+            if secondary_threshold is None
+            else _ratio(len(claim_matches) + len(secondary_matches), len(cand_claims))
+        ),
+        "claim_recall_with_secondary": (
+            None
+            if secondary_threshold is None
+            else _ratio(len(claim_matches) + len(secondary_matches), len(gold_claims))
+        ),
         "counts": {
             "gold_claims": len(gold_claims),
             "candidate_claims": len(cand_claims),
             "matched_claims": len(claim_matches),
+            "matched_claims_secondary": len(secondary_matches),
             "gold_positions": len(gold_positions),
             "candidate_positions": len(cand_positions),
             "matched_positions": len(position_matches),
             "gold_answered_links": len(gold_links),
+            "candidate_answered_links": len(candidate_links),
             "matched_answered_links": matched_links,
         },
         "candidate_schema_errors": ds.validate(candidate),
@@ -202,6 +275,12 @@ def main() -> int:
     parser.add_argument("--gold", required=True, type=Path)
     parser.add_argument("--candidate", required=True, type=Path)
     parser.add_argument("--threshold", type=float, default=0.6)
+    parser.add_argument(
+        "--secondary-threshold",
+        type=float,
+        default=None,
+        help="opt-in lower threshold for claims matching on post, target and polarity",
+    )
     parser.add_argument("--out", type=Path)
     parser.add_argument("--label", default="")
     args = parser.parse_args()
@@ -216,7 +295,13 @@ def main() -> int:
         for error in gold_errors:
             print(error)
         return 2
-    result = evaluate(gold, candidate, threshold=args.threshold, label=args.label)
+    result = evaluate(
+        gold,
+        candidate,
+        threshold=args.threshold,
+        label=args.label,
+        secondary_threshold=args.secondary_threshold,
+    )
     for error in result["candidate_schema_errors"]:
         print(f"warning {error}")
     width = max(len(key) for key in _METRIC_KEYS)

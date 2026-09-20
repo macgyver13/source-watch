@@ -313,6 +313,17 @@ def draft(
     return state, log
 
 
+def rejects_temperature(exc: HTTPError) -> bool:
+    """True when a 400 says the endpoint will not accept a temperature field."""
+    if exc.code != 400:
+        return False
+    try:
+        body = exc.read().decode("utf-8", "replace")
+    except Exception:
+        return False
+    return "temperature" in body.lower()
+
+
 def complete_chat(
     messages: list[dict],
     *,
@@ -320,17 +331,23 @@ def complete_chat(
     model: str,
     api_key: str,
     timeout: float,
+    send_temperature: bool = True,
 ) -> str:
     url = base_url.rstrip("/") + "/chat/completions"
-    payload = json.dumps(
-        {"model": model, "temperature": 0, "messages": messages}
-    ).encode("utf-8")
 
-    def _open(send_auth: bool) -> dict:
+    def _payload(with_temperature: bool) -> bytes:
+        body: dict = {"model": model, "messages": messages}
+        if with_temperature:
+            body["temperature"] = 0
+        return json.dumps(body).encode("utf-8")
+
+    def _open(send_auth: bool, with_temperature: bool) -> dict:
         headers = {"Content-Type": "application/json"}
         if send_auth:
             headers["Authorization"] = f"Bearer {api_key}"
-        request = Request(url, data=payload, headers=headers, method="POST")
+        request = Request(
+            url, data=_payload(with_temperature), headers=headers, method="POST"
+        )
         with urlopen(request, timeout=timeout) as response:
             body = response.read().decode("utf-8")
         data = json.loads(body)
@@ -338,11 +355,20 @@ def complete_chat(
             raise ValueError("chat completion response must be an object")
         return data
 
+    def _attempt(with_temperature: bool) -> dict:
+        try:
+            return _open(send_auth=True, with_temperature=with_temperature)
+        except HTTPError as exc:
+            if exc.code == 401 and not api_key:
+                return _open(send_auth=False, with_temperature=with_temperature)
+            raise
+
     try:
-        data = _open(send_auth=True)
+        data = _attempt(send_temperature)
     except HTTPError as exc:
-        if exc.code == 401 and not api_key:
-            data = _open(send_auth=False)
+        # Some endpoints reject temperature for reasoning models. Retry once without it.
+        if send_temperature and rejects_temperature(exc):
+            data = _attempt(False)
         else:
             raise
     try:
@@ -365,6 +391,11 @@ def main() -> int:
     parser.add_argument("--limit", type=int)
     parser.add_argument("--max-body-chars", type=int, default=6000)
     parser.add_argument("--timeout", type=float, default=180)
+    parser.add_argument(
+        "--no-temperature",
+        action="store_true",
+        help="omit temperature from requests (some endpoints reject it)",
+    )
     parser.add_argument("--log", type=Path)
     args = parser.parse_args()
     try:
@@ -382,6 +413,7 @@ def main() -> int:
             model=args.model,
             api_key=api_key,
             timeout=args.timeout,
+            send_temperature=not args.no_temperature,
         )
 
     state, log = draft(
