@@ -96,6 +96,10 @@ def json_only(text: str) -> str:
     return last if last is not None else stripped
 
 
+EMPTY_CONTENT_RETRIES = 4
+EMPTY_CONTENT_BACKOFF = 1.5
+
+
 def chat_complete(
     messages: list[dict],
     *,
@@ -113,25 +117,40 @@ def chat_complete(
     headers = {"Content-Type": "application/json"}
     if api_key:
         headers["Authorization"] = f"Bearer {api_key}"
-    request = Request(url, data=payload, headers=headers, method="POST")
-    try:
-        with urlopen(request, timeout=timeout) as response:
-            raw = response.read().decode("utf-8")
-    except (HTTPError, URLError, TimeoutError) as exc:
-        raise ExtractError(f"chat request failed: {exc}") from exc
-    try:
-        data = json.loads(raw)
-    except json.JSONDecodeError as exc:
-        raise ExtractError("chat completion missing choices[0].message.content") from exc
-    if not isinstance(data, dict):
-        raise ExtractError("chat completion missing choices[0].message.content")
-    try:
-        content = data["choices"][0]["message"]["content"]
-    except (KeyError, IndexError, TypeError) as exc:
-        raise ExtractError("chat completion missing choices[0].message.content") from exc
-    if not isinstance(content, str):
-        raise ExtractError("chat completion content must be a string")
-    return content
+    last_error = ""
+    for attempt in range(EMPTY_CONTENT_RETRIES + 1):
+        request = Request(url, data=payload, headers=headers, method="POST")
+        try:
+            with urlopen(request, timeout=timeout) as response:
+                raw = response.read().decode("utf-8")
+        except (HTTPError, URLError, TimeoutError) as exc:
+            raise ExtractError(f"chat request failed: {exc}") from exc
+        try:
+            data = json.loads(raw)
+        except json.JSONDecodeError as exc:
+            raise ExtractError("chat completion missing choices[0].message.content") from exc
+        if not isinstance(data, dict):
+            raise ExtractError("chat completion missing choices[0].message.content")
+        try:
+            content = data["choices"][0]["message"]["content"]
+        except (KeyError, IndexError, TypeError) as exc:
+            raise ExtractError("chat completion missing choices[0].message.content") from exc
+        if isinstance(content, str) and content.strip():
+            return content
+        # Some endpoints intermittently return a null or empty content with a normal
+        # finish reason. Retrying the same request usually succeeds, and aborting a
+        # long extraction over one flaky reply is worse than paying for a retry.
+        last_error = (
+            "content was null"
+            if content is None
+            else f"content was {type(content).__name__}"
+        )
+        if attempt < EMPTY_CONTENT_RETRIES:
+            time.sleep(EMPTY_CONTENT_BACKOFF * (attempt + 1))
+    raise ExtractError(
+        f"chat completion content must be a string ({last_error} after "
+        f"{EMPTY_CONTENT_RETRIES + 1} attempts)"
+    )
 
 
 def json_complete(complete: dd.CompleteFn) -> dd.CompleteFn:
