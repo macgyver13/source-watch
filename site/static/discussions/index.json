@@ -9,6 +9,11 @@
       "slug": "bips-2212-opus5",
       "label": "BIP 460 CISA review (extracted)",
       "note": "Machine extraction by claude-opus-5, not reviewed by a human. A single-proposal thread, so there is no option axis to pivot on."
+    },
+    {
+      "slug": "delving-2749-extracted",
+      "label": "PQC output types (extracted)",
+      "note": "Machine extraction by gemini-3.7-flash via combo/least-used routing, not reviewed by a human."
     }
   ]
 }
