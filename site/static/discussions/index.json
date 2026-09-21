@@ -1,0 +1,14 @@
+{
+  "discussions": [
+    {
+      "slug": "delving-2749",
+      "label": "PQC output types (curated)",
+      "note": "Human-curated gold record. The benchmark the extractions are scored against."
+    },
+    {
+      "slug": "bips-2212-opus5",
+      "label": "BIP 460 CISA review (extracted)",
+      "note": "Machine extraction by claude-opus-5, not reviewed by a human. A single-proposal thread, so there is no option axis to pivot on."
+    }
+  ]
+}
