@@ -23,6 +23,8 @@ _METRIC_KEYS = (
     "position_recall",
     "position_basis_agreement",
     "answered_by_recall",
+    "link_recall_by_post",
+    "link_precision_by_post",
 )
 
 
@@ -64,6 +66,27 @@ def _ratio(numerator: int, denominator: int) -> float | None:
     if denominator == 0:
         return None
     return numerator / denominator
+
+
+def _link_pairs(claims: list[dict]) -> set[tuple[str, str]]:
+    """Links as (post of the claim, post of the answer).
+
+    Claim-id matching compounds claim-matching error: a link can only match when
+    both endpoints independently match, so the id-based number understates the
+    linking logic by roughly the square of claim recall. Post pairs measure what
+    the link is actually claiming, which is that one post answers another.
+    """
+    by_id = {claim.get("id"): claim for claim in claims}
+    pairs: set[tuple[str, str]] = set()
+    for claim in claims:
+        answer = by_id.get(claim.get("answered_by"))
+        if not isinstance(answer, dict):
+            continue
+        src = claim.get("post_url")
+        dst = answer.get("post_url")
+        if isinstance(src, str) and isinstance(dst, str) and src and dst:
+            pairs.add((src, dst))
+    return pairs
 
 
 def _match_claims(
@@ -193,6 +216,9 @@ def evaluate(
         for gi, ci, _score in claim_matches
     }
     gold_links = [claim for claim in gold_claims if "answered_by" in claim]
+    gold_pairs = _link_pairs(gold_claims)
+    cand_pairs = _link_pairs(cand_claims)
+    matched_pairs = gold_pairs & cand_pairs
     candidate_links = [claim for claim in cand_claims if claim.get("answered_by")]
     matched_links = 0
     for claim in gold_links:
@@ -229,7 +255,14 @@ def evaluate(
         "answered_by_note": (
             "candidate has no answered_by links; drafting-only runs cannot produce them"
             if not candidate_links
-            else ""
+            else "id-based: both endpoints must match a gold claim, so this "
+            "compounds claim-matching error. Prefer link_recall_by_post."
+        ),
+        "link_recall_by_post": (
+            None if not candidate_links else _ratio(len(matched_pairs), len(gold_pairs))
+        ),
+        "link_precision_by_post": (
+            None if not candidate_links else _ratio(len(matched_pairs), len(cand_pairs))
         ),
         "secondary_threshold": secondary_threshold,
         "claim_precision_with_secondary": (
@@ -250,6 +283,9 @@ def evaluate(
             "gold_positions": len(gold_positions),
             "candidate_positions": len(cand_positions),
             "matched_positions": len(position_matches),
+            "gold_link_post_pairs": len(gold_pairs),
+            "candidate_link_post_pairs": len(cand_pairs),
+            "matched_link_post_pairs": len(matched_pairs),
             "gold_answered_links": len(gold_links),
             "candidate_answered_links": len(candidate_links),
             "matched_answered_links": matched_links,

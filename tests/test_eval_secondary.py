@@ -95,7 +95,46 @@ class AnsweredByReportingTest(unittest.TestCase):
         cand = state([k1, k2])
         result = ev.evaluate(gold, cand)
         self.assertEqual(result["answered_by_recall"], 1.0)
-        self.assertEqual(result["answered_by_note"], "")
+        self.assertIn("Prefer link_recall_by_post", result["answered_by_note"])
+
+
+class LinkByPostTest(unittest.TestCase):
+    def _linked(self, prefix: str) -> dict:
+        a = claim(prefix + "1", "the first point")
+        b = claim(prefix + "2", "a reply to it")
+        b["post_url"] = POST + "/b"
+        a["answered_by"] = prefix + "2"
+        return state([a, b])
+
+    def test_links_match_by_post_even_when_ids_differ(self) -> None:
+        gold = self._linked("c")
+        cand = self._linked("k")
+        result = ev.evaluate(gold, cand)
+        # id-based scoring can still match here because the quotes are identical;
+        # what matters is that the post-pair measure is reported and agrees.
+        self.assertEqual(result["link_recall_by_post"], 1.0)
+        self.assertEqual(result["link_precision_by_post"], 1.0)
+        self.assertEqual(result["counts"]["matched_link_post_pairs"], 1)
+
+    def test_link_precision_counts_extra_links(self) -> None:
+        gold = self._linked("c")
+        cand = self._linked("k")
+        extra_a = claim("k3", "another point")
+        extra_b = claim("k4", "another reply")
+        extra_b["post_url"] = POST + "/d"
+        extra_a["post_url"] = POST + "/c"
+        extra_a["answered_by"] = "k4"
+        cand["claims"].extend([extra_a, extra_b])
+        result = ev.evaluate(gold, cand)
+        self.assertEqual(result["link_recall_by_post"], 1.0)
+        self.assertEqual(result["link_precision_by_post"], 0.5)
+
+    def test_na_when_candidate_has_no_links(self) -> None:
+        gold = self._linked("c")
+        cand = state([claim("k1", "the first point")])
+        result = ev.evaluate(gold, cand)
+        self.assertIsNone(result["link_recall_by_post"])
+        self.assertIsNone(result["answered_by_recall"])
 
 
 if __name__ == "__main__":
