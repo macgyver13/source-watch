@@ -352,51 +352,85 @@
   }
 
 
-  /* ---- summary: the two roll up tables, read top to bottom ---- */
-  function claimLine(claim) {
-    var line = el("div", "d-sumclaim");
-    var body = claim.text || claim.quote || "";
-    line.appendChild(el("span", "d-sumtext", body));
-    var who = el("span", "d-sumwho", claim.participant);
-    line.appendChild(who);
-    if (claim.status === "conceded") line.appendChild(el("span", "d-status conceded", "conceded"));
-    else if (claim.status === "answered") line.appendChild(el("span", "d-status answered", "answered"));
+  /* ---- summary: two roll up tables, read top to bottom ---- */
+  function claimItem(claim) {
+    var li = el("li", "d-item");
+    li.appendChild(el("span", "d-itemtext", claim.text || claim.quote || ""));
+    var meta = el("span", "d-itemmeta");
+    meta.appendChild(el("span", "d-cite", claim.participant));
+    if (claim.status === "conceded") meta.appendChild(el("span", "d-status conceded", "conceded"));
+    else if (claim.status === "answered") meta.appendChild(el("span", "d-status answered", "answered"));
     if (claim.post_url) {
-      var a = el("a", "d-src", "post");
+      var a = el("a", "d-cite d-citelink", "post");
       a.href = claim.post_url;
       a.target = "_blank";
       a.rel = "noopener";
-      line.appendChild(a);
+      meta.appendChild(a);
     }
-    return line;
+    li.appendChild(meta);
+    return li;
   }
 
-  function claimList(claims) {
-    var host = el("div", "d-sumlist");
+  function claimCell(claims, label) {
+    var cell = el("td", "d-cell-list");
+    cell.appendChild(el("span", "d-sumlabel", label + " (" + claims.length + ")"));
     if (!claims.length) {
-      host.appendChild(el("span", "muted", "none raised"));
-      return host;
+      cell.appendChild(el("p", "muted", "none raised"));
+      return cell;
     }
     var sorted = claims.slice().sort(function (a, b) {
       return String(a.date).localeCompare(String(b.date));
     });
-    sorted.slice(0, SHOW_FIRST).forEach(function (c) { host.appendChild(claimLine(c)); });
+    var list = el("ul", "d-items");
+    sorted.slice(0, SHOW_FIRST).forEach(function (c) { list.appendChild(claimItem(c)); });
+    cell.appendChild(list);
     if (sorted.length > SHOW_FIRST) {
-      var rest = el("div", "d-sumrest");
+      var rest = el("ul", "d-items");
       rest.hidden = true;
-      sorted.slice(SHOW_FIRST).forEach(function (c) { rest.appendChild(claimLine(c)); });
-      var more = el("button", "chip d-more", "show " + (sorted.length - SHOW_FIRST) + " more");
+      sorted.slice(SHOW_FIRST).forEach(function (c) { rest.appendChild(claimItem(c)); });
+      cell.appendChild(rest);
+      var n = sorted.length - SHOW_FIRST;
+      var more = el("button", "chip d-more", "show " + n + " more");
       more.type = "button";
       more.addEventListener("click", function () {
         rest.hidden = !rest.hidden;
-        more.textContent = rest.hidden
-          ? "show " + (sorted.length - SHOW_FIRST) + " more"
-          : "show fewer";
+        more.textContent = rest.hidden ? "show " + n + " more" : "show fewer";
       });
-      host.appendChild(rest);
-      host.appendChild(more);
+      cell.appendChild(more);
     }
-    return host;
+    return cell;
+  }
+
+  function buckets(rows, key) {
+    var out = {};
+    rows.forEach(function (c) {
+      var k = c[key] || "unknown";
+      if (!out[k]) out[k] = { benefit: [], blocker: [], who: {} };
+      if (c.polarity === "benefit" || c.polarity === "blocker") out[k][c.polarity].push(c);
+      out[k].who[c.participant] = true;
+    });
+    return out;
+  }
+
+  function summaryTable(caption, note, rows, headers, buildRow) {
+    var wrap = el("section", "d-summary");
+    var head = el("div", "d-sumhead");
+    head.appendChild(el("h2", "d-sumcaption", caption));
+    head.appendChild(el("p", "d-sumnote", note));
+    wrap.appendChild(head);
+    var table = el("table", "d-sumtable");
+    var thead = el("thead");
+    var hr = el("tr");
+    headers.forEach(function (h) { hr.appendChild(el("th", null, h)); });
+    thead.appendChild(hr);
+    table.appendChild(thead);
+    var tbody = el("tbody");
+    rows.forEach(function (row) { tbody.appendChild(buildRow(row)); });
+    table.appendChild(tbody);
+    var scroll = el("div", "d-scroll");
+    scroll.appendChild(table);
+    wrap.appendChild(scroll);
+    return wrap;
   }
 
   function renderSummary(claims) {
@@ -407,14 +441,7 @@
       return;
     }
 
-    /* Table 1: what each option or mechanism has going for and against it */
-    var byTarget = {};
-    claims.forEach(function (c) {
-      var t = c.target || "unknown";
-      if (!byTarget[t]) byTarget[t] = { benefit: [], blocker: [], other: [] };
-      var bucket = byTarget[t][c.polarity] ? c.polarity : "other";
-      byTarget[t][bucket].push(c);
-    });
+    var byTarget = buckets(claims, "target");
     var targets = Object.keys(byTarget).sort(function (a, b) {
       var ka = kindByTarget[a] === "mechanism" ? 1 : 0;
       var kb = kindByTarget[b] === "mechanism" ? 1 : 0;
@@ -424,41 +451,32 @@
       return nb - na;
     });
 
-    var s1 = el("section", "d-summary");
-    var h1 = el("div", "d-sumhead");
-    h1.appendChild(el("span", "feed-label", "Benefits and blockers"));
-    h1.appendChild(el("span", "muted", targets.length + " options and mechanisms"));
-    s1.appendChild(h1);
-    targets.forEach(function (t) {
-      var block = el("div", "d-sumblock");
-      var head = el("div", "d-sumtitle");
-      head.appendChild(el("span", "d-sumname", t));
-      if (kindByTarget[t] === "mechanism") head.appendChild(el("span", "d-kind", "mechanism"));
-      var voices = {};
-      byTarget[t].benefit.concat(byTarget[t].blocker).forEach(function (c) {
-        voices[c.participant] = true;
-      });
-      head.appendChild(el("span", "muted", Object.keys(voices).length + " participants"));
-      block.appendChild(head);
-      var cols = el("div", "d-sumcols");
-      [["benefit", "Benefits"], ["blocker", "Blockers"]].forEach(function (pair) {
-        var col = el("div", "d-sumcol " + pair[0]);
-        col.appendChild(el("span", "d-sumlabel", pair[1] + " (" + byTarget[t][pair[0]].length + ")"));
-        col.appendChild(claimList(byTarget[t][pair[0]]));
-        cols.appendChild(col);
-      });
-      block.appendChild(cols);
-      s1.appendChild(block);
-    });
-    out.appendChild(s1);
+    out.appendChild(summaryTable(
+      "Benefits and blockers",
+      "As argued in this discussion, not a general survey. Every line links to the post it came from.",
+      targets,
+      ["Option", "Benefits raised", "Blockers raised", "Raised by"],
+      function (t) {
+        var tr = el("tr");
+        var name = el("td", "d-namecell");
+        name.appendChild(el("span", "d-sumname", t));
+        if (kindByTarget[t] === "mechanism") name.appendChild(el("span", "d-kind", "mechanism"));
+        var bucket = byTarget[t];
+        name.appendChild(el("span", "d-count",
+          bucket.benefit.length + bucket.blocker.length + " claims"));
+        tr.appendChild(name);
+        tr.appendChild(claimCell(bucket.benefit, "Benefits"));
+        tr.appendChild(claimCell(bucket.blocker, "Blockers"));
+        var who = el("td", "d-whocell");
+        Object.keys(bucket.who).sort().forEach(function (p) {
+          who.appendChild(el("span", "d-tag", p));
+        });
+        tr.appendChild(who);
+        return tr;
+      }
+    ));
 
-    /* Table 2: where each participant stands and what they argued */
-    var byWho = {};
-    claims.forEach(function (c) {
-      if (!byWho[c.participant]) byWho[c.participant] = { benefit: [], blocker: [], other: [] };
-      var bucket = byWho[c.participant][c.polarity] ? c.polarity : "other";
-      byWho[c.participant][bucket].push(c);
-    });
+    var byWho = buckets(claims, "participant");
     var positionsBy = {};
     (state.positions || []).forEach(function (p) {
       if (!positionsBy[p.participant]) positionsBy[p.participant] = [];
@@ -470,36 +488,40 @@
       return nb - na;
     });
 
-    var s2 = el("section", "d-summary");
-    var h2 = el("div", "d-sumhead");
-    h2.appendChild(el("span", "feed-label", "Where each participant lands"));
-    h2.appendChild(el("span", "muted", people.length + " participants"));
-    s2.appendChild(h2);
-    people.forEach(function (who) {
-      var block = el("div", "d-sumblock");
-      var head = el("div", "d-sumtitle");
-      head.appendChild(el("span", "d-sumname", who));
-      var rows = positionsBy[who] || [];
-      if (rows.length) {
-        var latest = rows[rows.length - 1];
-        head.appendChild(el("span", "d-basis " + (latest.basis || ""), String(latest.basis || "").replace("_", " ")));
-        head.appendChild(el("span", "d-prefers", (latest.prefers || []).join(", ")));
-        if (rows.length > 1) head.appendChild(el("span", "d-shift", rows.length + " positions over time"));
-      } else {
-        head.appendChild(el("span", "muted", "no position recorded"));
+    out.appendChild(summaryTable(
+      "Where each participant lands",
+      "Preference is marked stated where the person wrote it plainly, inferred where it is read from their arguments.",
+      people,
+      ["Participant", "Benefits they raised", "Blockers they raised", "Preference"],
+      function (who) {
+        var tr = el("tr");
+        var name = el("td", "d-namecell");
+        name.appendChild(el("span", "d-sumname", who));
+        var bucket = byWho[who];
+        name.appendChild(el("span", "d-count",
+          bucket.benefit.length + bucket.blocker.length + " claims"));
+        tr.appendChild(name);
+        tr.appendChild(claimCell(bucket.benefit, "Benefits"));
+        tr.appendChild(claimCell(bucket.blocker, "Blockers"));
+        var pref = el("td", "d-whocell");
+        var rows = positionsBy[who] || [];
+        if (!rows.length) {
+          pref.appendChild(el("span", "muted", "no position recorded"));
+        } else {
+          var latest = rows[rows.length - 1];
+          (latest.prefers || []).forEach(function (p) {
+            pref.appendChild(el("span", "d-tag", p));
+          });
+          pref.appendChild(el("span", "d-basis " + (latest.basis || ""),
+            String(latest.basis || "").replace("_", " ")));
+          if (rows.length > 1) {
+            pref.appendChild(el("span", "d-shift", rows.length + " over time"));
+          }
+        }
+        tr.appendChild(pref);
+        return tr;
       }
-      block.appendChild(head);
-      var cols = el("div", "d-sumcols");
-      [["benefit", "Benefits raised"], ["blocker", "Blockers raised"]].forEach(function (pair) {
-        var col = el("div", "d-sumcol " + pair[0]);
-        col.appendChild(el("span", "d-sumlabel", pair[1] + " (" + byWho[who][pair[0]].length + ")"));
-        col.appendChild(claimList(byWho[who][pair[0]]));
-        cols.appendChild(col);
-      });
-      block.appendChild(cols);
-      s2.appendChild(block);
-    });
-    out.appendChild(s2);
+    ));
   }
 
   function renderQuestions() {
