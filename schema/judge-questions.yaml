@@ -31,8 +31,18 @@ questions:
   - id: concedes
     primitive: truth
     inputs: [participant, claim_quote, post_excerpt]
-    statement: In this post the author gives up the argument quoted in claim_quote.
-    instructions: Weigh only what the post itself concedes.
+    statement: >-
+      In this post the author explicitly withdraws the argument quoted in
+      claim_quote, or states that they were wrong about it.
+    instructions: >-
+      Only an explicit retraction counts. Look for the author saying they stand
+      corrected, that they agree with the objection, that they no longer hold
+      the point, or that in retrospect it was wrong. All of these are false:
+      restating the point, refining or narrowing it, defending it, agreeing with
+      an unrelated point, conceding someone else's argument, or simply not
+      mentioning it again. Answer about the quoted argument only, not the topic
+      around it. When the post does not refer to the quoted argument at all, the
+      answer is false.
   - id: quote_fairness
     primitive: score
     inputs: [quote, post_excerpt]
