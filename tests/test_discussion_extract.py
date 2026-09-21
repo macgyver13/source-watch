@@ -380,7 +380,7 @@ class DiscussionExtractTests(unittest.TestCase):
         self.assertEqual(out["claims"][0]["id"], "c1")
         self.assertEqual(out["claims"][0]["quote"], "Format A keeps the registry small")
 
-    def test_all_open_author_claims_are_probed_for_concession(self) -> None:
+    def test_only_contested_author_claims_are_probed_for_concession(self) -> None:
         posts = [
             {
                 "post_number": n,
@@ -394,10 +394,12 @@ class DiscussionExtractTests(unittest.TestCase):
             for n, body in (
                 (1, "first argument here"),
                 (2, "second argument here"),
-                (3, "third argument here"),
+                (3, "counterpoint here"),
                 (4, "I no longer hold the second argument."),
             )
         ]
+        posts[2]["author"] = "bob"
+        posts[2]["author_name"] = "Bob"
         state = {
             "schema_version": ds.SCHEMA_VERSION,
             "discussion": {
@@ -416,15 +418,21 @@ class DiscussionExtractTests(unittest.TestCase):
             "positions": [],
             "questions": [],
         }
-        for n, quote in ((1, "first argument here"), (2, "second argument here"), (3, "third argument here")):
+        # ada argues for format-a twice; bob argues against it in post 3, which is
+        # what makes ada's earlier claims contested and a concession possible.
+        for n, quote, who, polarity in (
+            (1, "first argument here", "ada", "benefit"),
+            (2, "second argument here", "ada", "benefit"),
+            (3, "counterpoint here", "bob", "blocker"),
+        ):
             url = f"https://forum.example/t/101/{n}"
             state["claims"].append(
                 {
                     "id": f"c{n}",
-                    "hash": ds.claim_hash("ada", url, quote),
-                    "polarity": "benefit",
+                    "hash": ds.claim_hash(who, url, quote),
+                    "polarity": polarity,
                     "target": "format-a",
-                    "participant": "ada",
+                    "participant": who,
                     "post_url": url,
                     "quote": quote,
                     "date": f"2026-03-0{n}T09:00:00Z",
@@ -432,9 +440,12 @@ class DiscussionExtractTests(unittest.TestCase):
                 }
             )
 
+        probed: list[str] = []
+
         def concedes(payload, labels):
+            probed.append(payload["claim_quote"])
             if "second" in payload["claim_quote"]:
-                return 0.9
+                return 0.95
             return 0.2
 
         judge = ScriptedJudge({"concedes": concedes})
@@ -447,11 +458,14 @@ class DiscussionExtractTests(unittest.TestCase):
         }
         out, log = run_extract(state, posts, ScriptedDraft({}), judge, seen=seen)
         concede_calls = [call for call in judge.calls if call[0] == "concedes"]
-        self.assertEqual(len(concede_calls), 3)
-        self.assertEqual(log["concede_calls"], 3)
+        self.assertEqual(len(concede_calls), 2)
+        self.assertEqual(log["concede_calls"], 2)
+        self.assertNotIn("counterpoint here", probed)
+        self.assertEqual(sorted(probed), ["first argument here", "second argument here"])
         by_id = {claim["id"]: claim for claim in out["claims"]}
         self.assertEqual(by_id["c1"]["status"], "open")
         self.assertEqual(by_id["c2"]["status"], "conceded")
+        self.assertEqual(by_id["c2"]["concede_confidence"], 0.95)
         self.assertEqual(by_id["c3"]["status"], "open")
 
     def test_candidates_are_batched_not_truncated(self) -> None:
@@ -724,7 +738,9 @@ class DiscussionExtractTests(unittest.TestCase):
         run1 = {claim["id"]: claim for claim in out1["claims"]}
         run2 = {claim["id"]: claim for claim in out2["claims"]}
         self.assertEqual(_changed_keys(run1["c1"], run2["c1"]), {"status", "answered_by"})
-        self.assertEqual(_changed_keys(run1["c2"], run2["c2"]), {"status"})
+        self.assertEqual(
+            _changed_keys(run1["c2"], run2["c2"]), {"status", "concede_confidence"}
+        )
         self.assertEqual(run2["c1"]["status"], "answered")
         self.assertEqual(run2["c1"]["answered_by"], "c3")
         self.assertEqual(run2["c2"]["status"], "conceded")
