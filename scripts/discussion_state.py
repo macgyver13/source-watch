@@ -382,6 +382,7 @@ def _validate_claim_shape(
         "text",
         "answered_by",
         "confidence",
+        "concede_confidence",
         "hidden",
     }
     _unknown_keys(claim, allowed, errors, f"claims[{index}] {slot}: ")
@@ -457,6 +458,14 @@ def _validate_claim_shape(
 
     if "confidence" in claim:
         _check_confidence(claim["confidence"], errors, f"claims[{index}] {slot}: ")
+    if "concede_confidence" in claim:
+        _check_confidence(
+            claim["concede_confidence"], errors, f"claims[{index}] {slot}: concede "
+        )
+        if claim.get("status") != "conceded":
+            errors.append(
+                f"claims[{index}] {slot}: concede_confidence needs status conceded"
+            )
     if "hidden" in claim:
         _check_hidden(claim["hidden"], errors, f"claims[{index}] {slot}: ")
     return cid if cid and _ID_PATTERNS["claims"].match(cid) else None

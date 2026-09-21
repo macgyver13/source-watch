@@ -4,44 +4,78 @@
   "title": "Source Watch discussion state",
   "type": "object",
   "additionalProperties": false,
-  "required": ["schema_version", "discussion", "options", "claims", "positions", "questions"],
+  "required": [
+    "schema_version",
+    "discussion",
+    "options",
+    "claims",
+    "positions",
+    "questions"
+  ],
   "properties": {
-    "schema_version": { "const": "source-watch.discussion.v0" },
+    "schema_version": {
+      "const": "source-watch.discussion.v0"
+    },
     "discussion": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["id", "title", "sources"],
+      "required": [
+        "id",
+        "title",
+        "sources"
+      ],
       "properties": {
-        "id": { "$ref": "#/$defs/slug" },
-        "title": { "type": "string", "minLength": 1 },
-        "topic": { "type": "string" },
-        "updated_at": { "$ref": "#/$defs/timestamp" },
+        "id": {
+          "$ref": "#/$defs/slug"
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1
+        },
+        "topic": {
+          "type": "string"
+        },
+        "updated_at": {
+          "$ref": "#/$defs/timestamp"
+        },
         "sources": {
           "type": "array",
           "minItems": 1,
-          "items": { "$ref": "#/$defs/source" }
+          "items": {
+            "$ref": "#/$defs/source"
+          }
         }
       }
     },
     "options": {
       "type": "array",
-      "items": { "$ref": "#/$defs/option" }
+      "items": {
+        "$ref": "#/$defs/option"
+      }
     },
     "claims": {
       "type": "array",
-      "items": { "$ref": "#/$defs/claim" }
+      "items": {
+        "$ref": "#/$defs/claim"
+      }
     },
     "positions": {
       "type": "array",
-      "items": { "$ref": "#/$defs/position" }
+      "items": {
+        "$ref": "#/$defs/position"
+      }
     },
     "questions": {
       "type": "array",
-      "items": { "$ref": "#/$defs/question" }
+      "items": {
+        "$ref": "#/$defs/question"
+      }
     },
     "snapshots": {
       "type": "array",
-      "items": { "$ref": "#/$defs/snapshot" }
+      "items": {
+        "$ref": "#/$defs/snapshot"
+      }
     }
   },
   "$defs": {
@@ -66,27 +100,56 @@
     "hidden": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["reason", "at"],
+      "required": [
+        "reason",
+        "at"
+      ],
       "properties": {
         "reason": {
           "type": "string",
-          "enum": ["source_deleted", "source_edited", "disputed_by_participant", "curator"]
+          "enum": [
+            "source_deleted",
+            "source_edited",
+            "disputed_by_participant",
+            "curator"
+          ]
         },
-        "at": { "$ref": "#/$defs/timestamp" },
-        "note": { "type": "string" }
+        "at": {
+          "$ref": "#/$defs/timestamp"
+        },
+        "note": {
+          "type": "string"
+        }
       }
     },
     "source": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["platform", "url", "cursor"],
+      "required": [
+        "platform",
+        "url",
+        "cursor"
+      ],
       "properties": {
-        "platform": { "type": "string", "enum": ["discourse", "github"] },
-        "url": { "$ref": "#/$defs/url" },
+        "platform": {
+          "type": "string",
+          "enum": [
+            "discourse",
+            "github"
+          ]
+        },
+        "url": {
+          "$ref": "#/$defs/url"
+        },
         "cursor": {
           "anyOf": [
-            { "type": "integer", "minimum": 0 },
-            { "type": "null" }
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "null"
+            }
           ]
         }
       }
@@ -94,112 +157,265 @@
     "option": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["id", "name", "kind"],
+      "required": [
+        "id",
+        "name",
+        "kind"
+      ],
       "properties": {
-        "id": { "$ref": "#/$defs/slug" },
-        "name": { "type": "string", "minLength": 1 },
-        "kind": { "type": "string", "enum": ["option", "mechanism"] },
-        "gloss": { "type": "string" },
-        "hidden": { "$ref": "#/$defs/hidden" }
+        "id": {
+          "$ref": "#/$defs/slug"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "option",
+            "mechanism"
+          ]
+        },
+        "gloss": {
+          "type": "string"
+        },
+        "hidden": {
+          "$ref": "#/$defs/hidden"
+        }
       }
     },
     "claim": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["id", "hash", "polarity", "target", "participant", "post_url", "quote", "date", "status"],
+      "required": [
+        "id",
+        "hash",
+        "polarity",
+        "target",
+        "participant",
+        "post_url",
+        "quote",
+        "date",
+        "status"
+      ],
       "properties": {
-        "id": { "type": "string", "pattern": "^c\\d+$" },
+        "id": {
+          "type": "string",
+          "pattern": "^c\\d+$"
+        },
         "hash": {
           "description": "Must equal claim_hash(participant, post_url, quote); equality is validator-only.",
           "type": "string",
           "pattern": "^[0-9a-f]{64}$"
         },
-        "polarity": { "type": "string", "enum": ["benefit", "blocker"] },
+        "polarity": {
+          "type": "string",
+          "enum": [
+            "benefit",
+            "blocker"
+          ]
+        },
         "target": {
           "description": "Must resolve to an option id or question id; reference check is validator-only.",
           "type": "string",
           "minLength": 1
         },
-        "participant": { "type": "string", "minLength": 1 },
-        "post_url": { "$ref": "#/$defs/url" },
-        "quote": { "type": "string", "minLength": 1, "maxLength": 200 },
-        "date": { "$ref": "#/$defs/timestamp" },
-        "status": { "type": "string", "enum": ["open", "answered", "conceded", "withdrawn"] },
-        "text": { "type": "string", "maxLength": 280 },
+        "participant": {
+          "type": "string",
+          "minLength": 1
+        },
+        "post_url": {
+          "$ref": "#/$defs/url"
+        },
+        "quote": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "date": {
+          "$ref": "#/$defs/timestamp"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "open",
+            "answered",
+            "conceded",
+            "withdrawn"
+          ]
+        },
+        "text": {
+          "type": "string",
+          "maxLength": 280
+        },
         "answered_by": {
           "description": "Required iff status is answered; must name another existing claim. Coupling is validator-only.",
           "type": "string"
         },
-        "confidence": { "$ref": "#/$defs/confidence" },
-        "hidden": { "$ref": "#/$defs/hidden" }
+        "confidence": {
+          "$ref": "#/$defs/confidence"
+        },
+        "hidden": {
+          "$ref": "#/$defs/hidden"
+        },
+        "concede_confidence": {
+          "$ref": "#/$defs/confidence"
+        }
       }
     },
     "position": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["id", "participant", "prefers", "basis", "post_url", "date"],
+      "required": [
+        "id",
+        "participant",
+        "prefers",
+        "basis",
+        "post_url",
+        "date"
+      ],
       "properties": {
-        "id": { "type": "string", "pattern": "^p\\d+$" },
-        "participant": { "type": "string", "minLength": 1 },
+        "id": {
+          "type": "string",
+          "pattern": "^p\\d+$"
+        },
+        "participant": {
+          "type": "string",
+          "minLength": 1
+        },
         "prefers": {
           "description": "Each entry must be an existing option id; uniqueness of items is uniqueItems.",
           "type": "array",
           "uniqueItems": true,
-          "items": { "type": "string" }
+          "items": {
+            "type": "string"
+          }
         },
-        "basis": { "type": "string", "enum": ["inferred", "stated", "self_declared"] },
-        "post_url": { "$ref": "#/$defs/url" },
-        "date": { "$ref": "#/$defs/timestamp" },
+        "basis": {
+          "type": "string",
+          "enum": [
+            "inferred",
+            "stated",
+            "self_declared"
+          ]
+        },
+        "post_url": {
+          "$ref": "#/$defs/url"
+        },
+        "date": {
+          "$ref": "#/$defs/timestamp"
+        },
         "supersedes": {
           "description": "Must name another position by the same participant without cycles; chain checks are validator-only.",
           "type": "string"
         },
-        "confidence": { "$ref": "#/$defs/confidence" },
-        "hidden": { "$ref": "#/$defs/hidden" }
+        "confidence": {
+          "$ref": "#/$defs/confidence"
+        },
+        "hidden": {
+          "$ref": "#/$defs/hidden"
+        }
       }
     },
     "question": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["id", "text", "raised_by", "post_url", "date", "status"],
+      "required": [
+        "id",
+        "text",
+        "raised_by",
+        "post_url",
+        "date",
+        "status"
+      ],
       "properties": {
-        "id": { "type": "string", "pattern": "^q\\d+$" },
-        "text": { "type": "string", "minLength": 1 },
-        "raised_by": { "type": "string", "minLength": 1 },
-        "post_url": { "$ref": "#/$defs/url" },
-        "date": { "$ref": "#/$defs/timestamp" },
-        "status": { "type": "string", "enum": ["open", "resolved"] },
+        "id": {
+          "type": "string",
+          "pattern": "^q\\d+$"
+        },
+        "text": {
+          "type": "string",
+          "minLength": 1
+        },
+        "raised_by": {
+          "type": "string",
+          "minLength": 1
+        },
+        "post_url": {
+          "$ref": "#/$defs/url"
+        },
+        "date": {
+          "$ref": "#/$defs/timestamp"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "open",
+            "resolved"
+          ]
+        },
         "resolved_by": {
           "description": "Required iff status is resolved; must name an existing claim. Coupling is validator-only.",
           "type": "string"
         },
-        "hidden": { "$ref": "#/$defs/hidden" }
+        "hidden": {
+          "$ref": "#/$defs/hidden"
+        }
       }
     },
     "snapshot": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["at", "cursors", "counts"],
+      "required": [
+        "at",
+        "cursors",
+        "counts"
+      ],
       "properties": {
-        "at": { "$ref": "#/$defs/timestamp" },
+        "at": {
+          "$ref": "#/$defs/timestamp"
+        },
         "cursors": {
           "type": "object",
           "additionalProperties": {
             "anyOf": [
-              { "type": "integer", "minimum": 0 },
-              { "type": "null" }
+              {
+                "type": "integer",
+                "minimum": 0
+              },
+              {
+                "type": "null"
+              }
             ]
           }
         },
         "counts": {
           "type": "object",
           "additionalProperties": false,
-          "required": ["claims", "positions", "questions", "hidden"],
+          "required": [
+            "claims",
+            "positions",
+            "questions",
+            "hidden"
+          ],
           "properties": {
-            "claims": { "type": "integer", "minimum": 0 },
-            "positions": { "type": "integer", "minimum": 0 },
-            "questions": { "type": "integer", "minimum": 0 },
-            "hidden": { "type": "integer", "minimum": 0 }
+            "claims": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "positions": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "questions": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "hidden": {
+              "type": "integer",
+              "minimum": 0
+            }
           }
         }
       }
