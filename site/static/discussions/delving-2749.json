@@ -1976,5 +1976,5 @@
    "status": "open"
   }
  ],
- "_prototype_note": "Prototype data: the human-curated gold record for this thread, not live extraction output."
+ "_prototype_note": "Human-curated gold record. The benchmark the extractions are scored against."
 }

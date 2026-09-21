@@ -34,6 +34,7 @@
   var state = null;
   var spec = JSON.parse(JSON.stringify(DEFAULT));
   var kindByTarget = {};
+  var current = "";
 
   function el(tag, cls, text) {
     var n = document.createElement(tag);
@@ -428,6 +429,7 @@
 
   function boot(data) {
     state = data;
+    kindByTarget = {};
     (state.options || []).forEach(function (o) { kindByTarget[o.name] = o.kind; });
     var d = state.discussion || {};
     document.getElementById("d-title").textContent = d.title || "Discussion";
@@ -452,19 +454,72 @@
     render();
   }
 
-  function slug() {
-    var m = window.location.pathname.match(/\/discussions\/([^/]+)/);
-    return (m && m[1]) ? m[1] : "delving-2749";
+  function renderPicker(index, current) {
+    var host = document.getElementById("d-pick-chips");
+    if (!host) return;
+    host.innerHTML = "";
+    var rows = (index && index.discussions) || [];
+    if (rows.length < 2) {
+      var row = document.getElementById("d-pick-row");
+      if (row) row.hidden = true;
+      return;
+    }
+    rows.forEach(function (row) {
+      host.appendChild(chip(row.label || row.slug, row.slug === current, function () {
+        if (row.slug === current) return;
+        spec.filters = {};
+        load(row.slug, index);
+      }));
+    });
+    var note = rows.filter(function (r) { return r.slug === current; })[0];
+    if (note && note.note) {
+      host.appendChild(el("span", "d-note", note.note));
+    }
   }
 
-  fetch("/discussions/" + slug() + ".json")
-    .then(function (r) {
-      if (!r.ok) throw new Error("no discussion data");
-      return r.json();
-    })
-    .then(boot)
-    .catch(function () {
-      document.getElementById("d-output").innerHTML =
-        "<p class='muted'>No discussion data found.</p>";
+  function load(nextSlug, index) {
+    current = nextSlug;
+    try {
+      window.localStorage.setItem("sw_discussion", nextSlug);
+    } catch (e) {
+      /* a blocked store just means no remembered choice */
+    }
+    return fetch("/discussions/" + nextSlug + ".json")
+      .then(function (r) {
+        if (!r.ok) throw new Error("no discussion data");
+        return r.json();
+      })
+      .then(function (data) {
+        boot(data);
+        renderPicker(index, nextSlug);
+      })
+      .catch(function () {
+        document.getElementById("d-output").innerHTML =
+          "<p class='muted'>No discussion data found.</p>";
+      });
+  }
+
+  function slugFromPath() {
+    var m = window.location.pathname.match(/\/discussions\/([^/]+)/);
+    return (m && m[1]) ? m[1] : "";
+  }
+
+  function remembered() {
+    try {
+      return window.localStorage.getItem("sw_discussion") || "";
+    } catch (e) {
+      return "";
+    }
+  }
+
+  fetch("/discussions/index.json")
+    .then(function (r) { return r.ok ? r.json() : { discussions: [] }; })
+    .catch(function () { return { discussions: [] }; })
+    .then(function (index) {
+      var rows = (index && index.discussions) || [];
+      var known = rows.map(function (r) { return r.slug; });
+      var wanted = slugFromPath() || remembered() || known[0] || "delving-2749";
+      if (known.length && known.indexOf(wanted) === -1) wanted = known[0];
+      load(wanted, index);
     });
 })();
