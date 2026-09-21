@@ -5,7 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{{ if eq .Kind "home" }}{{ .Site.Title }}{{ else if and .Title (ne .Title .Site.Title) }}{{ .Title }} · {{ .Site.Title }}{{ else }}{{ .Site.Title }}{{ end }}</title>
   <meta name="description" content="{{ .Site.Params.description }}">
-  <link rel="stylesheet" href="/style.css">
+  {{- $cssRaw := "" -}}
+  {{- with try (os.ReadFile "static/style.css") }}{{ with .Value }}{{ $cssRaw = . }}{{ end }}{{ end -}}
+  <link rel="stylesheet" href="/style.css{{ with $cssRaw }}?v={{ . | crypto.FNV32a }}{{ end }}">
   <link rel="alternate" type="application/rss+xml" title="{{ .Site.Title }}" href="/feed.xml">
 {{- if ne site.Params.serving_mode "service" }}
 {{- if or (eq .RelPermalink "/weeks/") (eq .RelPermalink "/weeks") }}
