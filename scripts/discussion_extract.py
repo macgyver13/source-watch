@@ -31,7 +31,7 @@ EXCERPT_CHARS = 900
 CATALOG_CHARS = 900
 CANDIDATE_CHARS = 900
 DUPLICATE_MIN_OVERLAP = 0.35
-CONCEDE_MIN = 0.7
+CONCEDE_MIN = 0.9
 STATED_MIN_CONFIDENCE = 0.7
 NONE_LABEL = "none"
 EPOCH = "1970-01-01T00:00:00Z"
@@ -96,6 +96,17 @@ def json_only(text: str) -> str:
     return last if last is not None else stripped
 
 
+def _is_transient(exc: Exception) -> bool:
+    """True for errors worth retrying: timeouts, rate limits, server faults."""
+    if isinstance(exc, TimeoutError):
+        return True
+    if isinstance(exc, HTTPError):
+        return exc.code == 429 or exc.code >= 500
+    if isinstance(exc, URLError):
+        return isinstance(exc.reason, (TimeoutError, ConnectionError)) or "timed out" in str(exc.reason)
+    return False
+
+
 EMPTY_CONTENT_RETRIES = 4
 EMPTY_CONTENT_BACKOFF = 1.5
 
@@ -124,6 +135,11 @@ def chat_complete(
             with urlopen(request, timeout=timeout) as response:
                 raw = response.read().decode("utf-8")
         except (HTTPError, URLError, TimeoutError) as exc:
+            # A timeout or a 429/5xx is transient far more often than not, and a
+            # single one should not end an extraction that has run for an hour.
+            if attempt < EMPTY_CONTENT_RETRIES and _is_transient(exc):
+                time.sleep(EMPTY_CONTENT_BACKOFF * (attempt + 1))
+                continue
             raise ExtractError(f"chat request failed: {exc}") from exc
         try:
             data = json.loads(raw)
@@ -855,9 +871,38 @@ def extract(
                         position["supersedes"] = latest["id"]
                     new_state["positions"].append(position)
                     log["positions_added"] += 1
+        # A concession only makes sense where someone pushed back. Without this
+        # gate the question is asked of every earlier claim by the same author,
+        # including their own uncontested statements of fact, which is how a PR
+        # description ends up marked as a series of concessions.
+        contested: set[str] = set()
+        for other in _visible(new_state["claims"]):
+            if other.get("participant") == author:
+                continue
+            target = other.get("target")
+            polarity = other.get("polarity")
+            for challenged in _visible(new_state["claims"]):
+                if challenged.get("participant") != author:
+                    continue
+                if challenged.get("target") != target:
+                    continue
+                if polarity and challenged.get("polarity") and polarity == challenged.get("polarity"):
+                    continue
+                cid = challenged.get("id")
+                if isinstance(cid, str):
+                    contested.add(cid)
+        for claim_row in _visible(new_state["claims"]):
+            answered = claim_row.get("answered_by")
+            if isinstance(answered, str) and answered:
+                cid = claim_row.get("id")
+                if isinstance(cid, str):
+                    contested.add(cid)
+
         earlier_open = []
         for existing in _visible(new_state["claims"]):
             if existing.get("participant") != author or existing.get("status") != "open":
+                continue
+            if existing.get("id") not in contested:
                 continue
             existing_n = url_to_number.get(existing.get("post_url")) if isinstance(existing.get("post_url"), str) else None
             if _is_post_number(existing_n) and existing_n < post_n:
@@ -875,6 +920,7 @@ def extract(
             )
             if isinstance(result, (int, float)) and not isinstance(result, bool) and float(result) >= CONCEDE_MIN:
                 existing["status"] = "conceded"
+                existing["concede_confidence"] = round(float(result), 6)
                 log["conceded"] += 1
 
     highest = max(processed_numbers) if processed_numbers else cursor_in
